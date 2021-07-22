@@ -13,14 +13,57 @@ ClockifyUser::ClockifyUser(QString userId, ClockifyManager *manager)
 
 }
 
-json ClockifyUser::getRunningTimeEntry() const
+bool ClockifyUser::hasRunningTimeEntry()
 {
-	return m_manager->getRunningTimeEntry(m_userId);
+	bool success = false;
+
+	while (!success)
+	{
+		try
+		{
+			m_hasRunningTimeEntry = m_manager->userHasRunningTimeEntry(m_userId);
+
+			// if we get here, it means that the call succeeded with no errors
+			success = true;
+		}
+		catch (...) {}
+	}
+
+	return m_hasRunningTimeEntry;
+}
+
+json ClockifyUser::getRunningTimeEntry()
+{
+	bool success = false;
+
+	while (!success)
+	{
+		try
+		{
+			m_runningTimeEntry = m_manager->getRunningTimeEntry(m_userId);
+			success = true;
+		}
+		catch (...) {}
+	}
+
+	return m_runningTimeEntry;
 }
 
 void ClockifyUser::stopCurrentTimeEntry(bool async)
 {
-	m_manager->stopRunningTimeEntry(m_userId, async);
+	// we'll assume that all async calls succeed
+	bool success = async;
+
+	while (!success)
+	{
+		try
+		{
+			m_manager->stopRunningTimeEntry(m_userId, async);
+
+			success = true;
+		}
+		catch (...) {}
+	}
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, bool async) const

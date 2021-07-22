@@ -12,11 +12,12 @@ using json = nlohmann::json;
 class ClockifyUser : public QObject
 {
 	Q_OBJECT
+
 public:
 	explicit ClockifyUser(QString userId, ClockifyManager *manager);
 
-	bool hasRunningTimeEntry() const { return m_manager->userHasRunningTimeEntry(m_userId); }
-	json getRunningTimeEntry() const;
+	bool hasRunningTimeEntry();
+	json getRunningTimeEntry();
 	void stopCurrentTimeEntry(bool async = false);
 	void startTimeEntry(const QString &projectId, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
@@ -28,6 +29,9 @@ private:
 
 	QString m_userId;
 	QString m_name;
+
+	bool m_hasRunningTimeEntry;
+	json m_runningTimeEntry;
 };
 
 #endif // CLOCKIFYUSER_H
