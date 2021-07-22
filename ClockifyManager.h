@@ -41,6 +41,8 @@ signals:
 	void projectsLoaded();
 	void usersLoaded();
 
+	void invalidated();
+
 private:
 	QNetworkReply *get(const QUrl &url,
 					   std::function<void (QNetworkReply *)> successCb = s_defaultSuccessCb,

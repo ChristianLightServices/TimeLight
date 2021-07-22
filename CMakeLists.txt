@@ -11,13 +11,43 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
-add_executable(ClockifyModifier
+set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
+add_subdirectory(singleapplication)
+
+set(SRC_COMMON
     ClockifyManager.cpp
     ClockifyUser.cpp
-    main.cpp
 )
-target_link_libraries(ClockifyModifier Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network nlohmann_json::nlohmann_json)
+
+add_executable(ClockifyModifier
+    ${SRC_COMMON}
+
+    HeadlessRunner.cpp
+)
+
+add_executable(TrayIcons
+    ${SRC_COMMON}
+
+    TrayIcons.cpp
+
+    res.qrc
+)
+
+target_link_libraries(ClockifyModifier
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    nlohmann_json::nlohmann_json
+)
+
+
+target_link_libraries(TrayIcons
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Widgets
+    SingleApplication::SingleApplication
+    nlohmann_json::nlohmann_json
+)

@@ -6,11 +6,7 @@
 
 #include "ClockifyManager.h"
 #include "ClockifyUser.h"
-
-const QByteArray WORKSPACE{"redacted"};
-const QByteArray APIKEY{"redacted (use your own here)"};
-const QByteArray BREAKTIME{"redacted"};
-const QByteArray WORKTIME{"redacted"};
+#include "Common.h"
 
 int main(int argc, char *argv[])
 {

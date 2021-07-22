@@ -58,14 +58,21 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	url.setQuery(query);
 
 	get(url, [this](QNetworkReply *rep) {
-		json j{json::parse(rep->readAll().toStdString())};
+		try
+		{
+			json j{json::parse(rep->readAll().toStdString())};
 
-		for (auto item : j)
-			m_projects.push_back({item["id"].get<QByteArray>(),
-								  item["name"].get<QByteArray>()});
+			for (auto item : j)
+				m_projects.push_back({item["id"].get<QByteArray>(),
+									  item["name"].get<QByteArray>()});
 
-		m_projectsLoaded = true;
-		emit projectsLoaded();
+			m_projectsLoaded = true;
+			emit projectsLoaded();
+		}
+		catch (...)
+		{
+			emit invalidated();
+		}
 	});
 
 	// now load the users
@@ -75,14 +82,21 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	url.setQuery(query);
 
 	get(url, [this](QNetworkReply *rep) {
-		json j{json::parse(rep->readAll().toStdString())};
+		try
+		{
+			json j{json::parse(rep->readAll().toStdString())};
 
-		for (auto item : j)
-			m_users.push_back({item["id"].get<QByteArray>(),
-							   item["name"].get<QByteArray>()});
+			for (auto item : j)
+				m_users.push_back({item["id"].get<QByteArray>(),
+								   item["name"].get<QByteArray>()});
 
-		m_usersLoaded = true;
-		emit usersLoaded();
+			m_usersLoaded = true;
+			emit usersLoaded();
+		}
+		catch (...)
+		{
+			emit invalidated();
+		}
 	});
 }
 
