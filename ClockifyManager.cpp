@@ -77,6 +77,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 			{
 				json j{json::parse(rep->readAll().toStdString())};
 
+				m_projects.clear();
 				for (auto item : j)
 					m_projects.push_back({item["id"].get<QByteArray>(),
 										  item["name"].get<QByteArray>()});
@@ -101,6 +102,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 			{
 				json j{json::parse(rep->readAll().toStdString())};
 
+				m_users.clear();
 				for (auto item : j)
 					m_users.push_back({item["id"].get<QByteArray>(),
 									   item["name"].get<QByteArray>()});
