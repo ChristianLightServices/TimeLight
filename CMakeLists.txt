@@ -23,13 +23,20 @@ set(SRC_COMMON
     ClockifyUser.cpp
 )
 
-add_executable(ClockifyModifier
+# make sure that Windows doesn't display a console
+if(WIN32)
+    set(IS_WIN "WIN32")
+else()
+    set(IS_WIN "")
+endif()
+
+add_executable(ClockifyModifier ${IS_WIN}
     ${SRC_COMMON}
 
     HeadlessRunner.cpp
 )
 
-add_executable(ClockifyTrayIcons
+add_executable(ClockifyTrayIcons ${IS_WIN}
     ${SRC_COMMON}
 
     TrayIcons.cpp
