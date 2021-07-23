@@ -6,6 +6,7 @@
 #include <QSystemTrayIcon>
 #include <QTimer>
 #include <QMessageBox>
+#include <QDesktopServices>
 #include <QMenu>
 
 #include <SingleApplication>
@@ -182,6 +183,9 @@ int main(int argc, char *argv[])
 	});
 	QObject::connect(clockifyRunningMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
 	QObject::connect(clockifyRunningMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
+	QObject::connect(clockifyRunningMenu.addAction("Open the Clockify website"), &QAction::triggered, &a, []() {
+		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
+	});
 	QObject::connect(clockifyRunningMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	QObject::connect(runningJobMenu.addAction("Break"), &QAction::triggered, &a, [&]() {
@@ -202,6 +206,9 @@ int main(int argc, char *argv[])
 	});
 	QObject::connect(runningJobMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
 	QObject::connect(runningJobMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
+	QObject::connect(runningJobMenu.addAction("Open the Clockify website"), &QAction::triggered, &a, []() {
+		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
+	});
 	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	// set up the actions on icon click
