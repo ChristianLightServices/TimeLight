@@ -35,7 +35,12 @@ int main(int argc, char *argv[])
 
 	ClockifyManager manager{WORKSPACE, apiKey.toUtf8(), &a};
 	if (!manager.isValid())
+	{
+		QMessageBox::critical(nullptr,
+							  "Fatal error", "Could not load information from Clockify. "
+							  "Please check your internet connection and run this program again.");
 		return 1;
+	}
 	QObject::connect(&manager, &ClockifyManager::invalidated, &a, []() {
 		QMessageBox::critical(nullptr,
 							  "Fatal error", "Could not load information from Clockify. "
@@ -75,6 +80,8 @@ int main(int argc, char *argv[])
 	QPair<QString, QIcon> onBreak{"You are on break", QIcon{":/yellowlight.png"}};
 	QPair<QString, QIcon> working{"You are working", QIcon{":/greenlight.png"}};
 	QPair<QString, QIcon> notWorking{"You are not working", QIcon{":/redlight.png"}};
+	QPair<QString, QIcon> powerNotConnected{"You are offline", QIcon{":/graypower.png"}};
+	QPair<QString, QIcon> runningNotConnected{"You are offline", QIcon{":/graylight.png"}};
 
 	QSystemTrayIcon clockifyRunning{clockifyOff.second};
 	QSystemTrayIcon runningJob{notWorking.second};
@@ -87,7 +94,15 @@ int main(int argc, char *argv[])
 
 	// some well-used lambdas
 	auto updateTrayIcons = [&](){
-		if (user->hasRunningTimeEntry())
+		if (!manager.isConnectedToInternet())
+		{
+			clockifyRunning.setToolTip(powerNotConnected.first);
+			runningJob.setToolTip(runningNotConnected.first);
+
+			clockifyRunning.setIcon(powerNotConnected.second);
+			runningJob.setIcon(runningNotConnected.second);
+		}
+		else if (user->hasRunningTimeEntry())
 		{
 			clockifyRunning.setToolTip(clockifyOn.first);
 			clockifyRunning.setIcon(clockifyOn.second);
@@ -147,6 +162,8 @@ int main(int argc, char *argv[])
 		manager.setApiKey(apiKey);
 		settings.setValue("apiKey", apiKey);
 	};
+
+	updateTrayIcons();
 
 	// set up the menu actions
 	QObject::connect(clockifyRunningMenu.addAction("Start"), &QAction::triggered, &a, [&]() {

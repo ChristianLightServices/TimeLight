@@ -128,6 +128,18 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	m_updateCacheTimer.callOnTimeout(updateUsersAndProjects);
 	m_updateCacheTimer.setSingleShot(false);
 	m_updateCacheTimer.start();
+
+	m_checkConnectionTimer.setInterval(500);
+	m_checkConnectionTimer.callOnTimeout([this]() {
+		auto rep = m_manager.get(QNetworkRequest{QUrl{"https://clockify.me/"}});
+		QEventLoop loop;
+		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+		loop.exec();
+
+		m_isConnectedToInternet = rep->bytesAvailable();
+	});
+	m_checkConnectionTimer.setSingleShot(false);
+	m_checkConnectionTimer.start();
 }
 
 QList<QPair<QString, QString>> ClockifyManager::projects()
