@@ -42,6 +42,7 @@ public:
 	void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
 
+	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();
 
 	void setApiKey(const QString &apiKey);
@@ -104,8 +105,10 @@ private:
 	bool m_isValid{false};
 	bool m_projectsLoaded{false};
 	bool m_usersLoaded{false};
+	bool m_isConnectedToInternet;
 
 	QTimer m_updateCacheTimer;
+	QTimer m_checkConnectionTimer;
 
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
 	static const std::function<void (QNetworkReply *)> s_defaultFailureCb;

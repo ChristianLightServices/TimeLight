@@ -6,6 +6,6 @@
         <file>redlight.png</file>
         <file>redpower.png</file>
         <file>yellowlight.png</file>
-        <file>bluepower.png</file>
+        <file>graylight.png</file>
     </qresource>
 </RCC>
