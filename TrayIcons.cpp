@@ -48,15 +48,18 @@ int main(int argc, char *argv[])
 	QObject::connect(&manager, &ClockifyManager::invalidated, &a, []() {
 		QMessageBox::critical(nullptr,
 							  "Fatal error", "Could not load information from Clockify. "
-							  "Please check your internet connection and run this program again.",
-							  QMessageBox::Ok);
+							  "Please check your internet connection and run this program again.");
 		QApplication::exit(1);
 	});
 
 	QSharedPointer<ClockifyUser> user{manager.getApiKeyOwner()};
 
 	QObject::connect(&manager, &ClockifyManager::apiKeyChanged, &a, [&]() {
-		user = QSharedPointer<ClockifyUser>{manager.getApiKeyOwner()};
+		auto temp = manager.getApiKeyOwner();
+		if (temp != nullptr)
+			user = QSharedPointer<ClockifyUser>{temp};
+		else
+			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
 	});
 
 	QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
@@ -74,6 +77,7 @@ int main(int argc, char *argv[])
 	QMenu clockifyRunningMenu;
 	QMenu runningJobMenu;
 
+	// this was big enough and used enough places that I thought I'd just make it a variable instead of copy-pasting
 	auto updateTrayIcons = [&](){
 		if (user->hasRunningTimeEntry())
 		{
@@ -101,6 +105,7 @@ int main(int argc, char *argv[])
 		}
 	};
 
+	// set up the menu actions
 	QObject::connect(clockifyRunningMenu.addAction("Start"), &QAction::triggered, &a, [&]() {
 		if (!user->hasRunningTimeEntry())
 		{
@@ -165,6 +170,7 @@ int main(int argc, char *argv[])
 	});
 	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
+	// set up the actions on icon click
 	QObject::connect(&clockifyRunning, &QSystemTrayIcon::activated, &a, [&]() {
 		if (user->hasRunningTimeEntry())
 			user->stopCurrentTimeEntry();

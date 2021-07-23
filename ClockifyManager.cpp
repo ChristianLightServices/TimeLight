@@ -30,6 +30,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	  m_apiKey{apiKey}
 {
 	// request currently logged in user (the one whose API key we're using) as a validity test
+	// and also in order to cache API key info
 	QUrl url{s_baseUrl + "/user"};
 
 	QNetworkRequest currentUser{url};
@@ -43,9 +44,17 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 
 	if (auto status = userRep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
 	{
-		json j{json::parse(userRep->readAll().toStdString())};
-		m_ownerId = j["id"].get<QString>();
-		m_isValid = true;
+		try
+		{
+			json j{json::parse(userRep->readAll().toStdString())};
+			m_ownerId = j["id"].get<QString>();
+			m_isValid = true;
+		}
+		catch (const json::exception &ex)
+		{
+			std::cerr << "Error: " << ex.what() << std::endl;
+			return;
+		}
 	}
 	else
 	{
@@ -57,7 +66,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	// background; when the user calls projects(), projects() will block if needed until the projects are loaded
 	url = s_baseUrl + "/workspaces/" + m_workspaceId + "/projects";
 
-	// let's get all the projects! *evil laughter*
+	// let's get _all_ the projects! *evil laughter*
 	QUrlQuery query;
 	query.addQueryItem("page-size", QString::number(INT_MAX));
 	url.setQuery(query);
@@ -269,8 +278,16 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
 		{
-			json j{json::parse(rep->readAll().toStdString())};
-			return new ClockifyUser{j["id"].get<QString>(), this};
+			try
+			{
+				json j{json::parse(rep->readAll().toStdString())};
+				return new ClockifyUser{j["id"].get<QString>(), this};
+			}
+			catch (json::exception ex)
+			{
+				std::cout << ex.what() << std::endl;
+				return nullptr;
+			}
 		}
 		else
 			return nullptr;
