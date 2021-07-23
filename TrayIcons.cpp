@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 		auto projects = manager.projects();
 		QStringList projectIds;
 		QStringList projectNames;
-		for (auto project : projects)
+		for (const auto &project : projects)
 		{
 			projectIds.push_back(project.first);
 			projectNames.push_back(project.second);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 		auto projects = manager.projects();
 		QStringList projectIds;
 		QStringList projectNames;
-		for (auto project : projects)
+		for (const auto &project : projects)
 		{
 			projectIds.push_back(project.first);
 			projectNames.push_back(project.second);
