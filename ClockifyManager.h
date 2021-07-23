@@ -14,6 +14,8 @@
 
 using json = nlohmann::json;
 
+class ClockifyUser;
+
 class ClockifyManager : public QObject
 {
     Q_OBJECT
@@ -32,16 +34,23 @@ public:
 	QString userName(const QString &userId) const;
 
 	bool userHasRunningTimeEntry(const QString &userId);
-	void stopRunningTimeEntry(const QString &userId, bool async);
+	QDateTime stopRunningTimeEntry(const QString &userId, bool async);
 	json getRunningTimeEntry(const QString &userId);
 	void startTimeEntry(const QString &userId, const QString &projectId, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
+	void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
+	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+
+	ClockifyUser *getApiKeyOwner();
+
+	void setApiKey(const QString &apiKey);
 
 signals:
 	void projectsLoaded();
 	void usersLoaded();
 
 	void invalidated();
+	void apiKeyChanged();
 
 private:
 	QNetworkReply *get(const QUrl &url,
@@ -73,7 +82,9 @@ private:
 						 std::function<void (QNetworkReply *)> failureCb = s_defaultFailureCb);
 
 	QByteArray m_workspaceId;
-	const QByteArray m_apiKey;
+	QByteArray m_apiKey;
+
+	QString m_ownerId;
 
 	// these are ordered as <id, name>
 	QList<QPair<QString, QString>> m_projects;
