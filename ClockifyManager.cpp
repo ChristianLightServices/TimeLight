@@ -50,9 +50,14 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 			m_ownerId = j["id"].get<QString>();
 			m_isValid = true;
 		}
-		catch (const json::exception &ex)
+		catch (const std::exception &ex)
 		{
 			std::cerr << "Error: " << ex.what() << std::endl;
+			return;
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error!\n";
 			return;
 		}
 	}
@@ -294,9 +299,14 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 				json j{json::parse(rep->readAll().toStdString())};
 				return new ClockifyUser{j["id"].get<QString>(), this};
 			}
-			catch (json::exception ex)
+			catch (std::exception ex)
 			{
 				std::cout << ex.what() << std::endl;
+				return nullptr;
+			}
+			catch (...)
+			{
+				std::cout << "Unknown error!\n";
 				return nullptr;
 			}
 		}
