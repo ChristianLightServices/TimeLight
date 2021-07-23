@@ -29,7 +29,7 @@ add_executable(ClockifyModifier
     HeadlessRunner.cpp
 )
 
-add_executable(TrayIcons
+add_executable(ClockifyTrayIcons
     ${SRC_COMMON}
 
     TrayIcons.cpp
@@ -44,7 +44,7 @@ target_link_libraries(ClockifyModifier
 )
 
 
-target_link_libraries(TrayIcons
+target_link_libraries(ClockifyTrayIcons
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Widgets
