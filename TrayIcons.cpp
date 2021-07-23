@@ -20,7 +20,7 @@ const QByteArray BREAKTIME{"redacted"};
 int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("ClockifyEasyButtons");
-	QApplication::setApplicationName("Christian Light");
+	QApplication::setOrganizationName("Christian Light");
 
 	SingleApplication a{argc, argv};
 
