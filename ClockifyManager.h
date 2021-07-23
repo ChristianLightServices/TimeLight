@@ -6,6 +6,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QSet>
+#include <QTimer>
 
 #include <functional>
 #include <iostream>
@@ -103,6 +104,8 @@ private:
 	bool m_isValid{false};
 	bool m_projectsLoaded{false};
 	bool m_usersLoaded{false};
+
+	QTimer m_updateCacheTimer;
 
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
 	static const std::function<void (QNetworkReply *)> s_defaultFailureCb;

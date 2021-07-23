@@ -62,56 +62,65 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		return;
 	}
 
-	// get all projects for project list (note that this will return immediately and finish running in the
-	// background; when the user calls projects(), projects() will block if needed until the projects are loaded
-	url = s_baseUrl + "/workspaces/" + m_workspaceId + "/projects";
+	auto updateUsersAndProjects = [this]() {
+		// get all projects for project list (note that this will return immediately and finish running in the
+		// background; when the user calls projects(), projects() will block if needed until the projects are loaded
+		QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/projects"};
 
-	// let's get _all_ the projects! *evil laughter*
-	QUrlQuery query;
-	query.addQueryItem("page-size", QString::number(INT_MAX));
-	url.setQuery(query);
+		// let's get _all_ the projects! *evil laughter*
+		QUrlQuery query;
+		query.addQueryItem("page-size", QString::number(INT_MAX));
+		url.setQuery(query);
 
-	get(url, [this](QNetworkReply *rep) {
-		try
-		{
-			json j{json::parse(rep->readAll().toStdString())};
+		get(url, [this](QNetworkReply *rep) {
+			try
+			{
+				json j{json::parse(rep->readAll().toStdString())};
 
-			for (auto item : j)
-				m_projects.push_back({item["id"].get<QByteArray>(),
-									  item["name"].get<QByteArray>()});
+				for (auto item : j)
+					m_projects.push_back({item["id"].get<QByteArray>(),
+										  item["name"].get<QByteArray>()});
 
-			m_projectsLoaded = true;
-			emit projectsLoaded();
-		}
-		catch (...)
-		{
-			emit invalidated();
-		}
-	});
+				m_projectsLoaded = true;
+				emit projectsLoaded();
+			}
+			catch (...)
+			{
+				emit invalidated();
+			}
+		});
 
-	// now load the users
-	url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
-	query.clear();
-	query.addQueryItem("page-size", QString::number(INT_MAX));
-	url.setQuery(query);
+		// now load the users
+		url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
+		query.clear();
+		query.addQueryItem("page-size", QString::number(INT_MAX));
+		url.setQuery(query);
 
-	get(url, [this](QNetworkReply *rep) {
-		try
-		{
-			json j{json::parse(rep->readAll().toStdString())};
+		get(url, [this](QNetworkReply *rep) {
+			try
+			{
+				json j{json::parse(rep->readAll().toStdString())};
 
-			for (auto item : j)
-				m_users.push_back({item["id"].get<QByteArray>(),
-								   item["name"].get<QByteArray>()});
+				for (auto item : j)
+					m_users.push_back({item["id"].get<QByteArray>(),
+									   item["name"].get<QByteArray>()});
 
-			m_usersLoaded = true;
-			emit usersLoaded();
-		}
-		catch (...)
-		{
-			emit invalidated();
-		}
-	});
+				m_usersLoaded = true;
+				emit usersLoaded();
+			}
+			catch (...)
+			{
+				emit invalidated();
+			}
+		});
+	};
+
+	updateUsersAndProjects();
+
+	m_updateCacheTimer.setInterval(60000); // every minute
+	m_updateCacheTimer.callOnTimeout(updateUsersAndProjects);
+	m_updateCacheTimer.setSingleShot(false);
+	m_updateCacheTimer.start();
 }
 
 QList<QPair<QString, QString>> ClockifyManager::projects()
