@@ -18,9 +18,11 @@ public:
 
 	bool hasRunningTimeEntry();
 	json getRunningTimeEntry();
-	void stopCurrentTimeEntry(bool async = false);
+	QDateTime stopCurrentTimeEntry(bool async = false);
 	void startTimeEntry(const QString &projectId, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
+	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
+	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
 
 signals:
 

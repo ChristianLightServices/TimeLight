@@ -49,21 +49,25 @@ json ClockifyUser::getRunningTimeEntry()
 	return m_runningTimeEntry;
 }
 
-void ClockifyUser::stopCurrentTimeEntry(bool async)
+QDateTime ClockifyUser::stopCurrentTimeEntry(bool async)
 {
-	// we'll assume that all async calls succeed
+	// we'll assume that all async calls succeed (bad, but I'm not sure how to handle it otherwise)
 	bool success = async;
+	QDateTime now;
 
 	while (!success)
 	{
 		try
 		{
-			m_manager->stopRunningTimeEntry(m_userId, async);
+			now = m_manager->stopRunningTimeEntry(m_userId, async);
 
 			success = true;
+			m_hasRunningTimeEntry = false;
 		}
 		catch (...) {}
 	}
+
+	return now;
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, bool async) const
@@ -74,4 +78,14 @@ void ClockifyUser::startTimeEntry(const QString &projectId, bool async) const
 void ClockifyUser::startTimeEntry(const QString &projectId, const QString &description, bool async) const
 {
 	m_manager->startTimeEntry(m_userId, projectId, description, async);
+}
+
+void ClockifyUser::startTimeEntry(const QString &projectId, QDateTime start, bool async) const
+{
+	m_manager->startTimeEntry(m_userId, projectId, start, async);
+}
+
+void ClockifyUser::startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async) const
+{
+	m_manager->startTimeEntry(m_userId, projectId, description, start, async);
 }

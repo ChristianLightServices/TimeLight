@@ -11,6 +11,7 @@
 #include <nlohmann/json.hpp>
 
 #include "JsonHelper.h"
+#include "ClockifyUser.h"
 
 using nlohmann::json;
 
@@ -41,7 +42,11 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	loop.exec();
 
 	if (auto status = userRep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
+	{
+		json j{json::parse(userRep->readAll().toStdString())};
+		m_ownerId = j["id"].get<QString>();
 		m_isValid = true;
+	}
 	else
 	{
 		std::cerr << "Request failed with code " << status << std::endl;
@@ -178,9 +183,10 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 	return false;
 }
 
-void ClockifyManager::stopRunningTimeEntry(const QString &userId, bool async)
+QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool async)
 {
-	json j{{"end", QDateTime::currentDateTime().toUTC().toString("yyyy-MM-ddThh:mm:ssZ")}};
+	auto now = QDateTime::currentDateTimeUtc();
+	json j{{"end", now.toString("yyyy-MM-ddThh:mm:ssZ")}};
 
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
 	auto rep = patch(url, QByteArray::fromStdString(j.dump()));
@@ -191,6 +197,8 @@ void ClockifyManager::stopRunningTimeEntry(const QString &userId, bool async)
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 		loop.exec();
 	}
+
+	return now;
 }
 
 json ClockifyManager::getRunningTimeEntry(const QString &userId)
@@ -213,13 +221,23 @@ json ClockifyManager::getRunningTimeEntry(const QString &userId)
 
 void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
 {
-	startTimeEntry(userId, projectId, QString{}, async);
+	startTimeEntry(userId, projectId, QString{}, QDateTime::currentDateTimeUtc(), async);
 }
 
 void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async)
 {
+	startTimeEntry(userId, projectId, description, QDateTime::currentDateTimeUtc(), async);
+}
+
+void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async)
+{
+	startTimeEntry(userId, projectId, QString{}, start, async);
+}
+
+void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async)
+{
 	json j{
-		{"start", QDateTime::currentDateTime().toUTC().toString("yyyy-MM-ddThh:mm:ssZ")},
+		{"start", start.toString("yyyy-MM-ddThh:mm:ssZ")},
 		{"projectId", projectId}
 	};
 
@@ -235,6 +253,34 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 		loop.exec();
 	}
+}
+
+ClockifyUser *ClockifyManager::getApiKeyOwner()
+{
+	if (!m_ownerId.isEmpty())
+		return new ClockifyUser{m_ownerId, this};
+	else
+	{
+		auto rep = get(QUrl{s_baseUrl + "/user"});
+
+		QEventLoop loop;
+		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+		loop.exec();
+
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
+		{
+			json j{json::parse(rep->readAll().toStdString())};
+			return new ClockifyUser{j["id"].get<QString>(), this};
+		}
+		else
+			return nullptr;
+	}
+}
+
+void ClockifyManager::setApiKey(const QString &apiKey)
+{
+	m_apiKey = apiKey.toUtf8();
+	emit apiKeyChanged();
 }
 
 // *****************************************************************************

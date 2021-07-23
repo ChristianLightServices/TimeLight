@@ -13,7 +13,9 @@
 #include "JsonHelper.h"
 #include "ClockifyManager.h"
 #include "ClockifyUser.h"
-#include "Common.h"
+
+const QByteArray WORKSPACE{"redacted"};
+const QByteArray BREAKTIME{"redacted"};
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +24,25 @@ int main(int argc, char *argv[])
 
 	SingleApplication a{argc, argv};
 
-	ClockifyManager manager{WORKSPACE, APIKEY, &a};
+	QString apiKey;
+	QString projectId;
+	QSettings settings;
+
+	projectId = settings.value("projectId").toString();
+	apiKey = settings.value("apiKey").toString();
+
+	while (apiKey == "")
+	{
+		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
+		settings.setValue("apiKey", apiKey);
+	}
+	while (projectId == "")
+	{
+		projectId = QInputDialog::getText(nullptr, "Default project", "Enter your default project ID:");
+		settings.setValue("projectId", projectId);
+	}
+
+	ClockifyManager manager{WORKSPACE, apiKey.toUtf8(), &a};
 	if (!manager.isValid())
 		return 1;
 	QObject::connect(&manager, &ClockifyManager::invalidated, &a, []() {
@@ -33,28 +53,11 @@ int main(int argc, char *argv[])
 		QApplication::exit(1);
 	});
 
-	QString userId;
-	QString projectId;
-	QSettings settings;
+	QSharedPointer<ClockifyUser> user{manager.getApiKeyOwner()};
 
-	userId = settings.value("userId").toString();
-	projectId = settings.value("projectId").toString();
-
-	if (userId == "")
-	{
-		userId = QInputDialog::getText(nullptr, "User ID", "Enter your Clockify user ID:");
-		settings.setValue("userId", userId);
-	}
-	if (projectId == "")
-	{
-		projectId = QInputDialog::getText(nullptr, "Default project", "Enter your default project ID:");
-		settings.setValue("projectId", projectId);
-	}
-
-	if (userId.isEmpty() || projectId.isEmpty())
-		return 2;
-
-	ClockifyUser me{userId, &manager};
+	QObject::connect(&manager, &ClockifyManager::apiKeyChanged, &a, [&]() {
+		user = QSharedPointer<ClockifyUser>{manager.getApiKeyOwner()};
+	});
 
 	QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
 	QPair<QString, QIcon> clockifyOff{"Clockify is not running", QIcon{":/redpower.png"}};
@@ -72,12 +75,12 @@ int main(int argc, char *argv[])
 	QMenu runningJobMenu;
 
 	auto updateTrayIcons = [&](){
-		if (me.hasRunningTimeEntry())
+		if (user->hasRunningTimeEntry())
 		{
 			clockifyRunning.setToolTip(clockifyOn.first);
 			clockifyRunning.setIcon(clockifyOn.second);
 
-			if (me.getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
+			if (user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
 			{
 				runningJob.setToolTip(onBreak.first);
 				runningJob.setIcon(onBreak.second);
@@ -99,58 +102,92 @@ int main(int argc, char *argv[])
 	};
 
 	QObject::connect(clockifyRunningMenu.addAction("Start"), &QAction::triggered, &a, [&]() {
-		if (!me.hasRunningTimeEntry())
+		if (!user->hasRunningTimeEntry())
 		{
-			me.startTimeEntry(projectId);
+			user->startTimeEntry(projectId);
 			updateTrayIcons();
 		}
 	});
 	QObject::connect(clockifyRunningMenu.addAction("Stop"), &QAction::triggered, &a, [&]() {
-		if (me.hasRunningTimeEntry())
+		if (user->hasRunningTimeEntry())
 		{
-			me.stopCurrentTimeEntry();
+			user->stopCurrentTimeEntry();
 			updateTrayIcons();
 		}
+	});
+	QObject::connect(clockifyRunningMenu.addAction("Change default project"), &QAction::triggered, &a, [&]() {
+		do
+			projectId = QInputDialog::getText(nullptr, "Project ID", "Enter your default project ID:");
+		while (projectId == "");
+
+		settings.setValue("projectId", projectId);
+	});
+	QObject::connect(clockifyRunningMenu.addAction("Change API key"), &QAction::triggered, &a, [&]() {
+		do
+			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
+		while (apiKey == "");
+
+		manager.setApiKey(apiKey);
+		settings.setValue("apiKey", apiKey);
 	});
 	QObject::connect(clockifyRunningMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	QObject::connect(runningJobMenu.addAction("Break"), &QAction::triggered, &a, [&]() {
-		if (me.hasRunningTimeEntry())
-			me.stopCurrentTimeEntry();
-		me.startTimeEntry(BREAKTIME);
+		QDateTime start = QDateTime::currentDateTimeUtc();
+
+		if (user->hasRunningTimeEntry())
+			start = user->stopCurrentTimeEntry();
+		user->startTimeEntry(BREAKTIME, start);
 		updateTrayIcons();
 	});
 	QObject::connect(runningJobMenu.addAction("Resume work"), &QAction::triggered, &a, [&]() {
-		if (me.hasRunningTimeEntry())
-			me.stopCurrentTimeEntry();
-		me.startTimeEntry(projectId);
+		QDateTime start = QDateTime::currentDateTimeUtc();
+
+		if (user->hasRunningTimeEntry())
+			start = user->stopCurrentTimeEntry();
+		user->startTimeEntry(projectId, start);
 		updateTrayIcons();
+	});
+	QObject::connect(runningJobMenu.addAction("Change default project"), &QAction::triggered, &a, [&]() {
+		do
+			projectId = QInputDialog::getText(nullptr, "Project ID", "Enter your default project ID:");
+		while (projectId == "");
+
+		settings.setValue("projectId", projectId);
+	});
+	QObject::connect(runningJobMenu.addAction("Change API key"), &QAction::triggered, &a, [&]() {
+		do
+			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
+		while (apiKey == "");
+
+		manager.setApiKey(apiKey);
+		settings.setValue("apiKey", apiKey);
 	});
 	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	QObject::connect(&clockifyRunning, &QSystemTrayIcon::activated, &a, [&]() {
-		if (me.hasRunningTimeEntry())
-			me.stopCurrentTimeEntry();
+		if (user->hasRunningTimeEntry())
+			user->stopCurrentTimeEntry();
 		else
-			me.startTimeEntry(projectId);
+			user->startTimeEntry(projectId);
 		updateTrayIcons();
 	});
 	QObject::connect(&runningJob, &QSystemTrayIcon::activated, &a, [&]() {
-		if (me.hasRunningTimeEntry())
+		if (user->hasRunningTimeEntry())
 		{
-			if (me.getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
+			if (user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
 			{
-				me.stopCurrentTimeEntry();
-				me.startTimeEntry(projectId);
+				auto time = user->stopCurrentTimeEntry();
+				user->startTimeEntry(projectId, time);
 			}
 			else
 			{
-				me.stopCurrentTimeEntry();
-				me.startTimeEntry(BREAKTIME);
+				auto time = user->stopCurrentTimeEntry();
+				user->startTimeEntry(BREAKTIME, time);
 			}
 		}
 		else
-			me.startTimeEntry(projectId);
+			user->startTimeEntry(projectId);
 		updateTrayIcons();
 	});
 
