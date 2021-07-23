@@ -205,14 +205,20 @@ int main(int argc, char *argv[])
 	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	// set up the actions on icon click
-	QObject::connect(&clockifyRunning, &QSystemTrayIcon::activated, &a, [&]() {
+	QObject::connect(&clockifyRunning, &QSystemTrayIcon::activated, &a, [&](QSystemTrayIcon::ActivationReason reason) {
+		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
+			return;
+
 		if (user->hasRunningTimeEntry())
 			user->stopCurrentTimeEntry();
 		else
 			user->startTimeEntry(projectId);
 		updateTrayIcons();
 	});
-	QObject::connect(&runningJob, &QSystemTrayIcon::activated, &a, [&]() {
+	QObject::connect(&runningJob, &QSystemTrayIcon::activated, &a, [&](QSystemTrayIcon::ActivationReason reason) {
+		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
+			return;
+
 		if (user->hasRunningTimeEntry())
 		{
 			if (user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
