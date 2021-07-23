@@ -24,22 +24,13 @@ int main(int argc, char *argv[])
 
 	SingleApplication a{argc, argv};
 
-	QString apiKey;
-	QString projectId;
 	QSettings settings;
-
-	projectId = settings.value("projectId").toString();
-	apiKey = settings.value("apiKey").toString();
+	QString apiKey = settings.value("apiKey").toString();
 
 	while (apiKey == "")
 	{
 		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
 		settings.setValue("apiKey", apiKey);
-	}
-	while (projectId == "")
-	{
-		projectId = QInputDialog::getText(nullptr, "Default project", "Enter your default project ID:");
-		settings.setValue("projectId", projectId);
 	}
 
 	ClockifyManager manager{WORKSPACE, apiKey.toUtf8(), &a};
@@ -51,6 +42,23 @@ int main(int argc, char *argv[])
 							  "Please check your internet connection and run this program again.");
 		QApplication::exit(1);
 	});
+
+	QString projectId = settings.value("projectId").toString();
+	while (projectId == "")
+	{
+		auto projects = manager.projects();
+		QStringList projectIds;
+		QStringList projectNames;
+		for (auto project : projects)
+		{
+			projectIds.push_back(project.first);
+			projectNames.push_back(project.second);
+		}
+
+		auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames);
+		projectId = projectIds[projectNames.indexOf(projectName)];
+		settings.setValue("projectId", projectId);
+	}
 
 	QSharedPointer<ClockifyUser> user{manager.getApiKeyOwner()};
 
@@ -77,7 +85,7 @@ int main(int argc, char *argv[])
 	QMenu clockifyRunningMenu;
 	QMenu runningJobMenu;
 
-	// this was big enough and used enough places that I thought I'd just make it a variable instead of copy-pasting
+	// some well-used lambdas
 	auto updateTrayIcons = [&](){
 		if (user->hasRunningTimeEntry())
 		{
@@ -104,6 +112,41 @@ int main(int argc, char *argv[])
 			runningJob.setIcon(notWorking.second);
 		}
 	};
+	auto getNewProjectId = [&]() {
+		auto projects = manager.projects();
+		QStringList projectIds;
+		QStringList projectNames;
+		for (auto project : projects)
+		{
+			projectIds.push_back(project.first);
+			projectNames.push_back(project.second);
+		}
+
+		bool ok{true};
+		do
+		{
+			auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames, projectIds.indexOf(projectId), false, &ok);
+			if (!ok)
+				return;
+			projectId = projectIds[projectNames.indexOf(projectName)];
+		}
+		while (projectId == "");
+
+		settings.setValue("projectId", projectId);
+	};
+	auto getNewApiKey = [&]() {
+		bool ok{true};
+		do
+		{
+			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, apiKey, &ok);
+			if (!ok)
+				return;
+		}
+		while (apiKey == "");
+
+		manager.setApiKey(apiKey);
+		settings.setValue("apiKey", apiKey);
+	};
 
 	// set up the menu actions
 	QObject::connect(clockifyRunningMenu.addAction("Start"), &QAction::triggered, &a, [&]() {
@@ -120,21 +163,8 @@ int main(int argc, char *argv[])
 			updateTrayIcons();
 		}
 	});
-	QObject::connect(clockifyRunningMenu.addAction("Change default project"), &QAction::triggered, &a, [&]() {
-		do
-			projectId = QInputDialog::getText(nullptr, "Project ID", "Enter your default project ID:");
-		while (projectId == "");
-
-		settings.setValue("projectId", projectId);
-	});
-	QObject::connect(clockifyRunningMenu.addAction("Change API key"), &QAction::triggered, &a, [&]() {
-		do
-			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
-		while (apiKey == "");
-
-		manager.setApiKey(apiKey);
-		settings.setValue("apiKey", apiKey);
-	});
+	QObject::connect(clockifyRunningMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
+	QObject::connect(clockifyRunningMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
 	QObject::connect(clockifyRunningMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	QObject::connect(runningJobMenu.addAction("Break"), &QAction::triggered, &a, [&]() {
@@ -153,21 +183,8 @@ int main(int argc, char *argv[])
 		user->startTimeEntry(projectId, start);
 		updateTrayIcons();
 	});
-	QObject::connect(runningJobMenu.addAction("Change default project"), &QAction::triggered, &a, [&]() {
-		do
-			projectId = QInputDialog::getText(nullptr, "Project ID", "Enter your default project ID:");
-		while (projectId == "");
-
-		settings.setValue("projectId", projectId);
-	});
-	QObject::connect(runningJobMenu.addAction("Change API key"), &QAction::triggered, &a, [&]() {
-		do
-			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
-		while (apiKey == "");
-
-		manager.setApiKey(apiKey);
-		settings.setValue("apiKey", apiKey);
-	});
+	QObject::connect(runningJobMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
+	QObject::connect(runningJobMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
 	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
 
 	// set up the actions on icon click
