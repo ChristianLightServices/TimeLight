@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("ClockifyTrayIcons");
 	QApplication::setOrganizationName("Christian Light");
+	QApplication::setQuitOnLastWindowClosed(false);
 
 	SingleApplication a{argc, argv};
 
