@@ -17,6 +17,8 @@ public:
 
 	void show();
 
+	QString projectId() const;
+
 signals:
 
 private slots:

@@ -313,8 +313,38 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 	}
 }
 
+json ClockifyManager::getTimeEntries(const QString &userId)
+{
+	auto rep = get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"});
+
+	QEventLoop loop;
+	connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+	loop.exec();
+
+	if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
+	{
+		try
+		{
+			return json::parse(rep->readAll().toStdString());
+		}
+		catch (std::exception ex)
+		{
+			std::cout << ex.what() << std::endl;
+			return {};
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error!\n";
+			return {};
+		}
+	}
+	else
+		return {};
+}
+
 ClockifyUser *ClockifyManager::getApiKeyOwner()
 {
+	// TODO: make sure to always use the correct ID for the API key
 	if (!m_ownerId.isEmpty())
 		return new ClockifyUser{m_ownerId, this};
 	else
