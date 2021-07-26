@@ -212,9 +212,16 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 
 	if (auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
 	{
-		json j{json::parse(reply->readAll().toStdString())};
-		if (!j.empty())
-			return true;
+		try
+		{
+			json j{json::parse(reply->readAll().toStdString())};
+			if (!j.empty())
+				return true;
+		}
+		catch (...)
+		{
+			// TODO: add some realistic error handling here
+		}
 	}
 
 	return false;
@@ -251,7 +258,16 @@ json ClockifyManager::getRunningTimeEntry(const QString &userId)
 	loop.exec();
 
 	if (auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
-		return json::parse(reply->readAll().toStdString());
+	{
+		try
+		{
+			return json::parse(reply->readAll().toStdString());
+		}
+		catch (...)
+		{
+			return {};
+		}
+	}
 
 	return {};
 }
