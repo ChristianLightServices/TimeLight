@@ -428,10 +428,10 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 }
 
 QNetworkReply *ClockifyManager::post(const QUrl &url,
-									  const QByteArray &body,
+									 const QByteArray &body,
 									 int expectedReturnCode,
-									  std::function<void (QNetworkReply *)> successCb,
-									  std::function<void (QNetworkReply *)> failureCb)
+									 std::function<void (QNetworkReply *)> successCb,
+									 std::function<void (QNetworkReply *)> failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
