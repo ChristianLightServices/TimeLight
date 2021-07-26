@@ -10,6 +10,7 @@
 
 #include "ClockifyUser.h"
 #include "JsonHelper.h"
+#include "SelectDefaultProjectDialog.h"
 
 const QByteArray WORKSPACE{"redacted"};
 const QByteArray BREAKTIME{"redacted"};
@@ -22,6 +23,10 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QShar
 	  m_user{user}
 {
 	QSettings settings;
+	m_defaultProjectId = settings.value("projectId").toString();
+
+	if (m_defaultProjectId == "")
+		getNewProjectId();
 
 	setUpTrayIcons();
 
@@ -41,6 +46,38 @@ void TrayIcons::show()
 {
 	m_clockifyRunning->show();
 	m_runningJob->show();
+}
+
+QString TrayIcons::projectId() const
+{
+	if (m_defaultProjectId != "last-entered-code")
+		return m_defaultProjectId;
+	else
+	{
+		if (m_user->hasRunningTimeEntry())
+		{
+			if (auto code = m_user->getRunningTimeEntry()[0].get<QString>(); code != BREAKTIME)
+				return code;
+		}
+
+		auto entries = m_user->getTimeEntries();
+		for (auto entry : entries)
+		{
+			try
+			{
+				if (auto code = entry["projectId"].get<QString>(); code != BREAKTIME)
+					return code;
+			}
+			catch (...)
+			{
+				std::cerr << "getting project id failed\n";
+				continue; // no project id to see here, move along
+			}
+		}
+
+		// when all else fails, use the first extant project
+		return m_manager->projects().first().first;
+	}
 }
 
 void TrayIcons::updateTrayIcons()
@@ -98,18 +135,14 @@ void TrayIcons::getNewProjectId()
 		projectNames.push_back(project.second);
 	}
 
-	bool ok{true};
-	do
+	SelectDefaultProjectDialog dialog{projectId(), {projectIds, projectNames}};
+	if (dialog.exec() == QDialog::Accepted)
 	{
-		auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames, projectIds.indexOf(m_defaultProjectId), false, &ok);
-		if (!ok)
-			return;
-		m_defaultProjectId = projectIds[projectNames.indexOf(projectName)];
+		m_defaultProjectId = dialog.selectedProject();
+		QSettings settings;
+		settings.setValue("projectId", m_defaultProjectId);
+		settings.sync();
 	}
-	while (m_defaultProjectId == "");
-
-	QSettings settings;
-	settings.setValue("projectId", m_defaultProjectId);
 }
 
 void TrayIcons::getNewApiKey()
@@ -138,7 +171,7 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
 		if (!m_user->hasRunningTimeEntry())
 		{
-			m_user->startTimeEntry(m_defaultProjectId);
+			m_user->startTimeEntry(projectId());
 			updateTrayIcons();
 		}
 	});
@@ -169,7 +202,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 			start = m_user->stopCurrentTimeEntry();
-		m_user->startTimeEntry(m_defaultProjectId, start);
+		m_user->startTimeEntry(projectId(), start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
@@ -187,7 +220,7 @@ void TrayIcons::setUpTrayIcons()
 		if (m_user->hasRunningTimeEntry())
 			m_user->stopCurrentTimeEntry();
 		else
-			m_user->startTimeEntry(m_defaultProjectId);
+			m_user->startTimeEntry(projectId());
 		updateTrayIcons();
 	});
 	connect(m_runningJob, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
@@ -199,7 +232,7 @@ void TrayIcons::setUpTrayIcons()
 			if (m_user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
 			{
 				auto time = m_user->stopCurrentTimeEntry();
-				m_user->startTimeEntry(m_defaultProjectId, time);
+				m_user->startTimeEntry(projectId(), time);
 			}
 			else
 			{
@@ -208,7 +241,7 @@ void TrayIcons::setUpTrayIcons()
 			}
 		}
 		else
-			m_user->startTimeEntry(m_defaultProjectId);
+			m_user->startTimeEntry(projectId());
 		updateTrayIcons();
 	});
 

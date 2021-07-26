@@ -23,6 +23,7 @@ public:
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
 	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
+	json getTimeEntries();
 
 signals:
 
@@ -34,6 +35,8 @@ private:
 
 	bool m_hasRunningTimeEntry;
 	json m_runningTimeEntry;
+
+	json m_timeEntries;
 };
 
 #endif // CLOCKIFYUSER_H

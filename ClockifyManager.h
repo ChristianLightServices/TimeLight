@@ -41,6 +41,7 @@ public:
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+	json getTimeEntries(const QString &userId);
 
 	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();

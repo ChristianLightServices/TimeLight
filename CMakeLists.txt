@@ -40,6 +40,7 @@ add_executable(ClockifyTrayIcons ${IS_WIN}
     ${SRC_COMMON}
 
     ClockifyTrayIcons.cpp
+    SelectDefaultProjectDialog.cpp
     TrayIcons.cpp
 
     res.qrc

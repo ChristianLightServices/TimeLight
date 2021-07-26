@@ -89,3 +89,15 @@ void ClockifyUser::startTimeEntry(const QString &projectId, const QString &descr
 {
 	m_manager->startTimeEntry(m_userId, projectId, description, start, async);
 }
+
+json ClockifyUser::getTimeEntries()
+{
+	auto entries = m_manager->getTimeEntries(m_userId);
+	if (!entries.empty())
+	{
+		m_timeEntries = entries;
+		return m_timeEntries;
+	}
+	else
+		return {};
+}
