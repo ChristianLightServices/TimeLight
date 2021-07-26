@@ -165,7 +165,7 @@ void TrayIcons::getNewProjectId()
 		projectNames.push_back(project.second);
 	}
 
-	SelectDefaultProjectDialog dialog{projectId(), {projectIds, projectNames}};
+	SelectDefaultProjectDialog dialog{m_defaultProjectId, {projectIds, projectNames}};
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		m_defaultProjectId = dialog.selectedProject();

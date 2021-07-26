@@ -43,14 +43,14 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair
 	setLayout(layout);
 
 	connect(m_buttons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
-		if (m_buttons->checkedButton() == m_useSpecificProject)
+		if (m_buttons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificProject))
 		{
 			m_defaultProject = m_selectedSpecificProject;
 			m_selectDefaultProject->setEnabled(true);
 		}
 		else
 		{
-			if (m_buttons->checkedButton() == m_useLastProject)
+			if (m_buttons->checkedButton() == static_cast<QAbstractButton *>(m_useLastProject))
 				m_defaultProject = "last-entered-code";
 
 			m_selectDefaultProject->setEnabled(false);
@@ -63,7 +63,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair
 												 "Default project",
 												 "Select your default project",
 												 m_availableProjects.second,
-												 m_availableProjects.first.indexOf(m_defaultProject),
+												 m_availableProjects.first.indexOf(m_selectedSpecificProject),
 												 false,
 												 &ok);
 		if (!ok)

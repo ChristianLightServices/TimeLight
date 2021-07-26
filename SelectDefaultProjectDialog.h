@@ -18,9 +18,9 @@ public:
 signals:
 
 private:
+	QButtonGroup *m_buttons;
 	QRadioButton *m_useLastProject;
 	QRadioButton *m_useSpecificProject;
-	QButtonGroup *m_buttons;
 
 	QPushButton *m_selectDefaultProject;
 
