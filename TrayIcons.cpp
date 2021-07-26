@@ -1,81 +1,50 @@
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QCommandLineOption>
-#include <QSettings>
-#include <QInputDialog>
-#include <QSystemTrayIcon>
+#include "TrayIcons.h"
+
 #include <QTimer>
-#include <QMessageBox>
-#include <QDesktopServices>
+#include <QSettings>
 #include <QMenu>
+#include <QInputDialog>
+#include <QDesktopServices>
 
 #include <SingleApplication>
 
-#include "JsonHelper.h"
-#include "ClockifyManager.h"
 #include "ClockifyUser.h"
+#include "JsonHelper.h"
 
 const QByteArray WORKSPACE{"5e207622ba05e2483903da0d"};
 const QByteArray TIME_301{"5e20d8e0ba05e2483904a186"};
 
-int main(int argc, char *argv[])
+TrayIcons::TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QSharedPointer<ClockifyUser> &user, QObject *parent)
+	: QObject{parent},
+	  m_clockifyRunning{new QSystemTrayIcon},
+	  m_runningJob{new QSystemTrayIcon},
+	  m_manager{manager},
+	  m_user{user}
 {
-	QApplication::setApplicationName("ClockifyEasyButtons");
-	QApplication::setOrganizationName("Christian Light");
-
-	SingleApplication a{argc, argv};
-
 	QSettings settings;
-	QString apiKey = settings.value("apiKey").toString();
 
-	while (apiKey == "")
-	{
-		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
-		settings.setValue("apiKey", apiKey);
-	}
+	setUpTrayIcons();
 
-	ClockifyManager manager{WORKSPACE, apiKey.toUtf8(), &a};
-	if (!manager.isValid())
-	{
-		QMessageBox::critical(nullptr,
-							  "Fatal error", "Could not load information from Clockify. "
-							  "Please check your internet connection and run this program again.");
-		return 1;
-	}
-	QObject::connect(&manager, &ClockifyManager::invalidated, &a, []() {
-		QMessageBox::critical(nullptr,
-							  "Fatal error", "Could not load information from Clockify. "
-							  "Please check your internet connection and run this program again.");
-		QApplication::exit(1);
-	});
+	m_eventLoop.setInterval(500);
+	m_eventLoop.setSingleShot(false);
+	m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
+	m_eventLoop.start();
+}
 
-	QString projectId = settings.value("projectId").toString();
-	while (projectId == "")
-	{
-		auto projects = manager.projects();
-		QStringList projectIds;
-		QStringList projectNames;
-		for (const auto &project : projects)
-		{
-			projectIds.push_back(project.first);
-			projectNames.push_back(project.second);
-		}
+TrayIcons::~TrayIcons()
+{
+	delete m_clockifyRunning;
+	delete m_runningJob;
+}
 
-		auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames);
-		projectId = projectIds[projectNames.indexOf(projectName)];
-		settings.setValue("projectId", projectId);
-	}
+void TrayIcons::show()
+{
+	m_clockifyRunning->show();
+	m_runningJob->show();
+}
 
-	QSharedPointer<ClockifyUser> user{manager.getApiKeyOwner()};
-
-	QObject::connect(&manager, &ClockifyManager::apiKeyChanged, &a, [&]() {
-		auto temp = manager.getApiKeyOwner();
-		if (temp != nullptr)
-			user = QSharedPointer<ClockifyUser>{temp};
-		else
-			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
-	});
-
+void TrayIcons::updateTrayIcons()
+{
 	QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
 	QPair<QString, QIcon> clockifyOff{"Clockify is not running", QIcon{":/redpower.png"}};
 	QPair<QString, QIcon> onBreak{"You are on break", QIcon{":/yellowlight.png"}};
@@ -84,177 +53,167 @@ int main(int argc, char *argv[])
 	QPair<QString, QIcon> powerNotConnected{"You are offline", QIcon{":/graypower.png"}};
 	QPair<QString, QIcon> runningNotConnected{"You are offline", QIcon{":/graylight.png"}};
 
-	QSystemTrayIcon clockifyRunning{clockifyOff.second};
-	QSystemTrayIcon runningJob{notWorking.second};
+	if (!m_manager->isConnectedToInternet())
+	{
+		m_clockifyRunning->setToolTip(powerNotConnected.first);
+		m_runningJob->setToolTip(runningNotConnected.first);
 
-	clockifyRunning.setToolTip(clockifyOff.first);
-	runningJob.setToolTip(notWorking.first);
+		m_clockifyRunning->setIcon(powerNotConnected.second);
+		m_runningJob->setIcon(runningNotConnected.second);
+	}
+	else if (m_user->hasRunningTimeEntry())
+	{
+		m_clockifyRunning->setToolTip(clockifyOn.first);
+		m_clockifyRunning->setIcon(clockifyOn.second);
 
-	QMenu clockifyRunningMenu;
-	QMenu runningJobMenu;
-
-	// some well-used lambdas
-	auto updateTrayIcons = [&](){
-		if (!manager.isConnectedToInternet())
+		if (m_user->getRunningTimeEntry()[0]["projectId"].get<QString>() == TIME_301)
 		{
-			clockifyRunning.setToolTip(powerNotConnected.first);
-			runningJob.setToolTip(runningNotConnected.first);
-
-			clockifyRunning.setIcon(powerNotConnected.second);
-			runningJob.setIcon(runningNotConnected.second);
-		}
-		else if (user->hasRunningTimeEntry())
-		{
-			clockifyRunning.setToolTip(clockifyOn.first);
-			clockifyRunning.setIcon(clockifyOn.second);
-
-			if (user->getRunningTimeEntry()[0]["projectId"].get<QString>() == TIME_301)
-			{
-				runningJob.setToolTip(onBreak.first);
-				runningJob.setIcon(onBreak.second);
-			}
-			else
-			{
-				runningJob.setToolTip(working.first);
-				runningJob.setIcon(working.second);
-			}
+			m_runningJob->setToolTip(onBreak.first);
+			m_runningJob->setIcon(onBreak.second);
 		}
 		else
 		{
-			clockifyRunning.setToolTip(clockifyOff.first);
-			runningJob.setToolTip(notWorking.first);
-
-			clockifyRunning.setIcon(clockifyOff.second);
-			runningJob.setIcon(notWorking.second);
+			m_runningJob->setToolTip(working.first);
+			m_runningJob->setIcon(working.second);
 		}
-	};
-	auto getNewProjectId = [&]() {
-		auto projects = manager.projects();
-		QStringList projectIds;
-		QStringList projectNames;
-		for (const auto &project : projects)
-		{
-			projectIds.push_back(project.first);
-			projectNames.push_back(project.second);
-		}
+	}
+	else
+	{
+		m_clockifyRunning->setToolTip(clockifyOff.first);
+		m_runningJob->setToolTip(notWorking.first);
 
-		bool ok{true};
-		do
-		{
-			auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames, projectIds.indexOf(projectId), false, &ok);
-			if (!ok)
-				return;
-			projectId = projectIds[projectNames.indexOf(projectName)];
-		}
-		while (projectId == "");
+		m_clockifyRunning->setIcon(clockifyOff.second);
+		m_runningJob->setIcon(notWorking.second);
+	}
+}
 
-		settings.setValue("projectId", projectId);
-	};
-	auto getNewApiKey = [&]() {
-		bool ok{true};
-		do
-		{
-			apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, apiKey, &ok);
-			if (!ok)
-				return;
-		}
-		while (apiKey == "");
+void TrayIcons::getNewProjectId()
+{
+	auto projects = m_manager->projects();
+	QStringList projectIds;
+	QStringList projectNames;
+	for (const auto &project : projects)
+	{
+		projectIds.push_back(project.first);
+		projectNames.push_back(project.second);
+	}
 
-		manager.setApiKey(apiKey);
-		settings.setValue("apiKey", apiKey);
-	};
+	bool ok{true};
+	do
+	{
+		auto projectName = QInputDialog::getItem(nullptr, "Default project", "Select your default project", projectNames, projectIds.indexOf(m_defaultProjectId), false, &ok);
+		if (!ok)
+			return;
+		m_defaultProjectId = projectIds[projectNames.indexOf(projectName)];
+	}
+	while (m_defaultProjectId == "");
 
-	updateTrayIcons();
+	QSettings settings;
+	settings.setValue("projectId", m_defaultProjectId);
+}
+
+void TrayIcons::getNewApiKey()
+{
+	bool ok{true};
+	do
+	{
+		m_apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, m_apiKey, &ok);
+		if (!ok)
+			return;
+	}
+	while (m_apiKey == "");
+
+	m_manager->setApiKey(m_apiKey);
+
+	QSettings settings;
+	settings.setValue("apiKey", m_apiKey);
+}
+
+void TrayIcons::setUpTrayIcons()
+{
+	auto m_clockifyRunningMenu = new QMenu;
+	auto m_runningJobMenu = new QMenu;
 
 	// set up the menu actions
-	QObject::connect(clockifyRunningMenu.addAction("Start"), &QAction::triggered, &a, [&]() {
-		if (!user->hasRunningTimeEntry())
+	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
+		if (!m_user->hasRunningTimeEntry())
 		{
-			user->startTimeEntry(projectId);
+			m_user->startTimeEntry(m_defaultProjectId);
 			updateTrayIcons();
 		}
 	});
-	QObject::connect(clockifyRunningMenu.addAction("Stop"), &QAction::triggered, &a, [&]() {
-		if (user->hasRunningTimeEntry())
+	connect(m_clockifyRunningMenu->addAction("Stop"), &QAction::triggered, this, [&]() {
+		if (m_user->hasRunningTimeEntry())
 		{
-			user->stopCurrentTimeEntry();
+			m_user->stopCurrentTimeEntry();
 			updateTrayIcons();
 		}
 	});
-	QObject::connect(clockifyRunningMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
-	QObject::connect(clockifyRunningMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
-	QObject::connect(clockifyRunningMenu.addAction("Open the Clockify website"), &QAction::triggered, &a, []() {
+	connect(m_clockifyRunningMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_clockifyRunningMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_clockifyRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
-	QObject::connect(clockifyRunningMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
+	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
-	QObject::connect(runningJobMenu.addAction("Break"), &QAction::triggered, &a, [&]() {
+	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [&]() {
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
-		if (user->hasRunningTimeEntry())
-			start = user->stopCurrentTimeEntry();
-		user->startTimeEntry(TIME_301, start);
+		if (m_user->hasRunningTimeEntry())
+			start = m_user->stopCurrentTimeEntry();
+		m_user->startTimeEntry(TIME_301, start);
 		updateTrayIcons();
 	});
-	QObject::connect(runningJobMenu.addAction("Resume work"), &QAction::triggered, &a, [&]() {
+	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [&]() {
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
-		if (user->hasRunningTimeEntry())
-			start = user->stopCurrentTimeEntry();
-		user->startTimeEntry(projectId, start);
+		if (m_user->hasRunningTimeEntry())
+			start = m_user->stopCurrentTimeEntry();
+		m_user->startTimeEntry(m_defaultProjectId, start);
 		updateTrayIcons();
 	});
-	QObject::connect(runningJobMenu.addAction("Change default project"), &QAction::triggered, &a, getNewProjectId);
-	QObject::connect(runningJobMenu.addAction("Change API key"), &QAction::triggered, &a, getNewApiKey);
-	QObject::connect(runningJobMenu.addAction("Open the Clockify website"), &QAction::triggered, &a, []() {
+	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
-	QObject::connect(runningJobMenu.addAction("Quit"), &QAction::triggered, &a, &SingleApplication::quit);
+	connect(m_runningJobMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	// set up the actions on icon click
-	QObject::connect(&clockifyRunning, &QSystemTrayIcon::activated, &a, [&](QSystemTrayIcon::ActivationReason reason) {
+	connect(m_clockifyRunning, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
 
-		if (user->hasRunningTimeEntry())
-			user->stopCurrentTimeEntry();
+		if (m_user->hasRunningTimeEntry())
+			m_user->stopCurrentTimeEntry();
 		else
-			user->startTimeEntry(projectId);
+			m_user->startTimeEntry(m_defaultProjectId);
 		updateTrayIcons();
 	});
-	QObject::connect(&runningJob, &QSystemTrayIcon::activated, &a, [&](QSystemTrayIcon::ActivationReason reason) {
+	connect(m_runningJob, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
 
-		if (user->hasRunningTimeEntry())
+		if (m_user->hasRunningTimeEntry())
 		{
-			if (user->getRunningTimeEntry()[0]["projectId"].get<QString>() == TIME_301)
+			if (m_user->getRunningTimeEntry()[0]["projectId"].get<QString>() == TIME_301)
 			{
-				auto time = user->stopCurrentTimeEntry();
-				user->startTimeEntry(projectId, time);
+				auto time = m_user->stopCurrentTimeEntry();
+				m_user->startTimeEntry(m_defaultProjectId, time);
 			}
 			else
 			{
-				auto time = user->stopCurrentTimeEntry();
-				user->startTimeEntry(TIME_301, time);
+				auto time = m_user->stopCurrentTimeEntry();
+				m_user->startTimeEntry(TIME_301, time);
 			}
 		}
 		else
-			user->startTimeEntry(projectId);
+			m_user->startTimeEntry(m_defaultProjectId);
 		updateTrayIcons();
 	});
 
-	clockifyRunning.setContextMenu(&clockifyRunningMenu);
-	runningJob.setContextMenu(&runningJobMenu);
+	m_clockifyRunning->setContextMenu(m_clockifyRunningMenu);
+	m_runningJob->setContextMenu(m_runningJobMenu);
 
-	clockifyRunning.show();
-	runningJob.show();
-
-	QTimer eventLoop;
-	eventLoop.setInterval(500);
-	eventLoop.setSingleShot(false);
-	eventLoop.callOnTimeout(updateTrayIcons);
-	eventLoop.start();
-
-	return a.exec();
+	updateTrayIcons();
 }

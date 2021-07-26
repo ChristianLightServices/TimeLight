@@ -39,6 +39,7 @@ add_executable(ClockifyModifier ${IS_WIN}
 add_executable(ClockifyTrayIcons ${IS_WIN}
     ${SRC_COMMON}
 
+    ClockifyTrayIcons.cpp
     TrayIcons.cpp
 
     res.qrc
