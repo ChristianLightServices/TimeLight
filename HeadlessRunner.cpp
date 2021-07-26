@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 		if (!me.hasRunningTimeEntry())
 			return 1;
 		else
-			return me.getRunningTimeEntry()[0]["projectId"].get<QString>() == TIME_301; // get first (and only) json entry
+			return me.getRunningTimeEntry()["projectId"].get<QString>() == TIME_301; // get first (and only) json entry
 	}
 
 	return 0;
