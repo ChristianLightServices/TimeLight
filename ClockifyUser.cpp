@@ -40,7 +40,7 @@ json ClockifyUser::getRunningTimeEntry()
 	{
 		try
 		{
-			m_runningTimeEntry = m_manager->getRunningTimeEntry(m_userId);
+			m_runningTimeEntry = m_manager->getRunningTimeEntry(m_userId)[0];
 			success = true;
 		}
 		catch (...) {}
