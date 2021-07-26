@@ -103,15 +103,21 @@ void TrayIcons::updateTrayIcons()
 		m_clockifyRunning->setToolTip(clockifyOn.first);
 		m_clockifyRunning->setIcon(clockifyOn.second);
 
-		if (m_user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
-		{
-			m_runningJob->setToolTip(onBreak.first);
-			m_runningJob->setIcon(onBreak.second);
+		try {
+			if (m_user->getRunningTimeEntry()[0]["projectId"].get<QString>() == BREAKTIME)
+			{
+				m_runningJob->setToolTip(onBreak.first);
+				m_runningJob->setIcon(onBreak.second);
+			}
+			else
+			{
+				m_runningJob->setToolTip(working.first);
+				m_runningJob->setIcon(working.second);
+			}
 		}
-		else
+		catch (...)
 		{
-			m_runningJob->setToolTip(working.first);
-			m_runningJob->setIcon(working.second);
+			std::cerr << "Could not load running time entry\n";
 		}
 	}
 	else
@@ -221,7 +227,6 @@ void TrayIcons::setUpTrayIcons()
 			m_user->stopCurrentTimeEntry();
 		else
 			m_user->startTimeEntry(projectId());
-		updateTrayIcons();
 	});
 	connect(m_runningJob, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
@@ -242,7 +247,6 @@ void TrayIcons::setUpTrayIcons()
 		}
 		else
 			m_user->startTimeEntry(projectId());
-		updateTrayIcons();
 	});
 
 	m_clockifyRunning->setContextMenu(m_clockifyRunningMenu);
