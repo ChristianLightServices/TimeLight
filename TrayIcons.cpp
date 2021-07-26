@@ -91,7 +91,8 @@ QString TrayIcons::description() const
 		{
 			try
 			{
-				return entry["description"].get<QString>();
+				if (entry["projectId"].get<QString>() != TIME_301)
+					return entry["description"].get<QString>();
 			}
 			catch (...)
 			{
