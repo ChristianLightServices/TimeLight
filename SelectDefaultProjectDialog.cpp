@@ -20,7 +20,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair
 	m_buttons->addButton(m_useLastProject);
 	m_buttons->addButton(m_useSpecificProject);
 
-	if (m_defaultProject.isEmpty())
+	if (m_defaultProject == "last-entered-code")
 		m_useLastProject->setChecked(true);
 	else
 		m_useSpecificProject->setChecked(true);
