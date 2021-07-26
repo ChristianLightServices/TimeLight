@@ -80,6 +80,30 @@ QString TrayIcons::projectId() const
 	}
 }
 
+QString TrayIcons::description() const
+{
+	if (m_defaultProjectId != "last-entered-code")
+		return QString{};
+	else
+	{
+		auto entries = m_user->getTimeEntries();
+		for (auto entry : entries)
+		{
+			try
+			{
+				return entry["description"].get<QString>();
+			}
+			catch (...)
+			{
+				std::cerr << "getting description failed\n";
+				continue; // no project id to see here, move along
+			}
+		}
+
+		return QString{};
+	}
+}
+
 void TrayIcons::updateTrayIcons()
 {
 	QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
@@ -177,7 +201,7 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
 		if (!m_user->hasRunningTimeEntry())
 		{
-			m_user->startTimeEntry(projectId());
+			m_user->startTimeEntry(projectId(), description());
 			updateTrayIcons();
 		}
 	});
@@ -208,7 +232,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 			start = m_user->stopCurrentTimeEntry();
-		m_user->startTimeEntry(projectId(), start);
+		m_user->startTimeEntry(projectId(), description(), start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
@@ -228,7 +252,7 @@ void TrayIcons::setUpTrayIcons()
 		if (m_user->hasRunningTimeEntry())
 			m_user->stopCurrentTimeEntry();
 		else
-			m_user->startTimeEntry(projectId());
+			m_user->startTimeEntry(projectId(), description());
 
 		m_eventLoop.start();
 	});
@@ -243,7 +267,7 @@ void TrayIcons::setUpTrayIcons()
 			if (m_user->getRunningTimeEntry()["projectId"].get<QString>() == BREAKTIME)
 			{
 				auto time = m_user->stopCurrentTimeEntry();
-				m_user->startTimeEntry(projectId(), time);
+				m_user->startTimeEntry(projectId(), description(), time);
 			}
 			else
 			{
@@ -252,7 +276,7 @@ void TrayIcons::setUpTrayIcons()
 			}
 		}
 		else
-			m_user->startTimeEntry(projectId());
+			m_user->startTimeEntry(projectId(), description());
 
 		m_eventLoop.start();
 	});

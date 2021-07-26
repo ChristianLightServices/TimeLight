@@ -18,6 +18,7 @@ public:
 	void show();
 
 	QString projectId() const;
+	QString description() const;
 
 signals:
 
