@@ -220,6 +220,8 @@ void TrayIcons::setUpTrayIcons()
 
 	// set up the actions on icon click
 	connect(m_clockifyRunning, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
+		m_eventLoop.stop();
+
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
 
@@ -227,8 +229,12 @@ void TrayIcons::setUpTrayIcons()
 			m_user->stopCurrentTimeEntry();
 		else
 			m_user->startTimeEntry(projectId());
+
+		m_eventLoop.start();
 	});
 	connect(m_runningJob, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
+		m_eventLoop.stop();
+
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
 
@@ -247,6 +253,8 @@ void TrayIcons::setUpTrayIcons()
 		}
 		else
 			m_user->startTimeEntry(projectId());
+
+		m_eventLoop.start();
 	});
 
 	m_clockifyRunning->setContextMenu(m_clockifyRunningMenu);
