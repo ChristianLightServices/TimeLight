@@ -54,6 +54,8 @@ signals:
 	void invalidated();
 	void apiKeyChanged();
 
+	void internetConnectionChanged();
+
 private:
 	QNetworkReply *get(const QUrl &url,
 					   std::function<void (QNetworkReply *)> successCb = s_defaultSuccessCb,

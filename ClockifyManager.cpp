@@ -136,7 +136,12 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 		loop.exec();
 
-		m_isConnectedToInternet = rep->bytesAvailable();
+		bool connection = rep->bytesAvailable();
+		if (m_isConnectedToInternet != connection)
+		{
+			m_isConnectedToInternet = connection;
+			emit internetConnectionChanged();
+		}
 	});
 	m_checkConnectionTimer.setSingleShot(false);
 	m_checkConnectionTimer.start();
