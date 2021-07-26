@@ -62,6 +62,11 @@ int main(int argc, char *argv[])
 	});
 
 	QSharedPointer<ClockifyUser> user{manager->getApiKeyOwner()};
+	if (user.isNull())
+	{
+		QMessageBox::warning(nullptr, "Fatal error", "Could not load user!");
+		return 0;
+	}
 
 	QObject::connect(manager.data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
 		auto temp = manager->getApiKeyOwner();
