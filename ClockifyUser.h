@@ -18,7 +18,7 @@ public:
 
 	bool hasRunningTimeEntry();
 	json getRunningTimeEntry();
-	QDateTime stopCurrentTimeEntry(bool async = false);
+	QDateTime stopCurrentTimeEntry(bool async = false) const;
 	void startTimeEntry(const QString &projectId, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
 	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
@@ -32,11 +32,6 @@ private:
 
 	QString m_userId;
 	QString m_name;
-
-	bool m_hasRunningTimeEntry;
-	json m_runningTimeEntry;
-
-	json m_timeEntries;
 };
 
 #endif // CLOCKIFYUSER_H
