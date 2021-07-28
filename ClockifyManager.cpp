@@ -18,17 +18,30 @@ using nlohmann::json;
 const QByteArray ClockifyManager::s_baseUrl{"https://api.clockify.me/api/v1"};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultSuccessCb = [](QNetworkReply *){};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb = [](QNetworkReply *reply) {
-	std::cerr << "Request " << reply->url().toString().toStdString()
-			  << " failed with code "
-			  << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt()
-			  << std::endl;
+
+	if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code == 0)
+	{
+		std::cerr << "Internet connection lost" << std::endl;
+		ClockifyManager::instance()->m_isConnectedToInternet = false;
+		emit ClockifyManager::instance()->internetConnectionChanged();
+	}
+	else
+	{
+		std::cerr << "Request " << reply->url().toString().toStdString()
+				  << " failed with code "
+				  << code
+				  << std::endl;
+	}
 };
+QSharedPointer<ClockifyManager> ClockifyManager::s_instance;
 
 ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObject *parent)
 	: QObject{parent},
 	  m_workspaceId{workspaceId},
 	  m_apiKey{apiKey}
 {
+	s_instance.reset(this);
+
 	// request currently logged in user (the one whose API key we're using) as a validity test
 	// and also in order to cache API key info
 	QUrl url{s_baseUrl + "/user"};

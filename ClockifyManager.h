@@ -48,6 +48,8 @@ public:
 
 	void setApiKey(const QString &apiKey);
 
+	static QSharedPointer<ClockifyManager> instance() { return s_instance; }
+
 signals:
 	void projectsLoaded();
 	void usersLoaded();
@@ -115,6 +117,7 @@ private:
 
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
 	static const std::function<void (QNetworkReply *)> s_defaultFailureCb;
+	static QSharedPointer<ClockifyManager> s_instance;
 };
 
 #endif // CLOCKIFYMANAGER_H
