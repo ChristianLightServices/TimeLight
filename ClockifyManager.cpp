@@ -180,7 +180,7 @@ QString ClockifyManager::projectName(const QString &projectId) const
 		loop.exec();
 	}
 
-	for (auto item : m_projects)
+	for (const auto &item : m_projects)
 		if (item.first == projectId)
 			return item.second;
 
@@ -196,7 +196,7 @@ QString ClockifyManager::userName(const QString &userId) const
 		loop.exec();
 	}
 
-	for (auto item : m_users)
+	for (const auto &item : m_users)
 		if (item.first == userId)
 			return item.second;
 
