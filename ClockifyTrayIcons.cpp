@@ -43,7 +43,10 @@ int main(int argc, char *argv[])
 
 	while (apiKey == "")
 	{
-		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:");
+		bool ok{false};
+		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, QString{}, &ok);
+		if (!ok)
+			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
 	}
 
