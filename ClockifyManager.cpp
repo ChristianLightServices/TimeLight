@@ -155,6 +155,8 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 			m_isConnectedToInternet = connection;
 			emit internetConnectionChanged(m_isConnectedToInternet);
 		}
+
+		rep->deleteLater();
 	});
 	m_checkConnectionTimer.setSingleShot(false);
 	m_checkConnectionTimer.start();
