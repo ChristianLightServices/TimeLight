@@ -427,6 +427,7 @@ QNetworkReply *ClockifyManager::get(const QUrl &url,
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
+		rep->deleteLater();
 	});
 
 	return rep;
@@ -460,6 +461,7 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
+		rep->deleteLater();
 	});
 
 	return rep;
@@ -493,6 +495,7 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
+		rep->deleteLater();
 	});
 
 	return rep;
