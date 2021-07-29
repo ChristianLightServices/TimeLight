@@ -18,7 +18,7 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
-set(SRC_COMMON
+set(SRC_CLOCKIFY
     ClockifyManager.cpp
     ClockifyUser.cpp
     TimeEntry.cpp
@@ -30,15 +30,8 @@ if(WIN32)
 else()
     set(IS_WIN "")
 endif()
-
-add_executable(ClockifyModifier ${IS_WIN}
-    ${SRC_COMMON}
-
-    HeadlessRunner.cpp
-)
-
 add_executable(ClockifyTrayIcons ${IS_WIN}
-    ${SRC_COMMON}
+    ${SRC_CLOCKIFY}
 
     ClockifyTrayIcons.cpp
     SelectDefaultProjectDialog.cpp
@@ -46,13 +39,6 @@ add_executable(ClockifyTrayIcons ${IS_WIN}
 
     res.qrc
 )
-
-target_link_libraries(ClockifyModifier
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Network
-    nlohmann_json::nlohmann_json
-)
-
 
 target_link_libraries(ClockifyTrayIcons
     Qt${QT_VERSION_MAJOR}::Core
