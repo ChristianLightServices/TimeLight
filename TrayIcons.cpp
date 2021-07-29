@@ -282,8 +282,10 @@ void TrayIcons::setUpTrayIcons()
 		m_eventLoop.start();
 	});
 
-	connect(m_manager.data(), &ClockifyManager::internetConnectionChanged, this, [this]() {
-		m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+	connect(m_manager.data(), &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
+		updateTrayIcons();
+		if (connected == false)
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 	});
 
 	m_clockifyRunning->setContextMenu(m_clockifyRunningMenu);

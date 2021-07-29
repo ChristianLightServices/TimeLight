@@ -23,7 +23,7 @@ const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb 
 	{
 		std::cerr << "Internet connection lost" << std::endl;
 		ClockifyManager::instance()->m_isConnectedToInternet = false;
-		emit ClockifyManager::instance()->internetConnectionChanged();
+		emit ClockifyManager::instance()->internetConnectionChanged(false);
 	}
 	else
 	{
@@ -153,7 +153,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		if (m_isConnectedToInternet != connection)
 		{
 			m_isConnectedToInternet = connection;
-			emit internetConnectionChanged();
+			emit internetConnectionChanged(m_isConnectedToInternet);
 		}
 	});
 	m_checkConnectionTimer.setSingleShot(false);

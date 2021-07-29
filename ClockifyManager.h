@@ -57,7 +57,7 @@ signals:
 	void invalidated();
 	void apiKeyChanged();
 
-	void internetConnectionChanged();
+	void internetConnectionChanged(bool status);
 
 private:
 	QNetworkReply *get(const QUrl &url,
