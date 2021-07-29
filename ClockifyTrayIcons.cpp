@@ -51,18 +51,35 @@ int main(int argc, char *argv[])
 	}
 
 	QSharedPointer<ClockifyManager> manager{new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a}};
-	if (!manager->isValid())
+	while (!manager->isValid())
 	{
-		QMessageBox::critical(nullptr,
-							  "Fatal error", "Could not load information from Clockify. "
-							  "Please check your internet connection and run this program again.");
-		return 1;
+		bool ok{false};
+		apiKey = QInputDialog::getText(nullptr,
+									   "API key",
+									   "The API key is incorrect or invalid. Please enter a valid API key:",
+									   QLineEdit::Normal,
+									   QString{},
+									   &ok);
+		if (!ok)
+			QApplication::exit(1);
+		settings.setValue("apiKey", apiKey);
+		manager.reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
 	}
-	QObject::connect(manager.data(), &ClockifyManager::invalidated, &a, []() {
-		QMessageBox::critical(nullptr,
-							  "Fatal error", "Could not load information from Clockify. "
-							  "Please check your internet connection and run this program again.");
-		QApplication::exit(1);
+	QObject::connect(manager.data(), &ClockifyManager::invalidated, &a, [&]() {
+		while (!manager->isValid())
+		{
+			bool ok{false};
+			apiKey = QInputDialog::getText(nullptr,
+										   "API key",
+										   "The API key is incorrect or invalid. Please enter a valid API key:",
+										   QLineEdit::Normal,
+										   QString{},
+										   &ok);
+			if (!ok)
+				QApplication::exit(1);
+			settings.setValue("apiKey", apiKey);
+			manager.reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
+		}
 	});
 
 	QSharedPointer<ClockifyUser> user{manager->getApiKeyOwner()};
