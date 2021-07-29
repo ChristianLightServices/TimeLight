@@ -88,7 +88,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 
 	auto updateUsersAndProjects = [this]() {
 		// get all projects for project list (note that this will return immediately and finish running in the
-		// background; when the user calls projects(), projects() will block if needed until the projects are loaded
+		// background; when the user calls projects(), projects() will block if needed until the projects are loaded)
 		QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/projects"};
 
 		// let's get _all_ the projects! *evil laughter*
