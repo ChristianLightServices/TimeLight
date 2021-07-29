@@ -74,6 +74,12 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 			return;
 		}
 	}
+	else if (status == 0)
+	{
+		std::cerr << "Internet connection not found" << std::endl;
+		m_isConnectedToInternet = false;
+		emit internetConnectionChanged(m_isConnectedToInternet);
+	}
 	else
 	{
 		std::cerr << "Request failed with code " << status << std::endl;
