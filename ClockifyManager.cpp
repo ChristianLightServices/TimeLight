@@ -99,6 +99,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		get(url, [this](QNetworkReply *rep) {
 			try
 			{
+				m_projectsLoaded = false;
 				json j{json::parse(rep->readAll().toStdString())};
 
 				m_projects.clear();
@@ -124,6 +125,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		get(url, [this](QNetworkReply *rep) {
 			try
 			{
+				m_usersLoaded = false;
 				json j{json::parse(rep->readAll().toStdString())};
 
 				m_users.clear();
