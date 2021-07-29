@@ -223,26 +223,26 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 	query.addQueryItem("in-progress", "true");
 	url.setQuery(query);
 
-	auto reply = get(url);
-	QEventLoop loop;
-	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
+	bool status = false;
 
-	if (auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
-	{
+	auto reply = get(url, [&status](QNetworkReply *rep) {
 		try
 		{
-			json j{json::parse(reply->readAll().toStdString())};
+			json j{json::parse(rep->readAll().toStdString())};
 			if (!j.empty())
-				return true;
+				status = true;
 		}
 		catch (...)
 		{
 			// TODO: add some realistic error handling here
 		}
-	}
+	});
 
-	return false;
+	QEventLoop loop;
+	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+	loop.exec();
+
+	return status;
 }
 
 QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool async)
@@ -270,24 +270,24 @@ json ClockifyManager::getRunningTimeEntry(const QString &userId)
 	query.addQueryItem("in-progress", "true");
 	url.setQuery(query);
 
-	auto reply = get(url);
+	json j;
+
+	auto reply = get(url, [&j](QNetworkReply *rep) {
+		try
+		{
+			j = json::parse(rep->readAll().toStdString());
+		}
+		catch (...)
+		{
+			j = {};
+		}
+	});
+
 	QEventLoop loop;
 	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
 
-	if (auto status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
-	{
-		try
-		{
-			return json::parse(reply->readAll().toStdString());
-		}
-		catch (...)
-		{
-			return {};
-		}
-	}
-
-	return {};
+	return j;
 }
 
 void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
@@ -328,31 +328,30 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 
 json ClockifyManager::getTimeEntries(const QString &userId)
 {
-	auto rep = get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"});
+	json j;
+
+	auto rep = get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"}, [&j](QNetworkReply *rep) {
+		try
+		{
+			j = json::parse(rep->readAll().toStdString());
+		}
+		catch (std::exception ex)
+		{
+			std::cout << ex.what() << std::endl;
+			j = {};
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error!\n";
+			j = {};
+		}
+	});
 
 	QEventLoop loop;
 	connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
 
-	if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
-	{
-		try
-		{
-			return json::parse(rep->readAll().toStdString());
-		}
-		catch (std::exception ex)
-		{
-			std::cout << ex.what() << std::endl;
-			return {};
-		}
-		catch (...)
-		{
-			std::cout << "Unknown error!\n";
-			return {};
-		}
-	}
-	else
-		return {};
+	return j;
 }
 
 ClockifyUser *ClockifyManager::getApiKeyOwner()
@@ -362,32 +361,31 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 		return new ClockifyUser{m_ownerId, this};
 	else
 	{
-		auto rep = get(QUrl{s_baseUrl + "/user"});
+		ClockifyUser *retVal{nullptr};
+
+		auto rep = get(QUrl{s_baseUrl + "/user"}, [this, &retVal](QNetworkReply *rep) {
+			try
+			{
+				json j{json::parse(rep->readAll().toStdString())};
+				retVal = new ClockifyUser{j["id"].get<QString>(), this};
+			}
+			catch (std::exception ex)
+			{
+				std::cout << ex.what() << std::endl;
+				retVal = nullptr;
+			}
+			catch (...)
+			{
+				std::cout << "Unknown error!\n";
+				retVal = nullptr;
+			}
+		});
 
 		QEventLoop loop;
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 		loop.exec();
 
-		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
-		{
-			try
-			{
-				json j{json::parse(rep->readAll().toStdString())};
-				return new ClockifyUser{j["id"].get<QString>(), this};
-			}
-			catch (std::exception ex)
-			{
-				std::cout << ex.what() << std::endl;
-				return nullptr;
-			}
-			catch (...)
-			{
-				std::cout << "Unknown error!\n";
-				return nullptr;
-			}
-		}
-		else
-			return nullptr;
+		return retVal;
 	}
 }
 
