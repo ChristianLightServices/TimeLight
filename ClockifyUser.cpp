@@ -17,9 +17,9 @@ bool ClockifyUser::hasRunningTimeEntry()
 	return m_manager->userHasRunningTimeEntry(m_userId);
 }
 
-json ClockifyUser::getRunningTimeEntry()
+TimeEntry ClockifyUser::getRunningTimeEntry()
 {
-	return m_manager->getRunningTimeEntry(m_userId)[0];
+	return m_manager->getRunningTimeEntry(m_userId);
 }
 
 QDateTime ClockifyUser::stopCurrentTimeEntry(bool async) const
@@ -47,7 +47,7 @@ void ClockifyUser::startTimeEntry(const QString &projectId, const QString &descr
 	m_manager->startTimeEntry(m_userId, projectId, description, start, async);
 }
 
-json ClockifyUser::getTimeEntries()
+QVector<TimeEntry> ClockifyUser::getTimeEntries()
 {
 	return m_manager->getTimeEntries(m_userId);
 }

@@ -56,16 +56,16 @@ QString TrayIcons::projectId() const
 	{
 		if (m_user->hasRunningTimeEntry())
 		{
-			if (auto code = m_user->getRunningTimeEntry()["projectId"].get<QString>(); code != BREAKTIME)
+			if (auto code = m_user->getRunningTimeEntry().projectId(); code != BREAKTIME)
 				return code;
 		}
 
 		auto entries = m_user->getTimeEntries();
-		for (auto entry : entries)
+		for (const auto &entry : entries)
 		{
 			try
 			{
-				if (auto code = entry["projectId"].get<QString>(); code != BREAKTIME)
+				if (auto code = entry.projectId(); code != BREAKTIME)
 					return code;
 			}
 			catch (...)
@@ -87,12 +87,12 @@ QString TrayIcons::description() const
 	else
 	{
 		auto entries = m_user->getTimeEntries();
-		for (auto entry : entries)
+		for (const auto &entry : entries)
 		{
 			try
 			{
-				if (entry["projectId"].get<QString>() != BREAKTIME)
-					return entry["description"].get<QString>();
+				if (entry.projectId() != BREAKTIME)
+					return entry.description();
 			}
 			catch (...)
 			{
@@ -129,7 +129,7 @@ void TrayIcons::updateTrayIcons()
 		m_clockifyRunning->setIcon(clockifyOn.second);
 
 		try {
-			if (m_user->getRunningTimeEntry()["projectId"].get<QString>() == BREAKTIME)
+			if (m_user->getRunningTimeEntry().projectId() == BREAKTIME)
 			{
 				m_runningJob->setToolTip(onBreak.first);
 				m_runningJob->setIcon(onBreak.second);
@@ -265,7 +265,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 		{
-			if (m_user->getRunningTimeEntry()["projectId"].get<QString>() == BREAKTIME)
+			if (m_user->getRunningTimeEntry().projectId() == BREAKTIME)
 			{
 				auto time = m_user->stopCurrentTimeEntry();
 				m_user->startTimeEntry(projectId(), description(), time);

@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "ClockifyManager.h"
+#include "TimeEntry.h"
 
 #include <nlohmann/json.hpp>
 
@@ -17,13 +18,13 @@ public:
 	explicit ClockifyUser(QString userId, ClockifyManager *manager);
 
 	bool hasRunningTimeEntry();
-	json getRunningTimeEntry();
+	TimeEntry getRunningTimeEntry();
 	QDateTime stopCurrentTimeEntry(bool async = false) const;
 	void startTimeEntry(const QString &projectId, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
 	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
-	json getTimeEntries();
+	QVector<TimeEntry> getTimeEntries();
 
 signals:
 
