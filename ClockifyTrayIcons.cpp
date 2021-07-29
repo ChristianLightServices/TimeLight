@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
 	// TODO: remove this after everybody has been migrated
 	if (migration.allKeys().length() > 0)
-		for (auto key : migration.allKeys())
+		for (const auto &key : migration.allKeys())
 			settings.setValue(key, migration.value(key));
 
 	migration.clear();
