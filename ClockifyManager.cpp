@@ -12,6 +12,7 @@
 
 #include "JsonHelper.h"
 #include "ClockifyUser.h"
+#include "TimeEntry.h"
 
 using nlohmann::json;
 
@@ -273,7 +274,7 @@ QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool asyn
 	return now;
 }
 
-json ClockifyManager::getRunningTimeEntry(const QString &userId)
+TimeEntry ClockifyManager::getRunningTimeEntry(const QString &userId)
 {
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
 	QUrlQuery query;
@@ -297,7 +298,7 @@ json ClockifyManager::getRunningTimeEntry(const QString &userId)
 	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
 
-	return j;
+	return TimeEntry{j[0]};
 }
 
 void ClockifyManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
@@ -336,7 +337,7 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 	}
 }
 
-json ClockifyManager::getTimeEntries(const QString &userId)
+QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 {
 	json j;
 
@@ -361,7 +362,11 @@ json ClockifyManager::getTimeEntries(const QString &userId)
 	connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
 
-	return j;
+	QVector<TimeEntry> entries;
+	for (const auto &entry : j)
+		entries.push_back(TimeEntry{entry});
+
+	return entries;
 }
 
 ClockifyUser *ClockifyManager::getApiKeyOwner()

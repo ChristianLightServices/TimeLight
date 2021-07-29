@@ -7,6 +7,7 @@
 #include "ClockifyManager.h"
 #include "ClockifyUser.h"
 #include "Common.h"
+#include "TimeEntry.h"
 
 int main(int argc, char *argv[])
 {
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
 		if (!me.hasRunningTimeEntry())
 			return 1;
 		else
-			return me.getRunningTimeEntry()["projectId"].get<QString>() == TIME_301; // get first (and only) json entry
+			return me.getRunningTimeEntry().projectId() == TIME_301; // get first (and only) json entry
 	}
 
 	return 0;

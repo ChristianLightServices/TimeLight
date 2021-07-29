@@ -63,7 +63,7 @@ namespace nlohmann
 		{
 			opt = QDateTime::fromString(j.get<QString>(), "yyyy-MM-ddThh:mm:ssZ");
 		}
-	}
+	};
 }
 
 #endif // JSONHELPER_H

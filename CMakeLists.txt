@@ -21,6 +21,7 @@ add_subdirectory(singleapplication)
 set(SRC_COMMON
     ClockifyManager.cpp
     ClockifyUser.cpp
+    TimeEntry.cpp
 )
 
 # make sure that Windows doesn't display a console

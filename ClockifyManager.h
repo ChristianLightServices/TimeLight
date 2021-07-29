@@ -16,6 +16,7 @@
 using json = nlohmann::json;
 
 class ClockifyUser;
+class TimeEntry;
 
 class ClockifyManager : public QObject
 {
@@ -36,12 +37,12 @@ public:
 
 	bool userHasRunningTimeEntry(const QString &userId);
 	QDateTime stopRunningTimeEntry(const QString &userId, bool async);
-	json getRunningTimeEntry(const QString &userId);
+	TimeEntry getRunningTimeEntry(const QString &userId);
 	void startTimeEntry(const QString &userId, const QString &projectId, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
-	json getTimeEntries(const QString &userId);
+	QVector<TimeEntry> getTimeEntries(const QString &userId);
 
 	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();
