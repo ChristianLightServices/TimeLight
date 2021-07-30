@@ -6,6 +6,7 @@
 #include <QTimer>
 
 #include "ClockifyManager.h"
+#include "ClockifyProject.h"
 #include "ClockifyUser.h"
 
 class TrayIcons : public QObject
@@ -17,8 +18,7 @@ public:
 
 	void show();
 
-	QString projectId() const;
-	QString description() const;
+	ClockifyProject defaultProject() const;
 
 signals:
 

@@ -12,6 +12,7 @@
 
 #include "JsonHelper.h"
 #include "ClockifyUser.h"
+#include "ClockifyProject.h"
 #include "TimeEntry.h"
 
 using nlohmann::json;
@@ -104,9 +105,9 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 				json j{json::parse(rep->readAll().toStdString())};
 
 				m_projects.clear();
-				for (auto item : j)
-					m_projects.push_back({item["id"].get<QByteArray>(),
-										  item["name"].get<QByteArray>()});
+				for (const auto &item : j)
+					m_projects.push_back({item["id"].get<QString>(),
+										  item["name"].get<QString>()});
 
 				m_projectsLoaded = true;
 				emit projectsLoaded();
@@ -130,7 +131,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 				json j{json::parse(rep->readAll().toStdString())};
 
 				m_users.clear();
-				for (auto item : j)
+				for (const auto &item : j)
 					m_users.push_back({item["id"].get<QByteArray>(),
 									   item["name"].get<QByteArray>()});
 
@@ -171,7 +172,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	m_checkConnectionTimer.start();
 }
 
-QList<QPair<QString, QString>> ClockifyManager::projects()
+QList<ClockifyProject> ClockifyManager::projects()
 {
 	if (!m_projectsLoaded)
 	{
@@ -205,8 +206,8 @@ QString ClockifyManager::projectName(const QString &projectId) const
 	}
 
 	for (const auto &item : m_projects)
-		if (item.first == projectId)
-			return item.second;
+		if (item.id() == projectId)
+			return item.name();
 
 	return "";
 }
