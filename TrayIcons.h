@@ -30,8 +30,15 @@ private slots:
 private:
 	void setUpTrayIcons();
 
-	QSystemTrayIcon *m_clockifyRunning;
-	QSystemTrayIcon *m_runningJob;
+	void setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data);
+	void setRunningJobIconTooltip(const QPair<QString, QIcon> &data);
+
+	QSystemTrayIcon *m_clockifyRunning{nullptr};
+	QSystemTrayIcon *m_runningJob{nullptr};
+
+	// we'll cache icons in these to avoid having to reset icons lots
+	const QIcon *m_clockifyRunningCurrentIcon;
+	const QIcon *m_runningJobCurrentIcon;
 
 	QSharedPointer<ClockifyManager> m_manager;
 	QSharedPointer<ClockifyUser> m_user;
@@ -40,6 +47,14 @@ private:
 	QString m_apiKey;
 
 	QTimer m_eventLoop;
+
+	static QPair<QString, QIcon> s_clockifyOn;
+	static QPair<QString, QIcon> s_clockifyOff;
+	static QPair<QString, QIcon> s_onBreak;
+	static QPair<QString, QIcon> s_working;
+	static QPair<QString, QIcon> s_notWorking;
+	static QPair<QString, QIcon> s_powerNotConnected;
+	static QPair<QString, QIcon> s_runningNotConnected;
 };
 
 #endif // TRAYICONS_H
