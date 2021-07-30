@@ -83,13 +83,13 @@ ClockifyProject TrayIcons::defaultProject() const
 
 void TrayIcons::updateTrayIcons()
 {
-	QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
-	QPair<QString, QIcon> clockifyOff{"Clockify is not running", QIcon{":/redpower.png"}};
-	QPair<QString, QIcon> onBreak{"You are on break", QIcon{":/yellowlight.png"}};
-	QPair<QString, QIcon> working{"You are working", QIcon{":/greenlight.png"}};
-	QPair<QString, QIcon> notWorking{"You are not working", QIcon{":/redlight.png"}};
-	QPair<QString, QIcon> powerNotConnected{"You are offline", QIcon{":/graypower.png"}};
-	QPair<QString, QIcon> runningNotConnected{"You are offline", QIcon{":/graylight.png"}};
+	static QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
+	static QPair<QString, QIcon> clockifyOff{"Clockify is not running", QIcon{":/redpower.png"}};
+	static QPair<QString, QIcon> onBreak{"You are on break", QIcon{":/yellowlight.png"}};
+	static QPair<QString, QIcon> working{"You are working", QIcon{":/greenlight.png"}};
+	static QPair<QString, QIcon> notWorking{"You are not working", QIcon{":/redlight.png"}};
+	static QPair<QString, QIcon> powerNotConnected{"You are offline", QIcon{":/graypower.png"}};
+	static QPair<QString, QIcon> runningNotConnected{"You are offline", QIcon{":/graylight.png"}};
 
 	if (!m_manager->isConnectedToInternet())
 	{
