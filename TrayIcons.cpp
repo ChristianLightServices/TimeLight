@@ -16,6 +16,14 @@
 const QByteArray WORKSPACE{"redacted"};
 const QByteArray BREAKTIME{"redacted"};
 
+QPair<QString, QIcon> TrayIcons::s_clockifyOn;
+QPair<QString, QIcon> TrayIcons::s_clockifyOff;
+QPair<QString, QIcon> TrayIcons::s_onBreak;
+QPair<QString, QIcon> TrayIcons::s_working;
+QPair<QString, QIcon> TrayIcons::s_notWorking;
+QPair<QString, QIcon> TrayIcons::s_powerNotConnected;
+QPair<QString, QIcon> TrayIcons::s_runningNotConnected;
+
 TrayIcons::TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	: QObject{parent},
 	  m_clockifyRunning{new QSystemTrayIcon},
@@ -28,6 +36,14 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QShar
 
 	if (m_defaultProjectId == "")
 		getNewProjectId();
+
+	s_clockifyOn = {"Clockify is running", QIcon{":/greenpower.png"}};
+	s_clockifyOff = {"Clockify is not running", QIcon{":/redpower.png"}};
+	s_onBreak = {"You are on break", QIcon{":/yellowlight.png"}};
+	s_working = {"You are working", QIcon{":/greenlight.png"}};
+	s_notWorking = {"You are not working", QIcon{":/redlight.png"}};
+	s_powerNotConnected = {"You are offline", QIcon{":/graypower.png"}};
+	s_runningNotConnected = {"You are offline", QIcon{":/graylight.png"}};
 
 	setUpTrayIcons();
 
@@ -83,38 +99,21 @@ ClockifyProject TrayIcons::defaultProject() const
 
 void TrayIcons::updateTrayIcons()
 {
-	static QPair<QString, QIcon> clockifyOn{"Clockify is running", QIcon{":/greenpower.png"}};
-	static QPair<QString, QIcon> clockifyOff{"Clockify is not running", QIcon{":/redpower.png"}};
-	static QPair<QString, QIcon> onBreak{"You are on break", QIcon{":/yellowlight.png"}};
-	static QPair<QString, QIcon> working{"You are working", QIcon{":/greenlight.png"}};
-	static QPair<QString, QIcon> notWorking{"You are not working", QIcon{":/redlight.png"}};
-	static QPair<QString, QIcon> powerNotConnected{"You are offline", QIcon{":/graypower.png"}};
-	static QPair<QString, QIcon> runningNotConnected{"You are offline", QIcon{":/graylight.png"}};
 
 	if (!m_manager->isConnectedToInternet())
 	{
-		m_clockifyRunning->setToolTip(powerNotConnected.first);
-		m_runningJob->setToolTip(runningNotConnected.first);
-
-		m_clockifyRunning->setIcon(powerNotConnected.second);
-		m_runningJob->setIcon(runningNotConnected.second);
+		setClockifyRunningIconTooltip(s_powerNotConnected);
+		setRunningJobIconTooltip(s_runningNotConnected);
 	}
 	else if (m_user->hasRunningTimeEntry())
 	{
-		m_clockifyRunning->setToolTip(clockifyOn.first);
-		m_clockifyRunning->setIcon(clockifyOn.second);
+		setClockifyRunningIconTooltip(s_clockifyOn);
 
 		try {
 			if (m_user->getRunningTimeEntry().project().id() == BREAKTIME)
-			{
-				m_runningJob->setToolTip(onBreak.first);
-				m_runningJob->setIcon(onBreak.second);
-			}
+				setRunningJobIconTooltip(s_onBreak);
 			else
-			{
-				m_runningJob->setToolTip(working.first);
-				m_runningJob->setIcon(working.second);
-			}
+				setRunningJobIconTooltip(s_working);
 		}
 		catch (...)
 		{
@@ -123,11 +122,8 @@ void TrayIcons::updateTrayIcons()
 	}
 	else
 	{
-		m_clockifyRunning->setToolTip(clockifyOff.first);
-		m_runningJob->setToolTip(notWorking.first);
-
-		m_clockifyRunning->setIcon(clockifyOff.second);
-		m_runningJob->setIcon(notWorking.second);
+		setClockifyRunningIconTooltip(s_clockifyOff);
+		setRunningJobIconTooltip(s_notWorking);
 	}
 }
 
@@ -277,4 +273,24 @@ void TrayIcons::setUpTrayIcons()
 	m_runningJob->setContextMenu(m_runningJobMenu);
 
 	updateTrayIcons();
+}
+
+void TrayIcons::setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data)
+{
+	m_clockifyRunning->setToolTip(data.first);
+	if (m_clockifyRunningCurrentIcon != &data.second)
+	{
+		m_clockifyRunning->setIcon(data.second);
+		m_clockifyRunningCurrentIcon = &data.second;
+	}
+}
+
+void TrayIcons::setRunningJobIconTooltip(const QPair<QString, QIcon> &data)
+{
+	m_runningJob->setToolTip(data.first);
+	if (m_runningJobCurrentIcon != &data.second)
+	{
+		m_runningJob->setIcon(data.second);
+		m_runningJobCurrentIcon = &data.second;
+	}
 }
