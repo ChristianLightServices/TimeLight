@@ -8,6 +8,7 @@
 
 #include <SingleApplication>
 
+#include "ClockifyProject.h"
 #include "ClockifyUser.h"
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
@@ -48,16 +49,16 @@ void TrayIcons::show()
 	m_runningJob->show();
 }
 
-QString TrayIcons::projectId() const
+ClockifyProject TrayIcons::defaultProject() const
 {
 	if (m_defaultProjectId != "last-entered-code")
-		return m_defaultProjectId;
+		return {m_defaultProjectId, m_manager->projectName(m_defaultProjectId)};
 	else
 	{
 		if (m_user->hasRunningTimeEntry())
 		{
-			if (auto code = m_user->getRunningTimeEntry().projectId(); code != BREAKTIME)
-				return code;
+			if (auto project = m_user->getRunningTimeEntry().project(); project.id() != BREAKTIME)
+				return project;
 		}
 
 		auto entries = m_user->getTimeEntries();
@@ -65,8 +66,8 @@ QString TrayIcons::projectId() const
 		{
 			try
 			{
-				if (auto code = entry.projectId(); code != BREAKTIME)
-					return code;
+				if (entry.project().id() != BREAKTIME)
+					return entry.project();
 			}
 			catch (...)
 			{
@@ -76,32 +77,7 @@ QString TrayIcons::projectId() const
 		}
 
 		// when all else fails, use the first extant project
-		return m_manager->projects().first().first;
-	}
-}
-
-QString TrayIcons::description() const
-{
-	if (m_defaultProjectId != "last-entered-code")
-		return QString{};
-	else
-	{
-		auto entries = m_user->getTimeEntries();
-		for (const auto &entry : entries)
-		{
-			try
-			{
-				if (entry.projectId() != BREAKTIME)
-					return entry.description();
-			}
-			catch (...)
-			{
-				std::cerr << "getting description failed\n";
-				continue; // no project id to see here, move along
-			}
-		}
-
-		return QString{};
+		return m_manager->projects().first();
 	}
 }
 
@@ -129,7 +105,7 @@ void TrayIcons::updateTrayIcons()
 		m_clockifyRunning->setIcon(clockifyOn.second);
 
 		try {
-			if (m_user->getRunningTimeEntry().projectId() == BREAKTIME)
+			if (m_user->getRunningTimeEntry().project().id() == BREAKTIME)
 			{
 				m_runningJob->setToolTip(onBreak.first);
 				m_runningJob->setIcon(onBreak.second);
@@ -162,8 +138,8 @@ void TrayIcons::getNewProjectId()
 	QStringList projectNames;
 	for (const auto &project : projects)
 	{
-		projectIds.push_back(project.first);
-		projectNames.push_back(project.second);
+		projectIds.push_back(project.id());
+		projectNames.push_back(project.name());
 	}
 
 	SelectDefaultProjectDialog dialog{m_defaultProjectId, {projectIds, projectNames}};
@@ -202,7 +178,8 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
 		if (!m_user->hasRunningTimeEntry())
 		{
-			m_user->startTimeEntry(projectId(), description());
+			auto project = defaultProject();
+			m_user->startTimeEntry(project.id(), project.description());
 			updateTrayIcons();
 		}
 	});
@@ -233,7 +210,8 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 			start = m_user->stopCurrentTimeEntry();
-		m_user->startTimeEntry(projectId(), description(), start);
+		auto project = defaultProject();
+		m_user->startTimeEntry(project.id(), project.description(), start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
@@ -253,7 +231,10 @@ void TrayIcons::setUpTrayIcons()
 		if (m_user->hasRunningTimeEntry())
 			m_user->stopCurrentTimeEntry();
 		else
-			m_user->startTimeEntry(projectId(), description());
+		{
+			auto project = defaultProject();
+			m_user->startTimeEntry(project.id(), project.description());
+		}
 
 		m_eventLoop.start();
 	});
@@ -265,10 +246,11 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 		{
-			if (m_user->getRunningTimeEntry().projectId() == BREAKTIME)
+			if (m_user->getRunningTimeEntry().project().id() == BREAKTIME)
 			{
 				auto time = m_user->stopCurrentTimeEntry();
-				m_user->startTimeEntry(projectId(), description(), time);
+				auto project = defaultProject();
+				m_user->startTimeEntry(project.id(), project.description(), time);
 			}
 			else
 			{
@@ -277,7 +259,10 @@ void TrayIcons::setUpTrayIcons()
 			}
 		}
 		else
-			m_user->startTimeEntry(projectId(), description());
+		{
+			auto project = defaultProject();
+			m_user->startTimeEntry(project.id(), project.description());
+		}
 
 		m_eventLoop.start();
 	});

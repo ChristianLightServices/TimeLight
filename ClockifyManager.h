@@ -13,6 +13,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "ClockifyProject.h"
+
 using json = nlohmann::json;
 
 class ClockifyUser;
@@ -29,7 +31,7 @@ public:
 
 	bool isValid() const { return m_isValid; }
 
-	QList<QPair<QString, QString>> projects();
+	QList<ClockifyProject> projects();
 	QList<QPair<QString, QString>> users();
 
 	QString projectName(const QString &projectId) const;
@@ -94,8 +96,9 @@ private:
 
 	QString m_ownerId;
 
-	// these are ordered as <id, name>
-	QList<QPair<QString, QString>> m_projects;
+	QList<ClockifyProject> m_projects;
+
+	// this is ordered as <id, name>
 	QList<QPair<QString, QString>> m_users;
 
 	QNetworkAccessManager m_manager{this};

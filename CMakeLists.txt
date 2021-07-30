@@ -19,6 +19,7 @@ set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleAp
 add_subdirectory(singleapplication)
 
 set(SRC_CLOCKIFY
+    ClockifyProject.cpp
     ClockifyManager.cpp
     ClockifyUser.cpp
     TimeEntry.cpp
