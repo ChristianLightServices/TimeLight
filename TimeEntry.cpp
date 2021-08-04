@@ -17,8 +17,9 @@ TimeEntry::TimeEntry(nlohmann::json entry, QObject *parent)
 
 		m_isValid = true;
 	}
-	catch (const std::exception &ex)
+	catch (const std::exception &)
 	{
+		// TODO: do something here?
 	}
 }
 
