@@ -13,7 +13,7 @@ class TrayIcons : public QObject
 {
 	Q_OBJECT
 public:
-	explicit TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QSharedPointer<ClockifyUser> &user, QObject *parent = nullptr);
+	explicit TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent = nullptr);
 	~TrayIcons();
 
 	void show();
@@ -40,7 +40,6 @@ private:
 	const QIcon *m_clockifyRunningCurrentIcon;
 	const QIcon *m_runningJobCurrentIcon;
 
-	QSharedPointer<ClockifyManager> m_manager;
 	QSharedPointer<ClockifyUser> m_user;
 
 	QString m_defaultProjectId;

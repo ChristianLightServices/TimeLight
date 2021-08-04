@@ -2,52 +2,53 @@
 
 #include <nlohmann/json.hpp>
 
+#include "ClockifyManager.h"
+
 using json = nlohmann::json;
 
-ClockifyUser::ClockifyUser(QString userId, ClockifyManager *manager)
-	: QObject{manager},
-	  m_manager{manager},
+ClockifyUser::ClockifyUser(QString userId, QObject *parent)
+	: QObject{parent},
 	  m_userId{userId},
-	  m_name{m_manager->userName(userId)}
+	  m_name{ClockifyManager::instance()->userName(userId)}
 {
 }
 
 bool ClockifyUser::hasRunningTimeEntry()
 {
-	return m_manager->userHasRunningTimeEntry(m_userId);
+	return ClockifyManager::instance()->userHasRunningTimeEntry(m_userId);
 }
 
 TimeEntry ClockifyUser::getRunningTimeEntry()
 {
-	return m_manager->getRunningTimeEntry(m_userId);
+	return ClockifyManager::instance()->getRunningTimeEntry(m_userId);
 }
 
 QDateTime ClockifyUser::stopCurrentTimeEntry(bool async) const
 {
-	return m_manager->stopRunningTimeEntry(m_userId, async);
+	return ClockifyManager::instance()->stopRunningTimeEntry(m_userId, async);
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, bool async) const
 {
-	m_manager->startTimeEntry(m_userId, projectId, async);
+	ClockifyManager::instance()->startTimeEntry(m_userId, projectId, async);
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, const QString &description, bool async) const
 {
-	m_manager->startTimeEntry(m_userId, projectId, description, async);
+	ClockifyManager::instance()->startTimeEntry(m_userId, projectId, description, async);
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, QDateTime start, bool async) const
 {
-	m_manager->startTimeEntry(m_userId, projectId, start, async);
+	ClockifyManager::instance()->startTimeEntry(m_userId, projectId, start, async);
 }
 
 void ClockifyUser::startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async) const
 {
-	m_manager->startTimeEntry(m_userId, projectId, description, start, async);
+	ClockifyManager::instance()->startTimeEntry(m_userId, projectId, description, start, async);
 }
 
 QVector<TimeEntry> ClockifyUser::getTimeEntries()
 {
-	return m_manager->getTimeEntries(m_userId);
+	return ClockifyManager::instance()->getTimeEntries(m_userId);
 }

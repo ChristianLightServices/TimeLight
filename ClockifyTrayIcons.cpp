@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 		settings.setValue("apiKey", apiKey);
 	}
 
-	QSharedPointer<ClockifyManager> manager{new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a}};
-	while (!manager->isValid())
+	ClockifyManager::init(WORKSPACE, apiKey.toUtf8(), &a);
+	while (!ClockifyManager::instance()->isValid())
 	{
 		bool ok{false};
 		apiKey = QInputDialog::getText(nullptr,
@@ -63,10 +63,10 @@ int main(int argc, char *argv[])
 		if (!ok)
 			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
-		manager.reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
+		ClockifyManager::instance().reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
 	}
-	QObject::connect(manager.data(), &ClockifyManager::invalidated, &a, [&]() {
-		while (!manager->isValid())
+	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
+		while (!ClockifyManager::instance()->isValid())
 		{
 			bool ok{false};
 			apiKey = QInputDialog::getText(nullptr,
@@ -78,26 +78,26 @@ int main(int argc, char *argv[])
 			if (!ok)
 				QApplication::exit(1);
 			settings.setValue("apiKey", apiKey);
-			manager.reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
+			ClockifyManager::instance().reset(new ClockifyManager{WORKSPACE, apiKey.toUtf8(), &a});
 		}
 	});
 
-	QSharedPointer<ClockifyUser> user{manager->getApiKeyOwner()};
+	QSharedPointer<ClockifyUser> user{ClockifyManager::instance()->getApiKeyOwner()};
 	if (user.isNull())
 	{
 		QMessageBox::warning(nullptr, "Fatal error", "Could not load user!");
 		return 0;
 	}
 
-	QObject::connect(manager.data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
-		auto temp = manager->getApiKeyOwner();
+	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
+		auto temp = ClockifyManager::instance()->getApiKeyOwner();
 		if (temp != nullptr)
 			user = QSharedPointer<ClockifyUser>{temp};
 		else
 			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
 	});
 
-	TrayIcons icons{manager, user};
+	TrayIcons icons{user};
 	icons.show();
 
 	return a.exec();

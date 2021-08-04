@@ -51,6 +51,7 @@ public:
 
 	void setApiKey(const QString &apiKey);
 
+	static bool init(QByteArray workspaceId, QByteArray apiKey, QObject *parent = nullptr);
 	static QSharedPointer<ClockifyManager> instance() { return s_instance; }
 
 signals:

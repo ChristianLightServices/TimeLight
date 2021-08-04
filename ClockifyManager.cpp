@@ -42,8 +42,6 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	  m_workspaceId{workspaceId},
 	  m_apiKey{apiKey}
 {
-	s_instance.reset(this);
-
 	// request currently logged in user (the one whose API key we're using) as a validity test
 	// and also in order to cache API key info
 	QUrl url{s_baseUrl + "/user"};
@@ -408,6 +406,12 @@ void ClockifyManager::setApiKey(const QString &apiKey)
 {
 	m_apiKey = apiKey.toUtf8();
 	emit apiKeyChanged();
+}
+
+bool ClockifyManager::init(QByteArray workspaceId, QByteArray apiKey, QObject *parent)
+{
+	s_instance.reset(new ClockifyManager{workspaceId, apiKey, parent});
+	return true;
 }
 
 // *****************************************************************************
