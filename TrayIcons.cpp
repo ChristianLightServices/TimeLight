@@ -239,6 +239,8 @@ void TrayIcons::setUpTrayIcons()
 		m_eventLoop.stop();
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
+		{
+			m_eventLoop.start();
 			return;
 		}
 
@@ -263,6 +265,8 @@ void TrayIcons::setUpTrayIcons()
 		m_eventLoop.stop();
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
+		{
+			m_eventLoop.start();
 			return;
 		}
 
