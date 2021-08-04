@@ -41,7 +41,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair
 	buttonLayout->addWidget(ok);
 	buttonLayout->addWidget(cancel);
 
-	layout->addLayout(buttonLayout, 2, 0, 2, 1);
+	layout->addLayout(buttonLayout, 2, 0, 1, 2);
 
 	setLayout(layout);
 
