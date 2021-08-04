@@ -24,11 +24,10 @@ QPair<QString, QIcon> TrayIcons::s_notWorking;
 QPair<QString, QIcon> TrayIcons::s_powerNotConnected;
 QPair<QString, QIcon> TrayIcons::s_runningNotConnected;
 
-TrayIcons::TrayIcons(const QSharedPointer<ClockifyManager> &manager, const QSharedPointer<ClockifyUser> &user, QObject *parent)
+TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	: QObject{parent},
 	  m_clockifyRunning{new QSystemTrayIcon},
 	  m_runningJob{new QSystemTrayIcon},
-	  m_manager{manager},
 	  m_user{user}
 {
 	QSettings settings;
@@ -68,7 +67,7 @@ void TrayIcons::show()
 ClockifyProject TrayIcons::defaultProject() const
 {
 	if (m_defaultProjectId != "last-entered-code")
-		return {m_defaultProjectId, m_manager->projectName(m_defaultProjectId)};
+		return {m_defaultProjectId, ClockifyManager::instance()->projectName(m_defaultProjectId)};
 	else
 	{
 		if (m_user->hasRunningTimeEntry())
@@ -93,14 +92,14 @@ ClockifyProject TrayIcons::defaultProject() const
 		}
 
 		// when all else fails, use the first extant project
-		return m_manager->projects().first();
+		return ClockifyManager::instance()->projects().first();
 	}
 }
 
 void TrayIcons::updateTrayIcons()
 {
 
-	if (!m_manager->isConnectedToInternet())
+	if (!ClockifyManager::instance()->isConnectedToInternet())
 	{
 		setClockifyRunningIconTooltip(s_powerNotConnected);
 		setRunningJobIconTooltip(s_runningNotConnected);
@@ -129,7 +128,7 @@ void TrayIcons::updateTrayIcons()
 
 void TrayIcons::getNewProjectId()
 {
-	auto projects = m_manager->projects();
+	auto projects = ClockifyManager::instance()->projects();
 	QStringList projectIds;
 	QStringList projectNames;
 	for (const auto &project : projects)
@@ -159,7 +158,7 @@ void TrayIcons::getNewApiKey()
 	}
 	while (m_apiKey == "");
 
-	m_manager->setApiKey(m_apiKey);
+	ClockifyManager::instance()->setApiKey(m_apiKey);
 
 	QSettings settings;
 	settings.setValue("apiKey", m_apiKey);
@@ -263,7 +262,7 @@ void TrayIcons::setUpTrayIcons()
 		m_eventLoop.start();
 	});
 
-	connect(m_manager.data(), &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
+	connect(ClockifyManager::instance().data(), &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
 		updateTrayIcons();
 		if (connected == false)
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");

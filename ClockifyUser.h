@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#include "ClockifyManager.h"
 #include "TimeEntry.h"
 
 #include <nlohmann/json.hpp>
@@ -15,7 +14,7 @@ class ClockifyUser : public QObject
 	Q_OBJECT
 
 public:
-	explicit ClockifyUser(QString userId, ClockifyManager *manager);
+	explicit ClockifyUser(QString userId, QObject *parent = nullptr);
 
 	bool hasRunningTimeEntry();
 	TimeEntry getRunningTimeEntry();
@@ -29,8 +28,6 @@ public:
 signals:
 
 private:
-	ClockifyManager *m_manager;
-
 	QString m_userId;
 	QString m_name;
 };
