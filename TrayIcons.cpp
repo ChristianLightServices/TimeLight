@@ -171,6 +171,9 @@ void TrayIcons::setUpTrayIcons()
 
 	// set up the menu actions
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+
 		if (!m_user->hasRunningTimeEntry())
 		{
 			auto project = defaultProject();
@@ -179,6 +182,9 @@ void TrayIcons::setUpTrayIcons()
 		}
 	});
 	connect(m_clockifyRunningMenu->addAction("Stop"), &QAction::triggered, this, [&]() {
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+
 		if (m_user->hasRunningTimeEntry())
 		{
 			m_user->stopCurrentTimeEntry();
@@ -193,6 +199,12 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [&]() {
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+		{
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			return;
+		}
+
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
 		if (m_user->hasRunningTimeEntry())
@@ -201,6 +213,12 @@ void TrayIcons::setUpTrayIcons()
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [&]() {
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+		{
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			return;
+		}
+
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
 		if (m_user->hasRunningTimeEntry())
@@ -222,6 +240,14 @@ void TrayIcons::setUpTrayIcons()
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
+		}
+
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+		{
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_eventLoop.start();
+			return;
+		}
 
 		if (m_user->hasRunningTimeEntry())
 			m_user->stopCurrentTimeEntry();
@@ -238,6 +264,14 @@ void TrayIcons::setUpTrayIcons()
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
 			return;
+		}
+
+		if (ClockifyManager::instance()->isConnectedToInternet() == false)
+		{
+			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_eventLoop.start();
+			return;
+		}
 
 		if (m_user->hasRunningTimeEntry())
 		{
@@ -264,8 +298,6 @@ void TrayIcons::setUpTrayIcons()
 
 	connect(ClockifyManager::instance().data(), &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
 		updateTrayIcons();
-		if (connected == false)
-			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 	});
 
 	m_clockifyRunning->setContextMenu(m_clockifyRunningMenu);
