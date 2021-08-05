@@ -129,8 +129,21 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 
 				m_users.clear();
 				for (const auto &item : j)
-					m_users.push_back({item["id"].get<QByteArray>(),
-									   item["name"].get<QByteArray>()});
+				{
+					try
+					{
+						m_users.push_back({item["id"].get<QByteArray>(),
+										   item["name"].get<QByteArray>()});
+					}
+					catch (const std::exception &)
+					{
+						if (!item.contains("id"))
+							throw;
+						else // they are guaranteed to have an email address AFAIK
+							m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
+					}
+
+				}
 
 				m_usersLoaded = true;
 				emit usersLoaded();
