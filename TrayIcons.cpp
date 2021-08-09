@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QInputDialog>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 #include <SingleApplication>
 
@@ -196,6 +197,16 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
+	connect(m_clockifyRunningMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+	connect(m_clockifyRunningMenu->addAction("About"), &QAction::triggered, this, []() {
+		QMessageBox box{QMessageBox::Information,
+					"About ClockifyTrayIcons",
+					"ClockifyTrayIcons copyright © 2020.\n\n" \
+					"Licensed [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).",
+					QMessageBox::Ok};
+		box.setTextFormat(Qt::MarkdownText);
+		box.exec();
+	});
 	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [&]() {
@@ -231,6 +242,16 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
 	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
+	});
+	connect(m_runningJobMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+	connect(m_runningJobMenu->addAction("About"), &QAction::triggered, this, []() {
+		QMessageBox box{QMessageBox::Information,
+					"About ClockifyTrayIcons",
+					"ClockifyTrayIcons copyright © 2020.\n\n" \
+					"Licensed [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).",
+					QMessageBox::Ok};
+		box.setTextFormat(Qt::MarkdownText);
+		box.exec();
 	});
 	connect(m_runningJobMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
