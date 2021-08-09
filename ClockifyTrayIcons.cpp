@@ -27,17 +27,7 @@ int main(int argc, char *argv[])
 
 	SingleApplication a{argc, argv};
 
-	// migrate old keys
-	QSettings migration{QApplication::organizationName(), "ClockifyEasyButtons"};
-
 	QSettings settings;
-
-	// TODO: remove this after everybody has been migrated
-	if (migration.allKeys().length() > 0)
-		for (const auto &key : migration.allKeys())
-			settings.setValue(key, migration.value(key));
-
-	migration.clear();
 
 	QString apiKey = settings.value("apiKey").toString();
 
