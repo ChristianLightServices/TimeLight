@@ -273,7 +273,16 @@ void TrayIcons::setUpTrayIcons()
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
 		if (m_user->hasRunningTimeEntry())
+		{
+			try
+			{
+				if (m_user->getRunningTimeEntry().project().id() == TIME_301)
+					return;
+			}
+			catch (const std::exception &) {}
+
 			start = m_user->stopCurrentTimeEntry();
+		}
 		m_user->startTimeEntry(TIME_301, start);
 		updateTrayIcons();
 	});
@@ -287,7 +296,16 @@ void TrayIcons::setUpTrayIcons()
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
 		if (m_user->hasRunningTimeEntry())
+		{
+			try
+			{
+				if (m_user->getRunningTimeEntry().project().id() != TIME_301)
+					return;
+			}
+			catch (const std::exception &) {}
+
 			start = m_user->stopCurrentTimeEntry();
+		}
 		auto project = defaultProject();
 		m_user->startTimeEntry(project.id(), project.description(), start);
 		updateTrayIcons();
