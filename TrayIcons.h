@@ -42,8 +42,12 @@ private:
 
 	QSharedPointer<ClockifyUser> m_user;
 
-	QString m_defaultProjectId;
 	QString m_apiKey;
+
+	bool m_useLastProject;
+	bool m_useLastDescription;
+	QString m_defaultProjectId;
+	QString m_defaultDescription;
 
 	QTimer m_eventLoop;
 

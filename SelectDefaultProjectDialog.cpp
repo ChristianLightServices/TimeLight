@@ -3,58 +3,91 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QInputDialog>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QGroupBox>
+#include <QDialogButtonBox>
 
-SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair<QStringList, QStringList> availableProjects, QWidget *parent)
+SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
+													   bool useLastDescription,
+													   QString oldDefaultProject,
+													   QString oldDefaultDescription,
+													   QPair<QStringList, QStringList> availableProjects,
+													   QWidget *parent)
 	: QDialog{parent},
-	  m_buttons{new QButtonGroup{this}},
-	  m_useLastProject{new QRadioButton{"Use the project from the last task", this}},
-	  m_useSpecificProject{new QRadioButton{"Use a specific project every time", this}},
+	  m_projectButtons{new QButtonGroup{this}},
+	  m_useLastProjectBtn{new QRadioButton{"Use the project from the last task", this}},
+	  m_useSpecificProjectBtn{new QRadioButton{"Use a specific project every time", this}},
 	  m_selectDefaultProject{new QPushButton{"Select default project", this}},
-	  m_defaultProject{oldDefault},
-	  m_selectedSpecificProject{m_defaultProject},
+	  m_descriptionButtons{new QButtonGroup{this}},
+	  m_useLastDescriptionBtn{new QRadioButton{"Use the description from the last task", this}},
+	  m_useSpecificDescriptionBtn{new QRadioButton{"Use a specific description every time"}},
+	  m_defaultDescriptionEdit{new QLineEdit{oldDefaultDescription, this}},
+	  m_useLastProject{useLastProject},
+	  m_useLastDescription{useLastDescription},
+	  m_defaultProject{(oldDefaultProject.isEmpty() ? availableProjects.first.first() : oldDefaultProject)},
 	  m_availableProjects{availableProjects}
 {
-	auto layout	= new QGridLayout;
+	auto buttons = new QDialogButtonBox{QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this};
 
-	m_buttons->addButton(m_useLastProject);
-	m_buttons->addButton(m_useSpecificProject);
+	auto layout	= new QVBoxLayout{this};
 
-	if (m_defaultProject == "last-entered-code")
+	auto projectGroup = new QGroupBox{"Default project settings", this};
+	auto descriptionGroup = new QGroupBox{"Default description settings", this};
+
+	auto projectGroupLayout = new QGridLayout{this};
+
+	m_projectButtons->addButton(m_useLastProjectBtn);
+	m_projectButtons->addButton(m_useSpecificProjectBtn);
+
+	if (m_useLastProject)
 	{
-		m_useLastProject->setChecked(true);
+		m_useLastProjectBtn->setChecked(true);
 		m_selectDefaultProject->setEnabled(false);
 	}
 	else
-		m_useSpecificProject->setChecked(true);
+		m_useSpecificProjectBtn->setChecked(true);
 
-	layout->addWidget(m_useSpecificProject, 0, 0);
-	layout->addWidget(m_useLastProject, 1, 0);
-	layout->addWidget(m_selectDefaultProject, 0, 1);
+	projectGroupLayout->addWidget(m_useSpecificProjectBtn, 0, 0);
+	projectGroupLayout->addWidget(m_selectDefaultProject, 0, 1);
+	projectGroupLayout->addWidget(m_useLastProjectBtn, 1, 0);
 
-	auto ok = new QPushButton{"OK", this};
-	auto cancel = new QPushButton{"Cancel", this};
+	projectGroup->setLayout(projectGroupLayout);
 
-	auto buttonLayout = new QHBoxLayout;
+	auto descriptionGroupLayout = new QGridLayout{this};
 
-	buttonLayout->addStretch();
-	buttonLayout->addWidget(ok);
-	buttonLayout->addWidget(cancel);
+	m_descriptionButtons->addButton(m_useLastDescriptionBtn);
+	m_descriptionButtons->addButton(m_useSpecificDescriptionBtn);
 
-	layout->addLayout(buttonLayout, 2, 0, 1, 2);
+	if (m_useLastDescription)
+	{
+		m_useLastDescriptionBtn->setChecked(true);
+		m_defaultDescriptionEdit->setEnabled(false);
+	}
+	else
+		m_useSpecificDescriptionBtn->setChecked(true);
+
+	descriptionGroupLayout->addWidget(m_useSpecificDescriptionBtn, 0, 0);
+	descriptionGroupLayout->addWidget(m_defaultDescriptionEdit, 0, 1);
+	descriptionGroupLayout->addWidget(m_useLastDescriptionBtn, 1, 0);
+
+	descriptionGroup->setLayout(descriptionGroupLayout);
+
+	layout->addWidget(projectGroup);
+	layout->addWidget(descriptionGroup);
+	layout->addWidget(buttons);
 
 	setLayout(layout);
 
-	connect(m_buttons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
-		if (m_buttons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificProject))
+	connect(m_projectButtons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
+		if (m_projectButtons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificProjectBtn))
 		{
-			m_defaultProject = m_selectedSpecificProject;
+			m_useLastProject = false;
 			m_selectDefaultProject->setEnabled(true);
 		}
 		else
 		{
-			if (m_buttons->checkedButton() == static_cast<QAbstractButton *>(m_useLastProject))
-				m_defaultProject = "last-entered-code";
+			if (m_projectButtons->checkedButton() == static_cast<QAbstractButton *>(m_useLastProjectBtn))
+				m_useLastProject = true;
 
 			m_selectDefaultProject->setEnabled(false);
 		}
@@ -66,15 +99,34 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(QString oldDefault, QPair
 												 "Default project",
 												 "Select your default project",
 												 m_availableProjects.second,
-												 m_availableProjects.first.indexOf(m_selectedSpecificProject),
+												 m_availableProjects.first.indexOf(m_defaultProject),
 												 false,
 												 &ok);
 		if (!ok)
 			return;
 		else
-			m_defaultProject = m_selectedSpecificProject = m_availableProjects.first[m_availableProjects.second.indexOf(projectName)];
+			m_defaultProject = m_availableProjects.first[m_availableProjects.second.indexOf(projectName)];
 	});
 
-	connect(ok, &QPushButton::clicked, this, &SelectDefaultProjectDialog::accept);
-	connect(cancel, &QPushButton::clicked, this, &SelectDefaultProjectDialog::reject);
+	connect(m_descriptionButtons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
+		if (m_descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificDescriptionBtn))
+		{
+			m_useLastDescription = false;
+			m_defaultDescriptionEdit->setEnabled(true);
+		}
+		else
+		{
+			if (m_descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(m_useLastDescriptionBtn))
+				m_useLastDescription = true;
+
+			m_defaultDescriptionEdit->setEnabled(false);
+		}
+	});
+
+	connect(m_defaultDescriptionEdit, &QLineEdit::textChanged, this, [this]() {
+		m_defaultDescription = m_defaultDescriptionEdit->text();
+	});
+
+	connect(buttons, &QDialogButtonBox::accepted, this, &SelectDefaultProjectDialog::accept);
+	connect(buttons, &QDialogButtonBox::rejected, this, &SelectDefaultProjectDialog::reject);
 }
