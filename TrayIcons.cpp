@@ -170,6 +170,13 @@ void TrayIcons::setUpTrayIcons()
 	auto m_clockifyRunningMenu = new QMenu;
 	auto m_runningJobMenu = new QMenu;
 
+	static QString licenseInfo = "ClockifyTrayIcons copyright © 2020. Licensed " \
+								 "[GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).\n\n" \
+								 "Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
+								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and " \
+								 "[Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
+								 "(power icon, licensed [MIT](https://mit-license.org)).";
+
 	// set up the menu actions
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
 		if (ClockifyManager::instance()->isConnectedToInternet() == false)
@@ -199,11 +206,7 @@ void TrayIcons::setUpTrayIcons()
 	});
 	connect(m_clockifyRunningMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_clockifyRunningMenu->addAction("About"), &QAction::triggered, this, []() {
-		QMessageBox box{QMessageBox::Information,
-					"About ClockifyTrayIcons",
-					"ClockifyTrayIcons copyright © 2020.\n\n" \
-					"Licensed [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).",
-					QMessageBox::Ok};
+		QMessageBox box{QMessageBox::Information,"About ClockifyTrayIcons", licenseInfo, QMessageBox::Ok};
 		box.setTextFormat(Qt::MarkdownText);
 		box.exec();
 	});
@@ -245,11 +248,7 @@ void TrayIcons::setUpTrayIcons()
 	});
 	connect(m_runningJobMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_runningJobMenu->addAction("About"), &QAction::triggered, this, []() {
-		QMessageBox box{QMessageBox::Information,
-					"About ClockifyTrayIcons",
-					"ClockifyTrayIcons copyright © 2020.\n\n" \
-					"Licensed [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).",
-					QMessageBox::Ok};
+		QMessageBox box{QMessageBox::Information,"About ClockifyTrayIcons", licenseInfo, QMessageBox::Ok};
 		box.setTextFormat(Qt::MarkdownText);
 		box.exec();
 	});
