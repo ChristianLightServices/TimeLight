@@ -178,7 +178,7 @@ void TrayIcons::setUpTrayIcons()
 								 "(power icon, licensed [MIT](https://mit-license.org)).";
 
 	// set up the menu actions
-	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [&]() {
+	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [this]() {
 		if (ClockifyManager::instance()->isConnectedToInternet() == false)
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 
@@ -189,7 +189,7 @@ void TrayIcons::setUpTrayIcons()
 			updateTrayIcons();
 		}
 	});
-	connect(m_clockifyRunningMenu->addAction("Stop"), &QAction::triggered, this, [&]() {
+	connect(m_clockifyRunningMenu->addAction("Stop"), &QAction::triggered, this, [this]() {
 		if (ClockifyManager::instance()->isConnectedToInternet() == false)
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 
@@ -212,7 +212,7 @@ void TrayIcons::setUpTrayIcons()
 	});
 	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
-	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [&]() {
+	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [this]() {
 		if (ClockifyManager::instance()->isConnectedToInternet() == false)
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
@@ -226,7 +226,7 @@ void TrayIcons::setUpTrayIcons()
 		m_user->startTimeEntry(TIME_301, start);
 		updateTrayIcons();
 	});
-	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [&]() {
+	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [this]() {
 		if (ClockifyManager::instance()->isConnectedToInternet() == false)
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
@@ -255,7 +255,7 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_runningJobMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	// set up the actions on icon click
-	connect(m_clockifyRunning, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
+	connect(m_clockifyRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
 		m_eventLoop.stop();
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
@@ -281,7 +281,7 @@ void TrayIcons::setUpTrayIcons()
 
 		m_eventLoop.start();
 	});
-	connect(m_runningJob, &QSystemTrayIcon::activated, this, [&](QSystemTrayIcon::ActivationReason reason) {
+	connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
 		m_eventLoop.stop();
 
 		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick)
