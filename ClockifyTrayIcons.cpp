@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	});
 
 	QSharedPointer<ClockifyUser> user{ClockifyManager::instance()->getApiKeyOwner()};
-	if (user.isNull())
+	if (user.isNull()) [[unlikely]]
 	{
 		QMessageBox::warning(nullptr, "Fatal error", "Could not load user!");
 		return 0;
@@ -81,9 +81,9 @@ int main(int argc, char *argv[])
 
 	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
 		auto temp = ClockifyManager::instance()->getApiKeyOwner();
-		if (temp != nullptr)
+		if (temp != nullptr) [[likely]]
 			user = QSharedPointer<ClockifyUser>{temp};
-		else
+		else [[unlikely]]
 			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
 	});
 

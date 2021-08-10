@@ -55,7 +55,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 	connect(userRep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
 
-	if (auto status = userRep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
+	if (auto status = userRep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200) [[likely]]
 	{
 		try
 		{
@@ -79,7 +79,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		std::cerr << "Internet connection not found" << std::endl;
 		m_isConnectedToInternet = false;
 	}
-	else
+	else [[unlikely]]
 	{
 		std::cerr << "Request failed with code " << status << std::endl;
 		return;
@@ -170,7 +170,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 		loop.exec();
 
 		bool connection = rep->bytesAvailable();
-		if (m_isConnectedToInternet != connection)
+		if (m_isConnectedToInternet != connection) [[unlikely]]
 		{
 			m_isConnectedToInternet = connection;
 			emit internetConnectionChanged(m_isConnectedToInternet);
@@ -184,7 +184,7 @@ ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObj
 
 QList<ClockifyProject> ClockifyManager::projects()
 {
-	if (!m_projectsLoaded)
+	if (!m_projectsLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
 		connect(this, &ClockifyManager::projectsLoaded, &loop, &QEventLoop::quit);
@@ -196,7 +196,7 @@ QList<ClockifyProject> ClockifyManager::projects()
 
 QList<QPair<QString, QString>> ClockifyManager::users()
 {
-	if (!m_usersLoaded)
+	if (!m_usersLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
 		connect(this, &ClockifyManager::usersLoaded, &loop, &QEventLoop::quit);
@@ -208,7 +208,7 @@ QList<QPair<QString, QString>> ClockifyManager::users()
 
 QString ClockifyManager::projectName(const QString &projectId) const
 {
-	if (!m_projectsLoaded)
+	if (!m_projectsLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
 		connect(this, &ClockifyManager::projectsLoaded, &loop, &QEventLoop::quit);
@@ -224,7 +224,7 @@ QString ClockifyManager::projectName(const QString &projectId) const
 
 QString ClockifyManager::userName(const QString &userId) const
 {
-	if (!m_usersLoaded)
+	if (!m_usersLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
 		connect(this, &ClockifyManager::usersLoaded, &loop, &QEventLoop::quit);
@@ -251,7 +251,7 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 		try
 		{
 			json j{json::parse(rep->readAll().toStdString())};
-			if (!j.empty())
+			if (!j.empty()) [[likely]]
 				status = true;
 		}
 		catch (...)
@@ -275,7 +275,7 @@ QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool asyn
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
 	auto rep = patch(url, QByteArray::fromStdString(j.dump()));
 
-	if (!async)
+	if (!async) [[likely]]
 	{
 		QEventLoop loop;
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
@@ -340,7 +340,7 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
 	auto rep = post(url, QByteArray::fromStdString(j.dump()), 201);
 
-	if (!async)
+	if (!async) [[unlikely]]
 	{
 		QEventLoop loop;
 		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
@@ -383,7 +383,7 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 ClockifyUser *ClockifyManager::getApiKeyOwner()
 {
 	// TODO: make sure to always use the correct ID for the API key
-	if (!m_ownerId.isEmpty())
+	if (!m_ownerId.isEmpty()) [[likely]]
 		return new ClockifyUser{m_ownerId, this};
 	else
 	{
@@ -451,9 +451,9 @@ QNetworkReply *ClockifyManager::get(const QUrl &url,
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
 	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
-		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
-		else
+		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
@@ -485,9 +485,9 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
 	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
-		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
-		else
+		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
@@ -519,9 +519,9 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
 	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
-		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
-		else
+		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
 		m_pendingReplies.remove(rep);
