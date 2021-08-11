@@ -14,6 +14,7 @@ class SelectDefaultProjectDialog : public QDialog
 public:
 	explicit SelectDefaultProjectDialog(bool useLastProject,
 										bool useLastDescription,
+										bool disableDescription,
 										QString oldDefaultProject,
 										QString oldDefaultDescription,
 										QPair<QStringList, QStringList> availableProjects,
@@ -21,6 +22,7 @@ public:
 
 	bool useLastProject() const { return m_useLastProject; }
 	bool useLastDescription() const { return m_useLastDescription; }
+	bool disableDescription() const { return m_disableDescription; }
 	QString selectedProject() const { return m_defaultProject; }
 	QString selectedDescription() const { return m_defaultDescription; }
 
@@ -34,12 +36,14 @@ private:
 	QButtonGroup *m_descriptionButtons;
 	QRadioButton *m_useLastDescriptionBtn;
 	QRadioButton *m_useSpecificDescriptionBtn;
+	QRadioButton *m_useNoDescriptionBtn;
 
 	QComboBox *m_defaultProjectCombo;
 	QLineEdit *m_defaultDescriptionEdit;
 
 	bool m_useLastProject;
 	bool m_useLastDescription;
+	bool m_disableDescription;
 	QString m_defaultProject;
 	QString m_defaultDescription;
 	QPair<QStringList, QStringList> m_availableProjects;

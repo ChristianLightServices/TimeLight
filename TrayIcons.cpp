@@ -52,6 +52,7 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	// end of migration
 
 	m_defaultDescription = settings.value("description").toString();
+	m_disableDescription = settings.value("disableDescription", false).toBool();
 	m_useLastProject = settings.value("useLastProject", true).toBool();
 	m_useLastDescription = settings.value("useLastDescription", true).toBool();
 
@@ -118,7 +119,9 @@ ClockifyProject TrayIcons::defaultProject() const
 			projectId = ClockifyManager::instance()->projects().first().id();
 	}
 
-	if (!m_useLastDescription)
+	if (m_disableDescription)
+		; // description is already empty, so we will fall through
+	else if (!m_useLastDescription)
 		description = m_defaultDescription;
 	else
 	{
@@ -182,17 +185,24 @@ void TrayIcons::getNewProjectId()
 		projectNames.push_back(project.name());
 	}
 
-	SelectDefaultProjectDialog dialog{m_useLastProject, m_useLastDescription, m_defaultProjectId, m_defaultDescription, {projectIds, projectNames}};
+	SelectDefaultProjectDialog dialog{m_useLastProject,
+									  m_useLastDescription,
+									  m_disableDescription,
+									  m_defaultProjectId,
+									  m_defaultDescription,
+									  {projectIds, projectNames}};
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		m_defaultProjectId = dialog.selectedProject();
 		m_defaultDescription = dialog.selectedDescription();
+		m_disableDescription = dialog.disableDescription();
 		m_useLastProject = dialog.useLastProject();
 		m_useLastDescription = dialog.useLastDescription();
 
 		QSettings settings;
 		settings.setValue("projectId", m_defaultProjectId);
 		settings.setValue("description", m_defaultDescription);
+		settings.setValue("disableDescription", m_disableDescription);
 		settings.setValue("useLastProject", m_useLastProject);
 		settings.setValue("useLastDescription", m_useLastDescription);
 		settings.sync();
