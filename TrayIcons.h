@@ -46,6 +46,7 @@ private:
 
 	bool m_useLastProject;
 	bool m_useLastDescription;
+	bool m_disableDescription;
 	QString m_defaultProjectId;
 	QString m_defaultDescription;
 

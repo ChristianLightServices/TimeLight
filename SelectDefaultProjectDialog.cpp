@@ -8,6 +8,7 @@
 
 SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 													   bool useLastDescription,
+													   bool disableDescription,
 													   QString oldDefaultProject,
 													   QString oldDefaultDescription,
 													   QPair<QStringList, QStringList> availableProjects,
@@ -19,10 +20,12 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	  m_descriptionButtons{new QButtonGroup{this}},
 	  m_useLastDescriptionBtn{new QRadioButton{"Use the description from the last task", this}},
 	  m_useSpecificDescriptionBtn{new QRadioButton{"Use a specific description every time"}},
+	  m_useNoDescriptionBtn{new QRadioButton{"Don't use a description", this}},
 	  m_defaultProjectCombo{new QComboBox{this}},
 	  m_defaultDescriptionEdit{new QLineEdit{oldDefaultDescription, this}},
 	  m_useLastProject{useLastProject},
 	  m_useLastDescription{useLastDescription},
+	  m_disableDescription{disableDescription},
 	  m_defaultProject{(oldDefaultProject.isEmpty() ? availableProjects.first.first() : oldDefaultProject)},
 	  m_availableProjects{availableProjects}
 {
@@ -59,8 +62,14 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 
 	m_descriptionButtons->addButton(m_useLastDescriptionBtn);
 	m_descriptionButtons->addButton(m_useSpecificDescriptionBtn);
+	m_descriptionButtons->addButton(m_useNoDescriptionBtn);
 
-	if (m_useLastDescription)
+	if (m_disableDescription)
+	{
+		m_useNoDescriptionBtn->setChecked(true);
+		m_defaultDescriptionEdit->setEnabled(false);
+	}
+	else if (m_useLastDescription)
 	{
 		m_useLastDescriptionBtn->setChecked(true);
 		m_defaultDescriptionEdit->setEnabled(false);
@@ -71,6 +80,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	descriptionGroupLayout->addWidget(m_useSpecificDescriptionBtn, 0, 0);
 	descriptionGroupLayout->addWidget(m_defaultDescriptionEdit, 0, 1);
 	descriptionGroupLayout->addWidget(m_useLastDescriptionBtn, 1, 0);
+	descriptionGroupLayout->addWidget(m_useNoDescriptionBtn, 2, 0);
 
 	descriptionGroup->setLayout(descriptionGroupLayout);
 
@@ -103,12 +113,21 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 		if (m_descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificDescriptionBtn))
 		{
 			m_useLastDescription = false;
+			m_disableDescription = false;
 			m_defaultDescriptionEdit->setEnabled(true);
 		}
 		else
 		{
 			if (m_descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(m_useLastDescriptionBtn))
+			{
+				m_disableDescription = false;
 				m_useLastDescription = true;
+			}
+			else if (m_descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(m_useNoDescriptionBtn))
+			{
+				m_useLastDescription = false;
+				m_disableDescription = true;
+			}
 
 			m_defaultDescriptionEdit->setEnabled(false);
 		}
