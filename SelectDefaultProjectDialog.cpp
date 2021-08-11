@@ -2,7 +2,6 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QInputDialog>
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QDialogButtonBox>
@@ -20,7 +19,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	  m_descriptionButtons{new QButtonGroup{this}},
 	  m_useLastDescriptionBtn{new QRadioButton{"Use the description from the last task", this}},
 	  m_useSpecificDescriptionBtn{new QRadioButton{"Use a specific description every time"}},
-	  m_selectDefaultProject{new QPushButton{"Select default project", this}},
+	  m_defaultProjectCombo{new QComboBox{this}},
 	  m_defaultDescriptionEdit{new QLineEdit{oldDefaultDescription, this}},
 	  m_useLastProject{useLastProject},
 	  m_useLastDescription{useLastDescription},
@@ -42,13 +41,16 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	if (m_useLastProject)
 	{
 		m_useLastProjectBtn->setChecked(true);
-		m_selectDefaultProject->setEnabled(false);
+		m_defaultProjectCombo->setEnabled(false);
 	}
 	else
 		m_useSpecificProjectBtn->setChecked(true);
 
+	m_defaultProjectCombo->addItems(m_availableProjects.second);
+	m_defaultProjectCombo->setCurrentIndex(m_availableProjects.first.indexOf(m_defaultProject));
+
 	projectGroupLayout->addWidget(m_useSpecificProjectBtn, 0, 0);
-	projectGroupLayout->addWidget(m_selectDefaultProject, 0, 1);
+	projectGroupLayout->addWidget(m_defaultProjectCombo, 0, 1);
 	projectGroupLayout->addWidget(m_useLastProjectBtn, 1, 0);
 
 	projectGroup->setLayout(projectGroupLayout);
@@ -82,30 +84,19 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 		if (m_projectButtons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificProjectBtn))
 		{
 			m_useLastProject = false;
-			m_selectDefaultProject->setEnabled(true);
+			m_defaultProjectCombo->setEnabled(true);
 		}
 		else
 		{
 			if (m_projectButtons->checkedButton() == static_cast<QAbstractButton *>(m_useLastProjectBtn))
 				m_useLastProject = true;
 
-			m_selectDefaultProject->setEnabled(false);
+			m_defaultProjectCombo->setEnabled(false);
 		}
 	});
 
-	connect(m_selectDefaultProject, &QPushButton::clicked, this, [this]() {
-		bool ok{true};
-		auto projectName = QInputDialog::getItem(nullptr,
-												 "Default project",
-												 "Select your default project",
-												 m_availableProjects.second,
-												 m_availableProjects.first.indexOf(m_defaultProject),
-												 false,
-												 &ok);
-		if (!ok)
-			return;
-		else
-			m_defaultProject = m_availableProjects.first[m_availableProjects.second.indexOf(projectName)];
+	connect(m_defaultProjectCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
+		m_defaultProject = m_availableProjects.first[m_defaultProjectCombo->currentIndex()];
 	});
 
 	connect(m_descriptionButtons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
