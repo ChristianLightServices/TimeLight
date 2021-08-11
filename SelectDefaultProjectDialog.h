@@ -3,9 +3,9 @@
 
 #include <QDialog>
 #include <QRadioButton>
-#include <QPushButton>
 #include <QButtonGroup>
 #include <QLineEdit>
+#include <QComboBox>
 
 class SelectDefaultProjectDialog : public QDialog
 {
@@ -35,7 +35,7 @@ private:
 	QRadioButton *m_useLastDescriptionBtn;
 	QRadioButton *m_useSpecificDescriptionBtn;
 
-	QPushButton *m_selectDefaultProject;
+	QComboBox *m_defaultProjectCombo;
 	QLineEdit *m_defaultDescriptionEdit;
 
 	bool m_useLastProject;
