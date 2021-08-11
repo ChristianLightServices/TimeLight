@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
 		auto temp = ClockifyManager::instance()->getApiKeyOwner();
 		if (temp != nullptr) [[likely]]
-			user = QSharedPointer<ClockifyUser>{temp};
+			*user = *temp;
 		else [[unlikely]]
 			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
 	});

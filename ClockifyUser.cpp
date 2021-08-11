@@ -13,6 +13,12 @@ ClockifyUser::ClockifyUser(QString userId, QObject *parent)
 {
 }
 
+ClockifyUser::ClockifyUser(const ClockifyUser &that)
+	: QObject{that.parent()}
+{
+	*this = that;
+}
+
 bool ClockifyUser::hasRunningTimeEntry()
 {
 	return ClockifyManager::instance()->userHasRunningTimeEntry(m_userId);
@@ -51,4 +57,12 @@ void ClockifyUser::startTimeEntry(const QString &projectId, const QString &descr
 QVector<TimeEntry> ClockifyUser::getTimeEntries()
 {
 	return ClockifyManager::instance()->getTimeEntries(m_userId);
+}
+
+ClockifyUser &ClockifyUser::operator=(const ClockifyUser &other)
+{
+	m_userId = other.m_userId;
+	m_name = other.m_name;
+
+	return *this;
 }
