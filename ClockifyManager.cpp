@@ -44,46 +44,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 {
 	// request currently logged in user (the one whose API key we're using) as a validity test
 	// and also in order to cache API key info
-	QUrl url{s_baseUrl + "/user"};
-
-	QNetworkRequest currentUser{url};
-	currentUser.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-	currentUser.setRawHeader("X-Api-Key", m_apiKey);
-
-	auto userRep = m_manager.get(currentUser);
-	QEventLoop loop;
-	connect(userRep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
-
-	if (auto status = userRep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200) [[likely]]
-	{
-		try
-		{
-			json j{json::parse(userRep->readAll().toStdString())};
-			m_ownerId = j["id"].get<QString>();
-			m_isValid = true;
-		}
-		catch (const std::exception &ex)
-		{
-			std::cerr << "Error: " << ex.what() << std::endl;
-			return;
-		}
-		catch (...)
-		{
-			std::cout << "Unknown error!\n";
-			return;
-		}
-	}
-	else if (status == 0)
-	{
-		std::cerr << "Internet connection not found" << std::endl;
-		m_isConnectedToInternet = false;
-	}
-	else [[unlikely]]
-	{
-		std::cerr << "Request failed with code " << status << std::endl;
-		return;
-	}
+	updateCurrentUser();
 
 	auto updateUsersAndProjects = [this]() {
 		// get all projects for project list (note that this will return immediately and finish running in the
@@ -418,6 +379,7 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 void ClockifyManager::setApiKey(const QString &apiKey)
 {
 	m_apiKey = apiKey.toUtf8();
+	updateCurrentUser();
 	emit apiKeyChanged();
 }
 
@@ -425,6 +387,42 @@ bool ClockifyManager::init(QString workspaceId, QByteArray apiKey, QObject *pare
 {
 	s_instance.reset(new ClockifyManager{workspaceId, apiKey, parent});
 	return true;
+}
+
+void ClockifyManager::updateCurrentUser()
+{
+	auto userRep = get(s_baseUrl + "/user", [this](QNetworkReply *rep) {
+		try
+		{
+			json j{json::parse(rep->readAll().toStdString())};
+			m_ownerId = j["id"].get<QString>();
+			m_isValid = true;
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "Error: " << ex.what() << std::endl;
+		}
+		catch (...)
+		{
+			std::cout << "Unknown error!\n";
+		}
+	}, [this](QNetworkReply *rep) {
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 0) [[likely]]
+		{
+			std::cerr << "Internet connection not found" << std::endl;
+			m_isValid = true; // speculative that the connection will work once the internet is connected
+			m_isConnectedToInternet = false;
+		}
+		else [[unlikely]]
+		{
+			std::cerr << "Request failed with code " << status << std::endl;
+			return;
+		}
+	});
+
+	QEventLoop loop;
+	connect(userRep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+	loop.exec();
 }
 
 // *****************************************************************************

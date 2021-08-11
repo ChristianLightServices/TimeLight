@@ -64,6 +64,8 @@ signals:
 	void internetConnectionChanged(bool status);
 
 private:
+	void updateCurrentUser();
+
 	QNetworkReply *get(const QUrl &url,
 					   std::function<void (QNetworkReply *)> successCb = s_defaultSuccessCb,
 					   std::function<void (QNetworkReply *)> failureCb = s_defaultFailureCb);

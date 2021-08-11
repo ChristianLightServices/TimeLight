@@ -15,6 +15,7 @@ class ClockifyUser : public QObject
 
 public:
 	explicit ClockifyUser(QString userId, QObject *parent = nullptr);
+	explicit ClockifyUser(const ClockifyUser &that);
 
 	bool hasRunningTimeEntry();
 	TimeEntry getRunningTimeEntry();
@@ -24,6 +25,8 @@ public:
 	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
 	QVector<TimeEntry> getTimeEntries();
+
+	ClockifyUser &operator=(const ClockifyUser &other);
 
 signals:
 
