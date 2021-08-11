@@ -17,7 +17,7 @@
 
 using nlohmann::json;
 
-const QByteArray ClockifyManager::s_baseUrl{"https://api.clockify.me/api/v1"};
+const QString ClockifyManager::s_baseUrl{"https://api.clockify.me/api/v1"};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultSuccessCb = [](QNetworkReply *){};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb = [](QNetworkReply *reply) {
 
@@ -37,7 +37,7 @@ const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb 
 };
 QSharedPointer<ClockifyManager> ClockifyManager::s_instance;
 
-ClockifyManager::ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObject *parent)
+ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject *parent)
 	: QObject{parent},
 	  m_workspaceId{workspaceId},
 	  m_apiKey{apiKey}
@@ -421,7 +421,7 @@ void ClockifyManager::setApiKey(const QString &apiKey)
 	emit apiKeyChanged();
 }
 
-bool ClockifyManager::init(QByteArray workspaceId, QByteArray apiKey, QObject *parent)
+bool ClockifyManager::init(QString workspaceId, QByteArray apiKey, QObject *parent)
 {
 	s_instance.reset(new ClockifyManager{workspaceId, apiKey, parent});
 	return true;

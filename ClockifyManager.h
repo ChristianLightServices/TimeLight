@@ -27,7 +27,7 @@ class ClockifyManager : public QObject
 	Q_PROPERTY(bool isValid READ isValid CONSTANT)
 
 public:
-	explicit ClockifyManager(QByteArray workspaceId, QByteArray apiKey, QObject *parent = nullptr);
+	explicit ClockifyManager(QString workspaceId, QByteArray apiKey, QObject *parent = nullptr);
 
 	bool isValid() const { return m_isValid; }
 
@@ -51,7 +51,7 @@ public:
 
 	void setApiKey(const QString &apiKey);
 
-	static bool init(QByteArray workspaceId, QByteArray apiKey, QObject *parent = nullptr);
+	static bool init(QString workspaceId, QByteArray apiKey, QObject *parent = nullptr);
 	static QSharedPointer<ClockifyManager> instance() { return s_instance; }
 
 signals:
@@ -92,7 +92,7 @@ private:
 						 std::function<void (QNetworkReply *)> successCb = s_defaultSuccessCb,
 						 std::function<void (QNetworkReply *)> failureCb = s_defaultFailureCb);
 
-	QByteArray m_workspaceId;
+	QString m_workspaceId;
 	QByteArray m_apiKey;
 
 	QString m_ownerId;
@@ -110,7 +110,7 @@ private:
 	// trying to juggle pointers to dynamically-allocated std::functions.
 	QHash<QNetworkReply *, QPair<std::function<void (QNetworkReply *)>, std::function<void (QNetworkReply *)>>> m_pendingReplies;
 
-	const static QByteArray s_baseUrl;
+	const static QString s_baseUrl;
 
 	bool m_isValid{false};
 	bool m_projectsLoaded{false};
