@@ -320,9 +320,9 @@ void ClockifyManager::setApiKey(const QString &apiKey)
 	emit apiKeyChanged();
 }
 
-bool ClockifyManager::init(QString workspaceId, QByteArray apiKey, QObject *parent)
+bool ClockifyManager::init(QString workspaceId, QByteArray apiKey)
 {
-	s_instance.reset(new ClockifyManager{workspaceId, apiKey, parent});
+	s_instance.reset(new ClockifyManager{workspaceId, apiKey, nullptr});
 	return true;
 }
 
