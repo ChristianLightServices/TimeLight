@@ -37,8 +37,8 @@ private:
 	QSystemTrayIcon *m_runningJob{nullptr};
 
 	// we'll cache icons and tooltips in these to avoid having to reset stuff a lot
-	const QIcon *m_clockifyRunningCurrentIcon;
-	const QIcon *m_runningJobCurrentIcon;
+	const QIcon *m_clockifyRunningCurrentIcon{nullptr};
+	const QIcon *m_runningJobCurrentIcon{nullptr};
 	QString m_clockifyRunningCurrentTooltip;
 	QString m_runningJobCurrentTooltip;
 
