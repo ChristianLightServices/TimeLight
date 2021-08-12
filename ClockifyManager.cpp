@@ -117,7 +117,7 @@ QList<QPair<QString, QString>> &ClockifyManager::users()
 
 QString ClockifyManager::projectName(const QString &projectId)
 {
-	for (const auto &item : projects())
+	for (const auto &item : qAsConst(projects()))
 		if (item.id() == projectId)
 			return item.name();
 
@@ -126,7 +126,7 @@ QString ClockifyManager::projectName(const QString &projectId)
 
 QString ClockifyManager::userName(const QString &userId)
 {
-	for (const auto &item : users())
+	for (const auto &item : qAsConst(users()))
 		if (item.first == userId)
 			return item.second;
 

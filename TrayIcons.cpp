@@ -14,8 +14,8 @@
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
 
-const QByteArray WORKSPACE{"5e207622ba05e2483903da0d"};
-const QByteArray TIME_301{"5e20d8e0ba05e2483904a186"};
+const auto WORKSPACE{"5e207622ba05e2483903da0d"};
+const auto TIME_301{"5e20d8e0ba05e2483904a186"};
 
 QPair<QString, QIcon> TrayIcons::s_clockifyOn;
 QPair<QString, QIcon> TrayIcons::s_clockifyOff;
@@ -178,7 +178,7 @@ void TrayIcons::getNewProjectId()
 {
 	QStringList projectIds;
 	QStringList projectNames;
-	for (const auto &project : ClockifyManager::instance()->projects())
+	for (const auto &project : qAsConst(ClockifyManager::instance()->projects()))
 	{
 		projectIds.push_back(project.id());
 		projectNames.push_back(project.name());

@@ -16,9 +16,6 @@
 #include "ClockifyUser.h"
 #include "TrayIcons.h"
 
-const QByteArray WORKSPACE{"5e207622ba05e2483903da0d"};
-const QByteArray TIME_301{"5e20d8e0ba05e2483904a186"};
-
 int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("ClockifyTrayIcons");
@@ -39,6 +36,8 @@ int main(int argc, char *argv[])
 			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
 	}
+
+	const QByteArray WORKSPACE{"5e207622ba05e2483903da0d"};
 
 	ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
 	while (!ClockifyManager::instance()->isValid())
