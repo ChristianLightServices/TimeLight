@@ -63,22 +63,27 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	updateProjects();
 	updateUsers();
 
-	m_checkConnectionTimer.setInterval(500);
-	m_checkConnectionTimer.callOnTimeout([this]() {
-		auto rep = m_manager.get(QNetworkRequest{QUrl{"https://clockify.me/"}});
-		QEventLoop loop;
-		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-		loop.exec();
+	auto checkInternet = [this] {
+		auto rep = head(QUrl{"https://clockify.me"}, [this](QNetworkReply *) {
+			// a changed internet connection is rather unlikely
+			if (!m_isConnectedToInternet) [[unlikely]]
+			{
+				m_isConnectedToInternet = true;
+				emit internetConnectionChanged(m_isConnectedToInternet);
+			}
+		}, [this](QNetworkReply *) {
+			if (m_isConnectedToInternet) [[unlikely]]
+			{
+				m_isConnectedToInternet = false;
+				emit internetConnectionChanged(m_isConnectedToInternet);
+			}
+		});
+	};
 
-		bool connection = rep->bytesAvailable();
-		if (m_isConnectedToInternet != connection) [[unlikely]]
-		{
-			m_isConnectedToInternet = connection;
-			emit internetConnectionChanged(m_isConnectedToInternet);
-		}
+	checkInternet();
 
-		rep->deleteLater();
-	});
+	m_checkConnectionTimer.setInterval(5000); // check connection every 5s, since it's not that likely to change a lot
+	m_checkConnectionTimer.callOnTimeout(checkInternet);
 	m_checkConnectionTimer.setSingleShot(false);
 	m_checkConnectionTimer.start();
 }
@@ -523,6 +528,33 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 	req.setRawHeader("X-Api-Key", m_apiKey);
 
 	auto rep = m_manager.sendCustomRequest(req, "PATCH", body);
+	m_pendingReplies.insert(rep, {successCb, failureCb});
+
+	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
+		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
+			m_pendingReplies[rep].first(rep);
+		else [[unlikely]]
+			m_pendingReplies[rep].second(rep);
+
+		m_pendingReplies.remove(rep);
+		rep->deleteLater();
+	});
+
+	return rep;
+}
+
+QNetworkReply *ClockifyManager::head(const QUrl &url, std::function<void (QNetworkReply *)> successCb, std::function<void (QNetworkReply *)> failureCb)
+{
+	return head(url, 200, successCb, failureCb);
+}
+
+QNetworkReply *ClockifyManager::head(const QUrl &url, int expectedReturnCode, std::function<void (QNetworkReply *)> successCb, std::function<void (QNetworkReply *)> failureCb)
+{
+	QNetworkRequest req{url};
+	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+	req.setRawHeader("X-Api-Key", m_apiKey);
+
+	auto rep = m_manager.head(req);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
 	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
