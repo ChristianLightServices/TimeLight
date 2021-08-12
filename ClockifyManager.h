@@ -31,8 +31,8 @@ public:
 
 	bool isValid() const { return m_isValid; }
 
-	QList<ClockifyProject> projects();
-	QList<QPair<QString, QString>> users();
+	QList<ClockifyProject> &projects();
+	QList<QPair<QString, QString>> &users();
 
 	QString projectName(const QString &projectId);
 	QString userName(const QString &userId);

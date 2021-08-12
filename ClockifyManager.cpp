@@ -83,7 +83,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	m_checkConnectionTimer.start();
 }
 
-QList<ClockifyProject> ClockifyManager::projects()
+QList<ClockifyProject> &ClockifyManager::projects()
 {
 	if (m_projectsStale)
 		updateProjects();
@@ -98,7 +98,7 @@ QList<ClockifyProject> ClockifyManager::projects()
 	return m_projects;
 }
 
-QList<QPair<QString, QString>> ClockifyManager::users()
+QList<QPair<QString, QString>> &ClockifyManager::users()
 {
 	if (m_usersStale)
 		updateUsers();
@@ -115,7 +115,7 @@ QList<QPair<QString, QString>> ClockifyManager::users()
 
 QString ClockifyManager::projectName(const QString &projectId)
 {
-	for (const auto &item : m_projects)
+	for (const auto &item : projects())
 		if (item.id() == projectId)
 			return item.name();
 
@@ -124,7 +124,7 @@ QString ClockifyManager::projectName(const QString &projectId)
 
 QString ClockifyManager::userName(const QString &userId)
 {
-	for (const auto &item : m_users)
+	for (const auto &item : users())
 		if (item.first == userId)
 			return item.second;
 
