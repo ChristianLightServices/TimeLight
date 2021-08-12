@@ -71,22 +71,23 @@ int main(int argc, char *argv[])
 		}
 	});
 
-	QSharedPointer<ClockifyUser> user{ClockifyManager::instance()->getApiKeyOwner()};
-	if (user.isNull()) [[unlikely]]
+	auto user{ClockifyManager::instance()->getApiKeyOwner()};
+	if (user == nullptr) [[unlikely]]
 	{
 		QMessageBox::warning(nullptr, "Fatal error", "Could not load user!");
 		return 0;
 	}
 
+	TrayIcons icons{QSharedPointer<ClockifyUser>{user}};
+
 	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
 		auto temp = ClockifyManager::instance()->getApiKeyOwner();
 		if (temp != nullptr) [[likely]]
-			*user = *temp;
+			icons.setUser(QSharedPointer<ClockifyUser>{temp});
 		else [[unlikely]]
 			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
 	});
 
-	TrayIcons icons{user};
 	icons.show();
 
 	return a.exec();

@@ -19,6 +19,7 @@ public:
 	void show();
 
 	ClockifyProject defaultProject() const;
+	void setUser(QSharedPointer<ClockifyUser> user);
 
 signals:
 

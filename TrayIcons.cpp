@@ -144,6 +144,12 @@ ClockifyProject TrayIcons::defaultProject() const
 	return ClockifyProject{projectId, ClockifyManager::instance()->projectName(projectId), description};
 }
 
+void TrayIcons::setUser(QSharedPointer<ClockifyUser> user)
+{
+	m_user.clear();
+	m_user = user;
+}
+
 void TrayIcons::updateTrayIcons()
 {
 
