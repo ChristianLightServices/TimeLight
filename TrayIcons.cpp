@@ -411,7 +411,11 @@ void TrayIcons::setUpTrayIcons()
 
 void TrayIcons::setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data)
 {
-	m_clockifyRunning->setToolTip(data.first);
+	if (m_clockifyRunningCurrentTooltip != data.first) [[unlikely]]
+	{
+		m_clockifyRunning->setToolTip(data.first);
+		m_clockifyRunningCurrentTooltip = data.first;
+	}
 	if (m_clockifyRunningCurrentIcon != &data.second) [[unlikely]]
 	{
 		m_clockifyRunning->setIcon(data.second);
@@ -421,7 +425,11 @@ void TrayIcons::setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data)
 
 void TrayIcons::setRunningJobIconTooltip(const QPair<QString, QIcon> &data)
 {
-	m_runningJob->setToolTip(data.first);
+	if (m_runningJobCurrentTooltip != data.first) [[unlikely]]
+	{
+		m_runningJob->setToolTip(data.first);
+		m_runningJobCurrentTooltip = data.first;
+	}
 	if (m_runningJobCurrentIcon != &data.second) [[unlikely]]
 	{
 		m_runningJob->setIcon(data.second);
