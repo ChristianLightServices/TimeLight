@@ -129,7 +129,7 @@ private:
 	bool m_usersLoaded{false};
 	bool m_projectsStale{true};
 	bool m_usersStale{true};
-	bool m_isConnectedToInternet;
+	bool m_isConnectedToInternet{true}; // assume connected at start
 
 	QTimer m_markUsersAsStaleTimer;
 	QTimer m_markProjectsAsStaleTimer;
