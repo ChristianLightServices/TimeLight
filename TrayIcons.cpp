@@ -176,10 +176,9 @@ void TrayIcons::updateTrayIcons()
 
 void TrayIcons::getNewProjectId()
 {
-	auto projects = ClockifyManager::instance()->projects();
 	QStringList projectIds;
 	QStringList projectNames;
-	for (const auto &project : projects)
+	for (const auto &project : ClockifyManager::instance()->projects())
 	{
 		projectIds.push_back(project.id());
 		projectNames.push_back(project.name());
