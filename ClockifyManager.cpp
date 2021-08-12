@@ -58,10 +58,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	});
 	m_markProjectsAsStaleTimer.setSingleShot(true);
 
-	// begin populating the user/project cache
-	// this will start the timers automatically
-	updateProjects();
-	updateUsers();
+	// We won't actually populate the user or project list yet; why do it when we probably won't need it for a long time?
 
 	auto checkInternet = [this] {
 		auto rep = head(QUrl{"https://clockify.me"}, [this](QNetworkReply *) {
