@@ -46,82 +46,22 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	// and also in order to cache API key info
 	updateCurrentUser();
 
-	auto updateUsersAndProjects = [this]() {
-		// get all projects for project list (note that this will return immediately and finish running in the
-		// background; when the user calls projects(), projects() will block if needed until the projects are loaded)
-		QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/projects"};
+	m_markUsersAsStaleTimer.setInterval(60 * 60 * 1000); // every hour
+	m_markUsersAsStaleTimer.callOnTimeout(this, [this]() {
+		m_usersStale = true;
+	});
+	m_markUsersAsStaleTimer.setSingleShot(true);
 
-		// let's get _all_ the projects! *evil laughter*
-		QUrlQuery query;
-		query.addQueryItem("page-size", QString::number(INT_MAX));
-		url.setQuery(query);
+	m_markProjectsAsStaleTimer.setInterval(60 * 60 * 1000);
+	m_markProjectsAsStaleTimer.callOnTimeout(this, [this]() {
+		m_projectsStale = true;
+	});
+	m_markProjectsAsStaleTimer.setSingleShot(true);
 
-		get(url, [this](QNetworkReply *rep) {
-			try
-			{
-				m_projectsLoaded = false;
-				json j{json::parse(rep->readAll().toStdString())};
-
-				m_projects.clear();
-				for (const auto &item : j)
-					m_projects.push_back({item["id"].get<QString>(),
-										  item["name"].get<QString>()});
-
-				m_projectsLoaded = true;
-				emit projectsLoaded();
-			}
-			catch (...)
-			{
-				emit invalidated();
-			}
-		});
-
-		// now load the users
-		url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
-		query.clear();
-		query.addQueryItem("page-size", QString::number(INT_MAX));
-		url.setQuery(query);
-
-		get(url, [this](QNetworkReply *rep) {
-			try
-			{
-				m_usersLoaded = false;
-				json j{json::parse(rep->readAll().toStdString())};
-
-				m_users.clear();
-				for (const auto &item : j)
-				{
-					try
-					{
-						m_users.push_back({item["id"].get<QByteArray>(),
-										   item["name"].get<QByteArray>()});
-					}
-					catch (const std::exception &)
-					{
-						if (!item.contains("id"))
-							throw;
-						else // they are guaranteed to have an email address AFAIK
-							m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
-					}
-
-				}
-
-				m_usersLoaded = true;
-				emit usersLoaded();
-			}
-			catch (...)
-			{
-				emit invalidated();
-			}
-		});
-	};
-
-	updateUsersAndProjects();
-
-	m_updateCacheTimer.setInterval(60000); // every minute
-	m_updateCacheTimer.callOnTimeout(updateUsersAndProjects);
-	m_updateCacheTimer.setSingleShot(false);
-	m_updateCacheTimer.start();
+	// begin populating the user/project cache
+	// this will start the timers automatically
+	updateProjects();
+	updateUsers();
 
 	m_checkConnectionTimer.setInterval(500);
 	m_checkConnectionTimer.callOnTimeout([this]() {
@@ -145,6 +85,9 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 
 QList<ClockifyProject> ClockifyManager::projects()
 {
+	if (m_projectsStale)
+		updateProjects();
+
 	if (!m_projectsLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
@@ -157,6 +100,9 @@ QList<ClockifyProject> ClockifyManager::projects()
 
 QList<QPair<QString, QString>> ClockifyManager::users()
 {
+	if (m_usersStale)
+		updateUsers();
+
 	if (!m_usersLoaded) [[unlikely]]
 	{
 		QEventLoop loop;
@@ -167,15 +113,8 @@ QList<QPair<QString, QString>> ClockifyManager::users()
 	return m_users;
 }
 
-QString ClockifyManager::projectName(const QString &projectId) const
+QString ClockifyManager::projectName(const QString &projectId)
 {
-	if (!m_projectsLoaded) [[unlikely]]
-	{
-		QEventLoop loop;
-		connect(this, &ClockifyManager::projectsLoaded, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
-
 	for (const auto &item : m_projects)
 		if (item.id() == projectId)
 			return item.name();
@@ -183,15 +122,8 @@ QString ClockifyManager::projectName(const QString &projectId) const
 	return "";
 }
 
-QString ClockifyManager::userName(const QString &userId) const
+QString ClockifyManager::userName(const QString &userId)
 {
-	if (!m_usersLoaded) [[unlikely]]
-	{
-		QEventLoop loop;
-		connect(this, &ClockifyManager::usersLoaded, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
-
 	for (const auto &item : m_users)
 		if (item.first == userId)
 			return item.second;
@@ -423,6 +355,83 @@ void ClockifyManager::updateCurrentUser()
 	QEventLoop loop;
 	connect(userRep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 	loop.exec();
+}
+
+void ClockifyManager::updateUsers()
+{
+	QUrl url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
+	QUrlQuery query;
+	query.addQueryItem("page-size", QString::number(INT_MAX));
+	url.setQuery(query);
+
+	get(url, [this](QNetworkReply *rep) {
+		try
+		{
+			m_usersLoaded = false;
+			json j{json::parse(rep->readAll().toStdString())};
+
+			m_users.clear();
+			for (const auto &item : j)
+			{
+				try
+				{
+					m_users.push_back({item["id"].get<QByteArray>(),
+									   item["name"].get<QByteArray>()});
+				}
+				catch (const std::exception &)
+				{
+					if (!item.contains("id"))
+						throw;
+					else // they are guaranteed to have an email address AFAIK
+						m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
+				}
+
+			}
+
+			m_usersLoaded = true;
+			m_usersStale = false;
+			emit usersLoaded();
+			m_markUsersAsStaleTimer.start();
+		}
+		catch (...)
+		{
+			emit invalidated();
+		}
+	});
+}
+
+void ClockifyManager::updateProjects()
+{
+	// get all projects for project list (note that this will return immediately and finish running in the
+	// background; when the user calls projects(), projects() will block if needed until the projects are loaded)
+	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/projects"};
+
+	// let's get _all_ the projects! *evil laughter*
+	QUrlQuery query;
+	query.addQueryItem("page-size", QString::number(INT_MAX));
+	url.setQuery(query);
+
+	get(url, [this](QNetworkReply *rep) {
+		try
+		{
+			m_projectsLoaded = false;
+			json j{json::parse(rep->readAll().toStdString())};
+
+			m_projects.clear();
+			for (const auto &item : j)
+				m_projects.push_back({item["id"].get<QString>(),
+									  item["name"].get<QString>()});
+
+			m_projectsLoaded = true;
+			m_projectsStale = false;
+			emit projectsLoaded();
+			m_markProjectsAsStaleTimer.start();
+		}
+		catch (...)
+		{
+			emit invalidated();
+		}
+	});
 }
 
 // *****************************************************************************

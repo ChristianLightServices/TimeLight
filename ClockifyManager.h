@@ -34,8 +34,8 @@ public:
 	QList<ClockifyProject> projects();
 	QList<QPair<QString, QString>> users();
 
-	QString projectName(const QString &projectId) const;
-	QString userName(const QString &userId) const;
+	QString projectName(const QString &projectId);
+	QString userName(const QString &userId);
 
 	bool userHasRunningTimeEntry(const QString &userId);
 	QDateTime stopRunningTimeEntry(const QString &userId, bool async);
@@ -65,6 +65,8 @@ signals:
 
 private:
 	void updateCurrentUser();
+	void updateUsers();
+	void updateProjects();
 
 	QNetworkReply *get(const QUrl &url,
 					   std::function<void (QNetworkReply *)> successCb = s_defaultSuccessCb,
@@ -117,9 +119,12 @@ private:
 	bool m_isValid{false};
 	bool m_projectsLoaded{false};
 	bool m_usersLoaded{false};
+	bool m_projectsStale{true};
+	bool m_usersStale{true};
 	bool m_isConnectedToInternet;
 
-	QTimer m_updateCacheTimer;
+	QTimer m_markUsersAsStaleTimer;
+	QTimer m_markProjectsAsStaleTimer;
 	QTimer m_checkConnectionTimer;
 
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
