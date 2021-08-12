@@ -14,8 +14,8 @@
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
 
-const QByteArray WORKSPACE{"redacted"};
-const QByteArray BREAKTIME{"redacted"};
+const auto WORKSPACE{"redacted"};
+const auto BREAKTIME{"redacted"};
 
 QPair<QString, QIcon> TrayIcons::s_clockifyOn;
 QPair<QString, QIcon> TrayIcons::s_clockifyOff;
@@ -178,7 +178,7 @@ void TrayIcons::getNewProjectId()
 {
 	QStringList projectIds;
 	QStringList projectNames;
-	for (const auto &project : ClockifyManager::instance()->projects())
+	for (const auto &project : qAsConst(ClockifyManager::instance()->projects()))
 	{
 		projectIds.push_back(project.id());
 		projectNames.push_back(project.name());

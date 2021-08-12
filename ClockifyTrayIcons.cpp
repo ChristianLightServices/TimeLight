@@ -16,9 +16,6 @@
 #include "ClockifyUser.h"
 #include "TrayIcons.h"
 
-const QByteArray WORKSPACE{"redacted"};
-const QByteArray BREAKTIME{"redacted"};
-
 int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("ClockifyTrayIcons");
@@ -39,6 +36,8 @@ int main(int argc, char *argv[])
 			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
 	}
+
+	const QByteArray WORKSPACE{"redacted"};
 
 	ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
 	while (!ClockifyManager::instance()->isValid())
