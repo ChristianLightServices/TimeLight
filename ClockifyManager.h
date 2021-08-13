@@ -49,6 +49,7 @@ public:
 	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();
 
+	QString apiKey() const { return m_apiKey; }
 	void setApiKey(const QString &apiKey);
 
 	static bool init(QString workspaceId, QByteArray apiKey);
