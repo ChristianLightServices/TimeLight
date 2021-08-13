@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 	QApplication::setQuitOnLastWindowClosed(false);
 
 	SingleApplication a{argc, argv};
+	a.setWindowIcon(QIcon{":/icons/greenlight.png"});
 
 	QSettings settings;
 
