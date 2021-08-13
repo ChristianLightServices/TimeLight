@@ -105,12 +105,8 @@ QList<ClockifyProject> &ClockifyManager::projects()
 	if (m_projectsStale)
 		updateProjects();
 
-	if (!m_projectsLoaded) [[unlikely]]
-	{
-		QEventLoop loop;
-		connect(this, &ClockifyManager::projectsLoaded, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
+	while (!m_projectsLoaded) [[unlikely]]
+			qApp->processEvents();
 
 	return m_projects;
 }
@@ -120,12 +116,8 @@ QList<QPair<QString, QString>> &ClockifyManager::users()
 	if (m_usersStale)
 		updateUsers();
 
-	if (!m_usersLoaded) [[unlikely]]
-	{
-		QEventLoop loop;
-		connect(this, &ClockifyManager::usersLoaded, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
+	while (!m_usersLoaded) [[unlikely]]
+			qApp->processEvents();
 
 	return m_users;
 }
@@ -170,9 +162,8 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 		}
 	});
 
-	QEventLoop loop;
-	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
+	while (!reply->isFinished())
+		qApp->processEvents();
 
 	return status;
 }
@@ -186,11 +177,8 @@ QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool asyn
 	auto rep = patch(url, QByteArray::fromStdString(j.dump()));
 
 	if (!async) [[likely]]
-	{
-		QEventLoop loop;
-		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
+		while (!rep->isFinished())
+			qApp->processEvents();
 
 	return now;
 }
@@ -215,9 +203,8 @@ TimeEntry ClockifyManager::getRunningTimeEntry(const QString &userId)
 		}
 	});
 
-	QEventLoop loop;
-	connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
+	while (!reply->isFinished())
+		qApp->processEvents();
 
 	return TimeEntry{j[0]};
 }
@@ -251,11 +238,8 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 	auto rep = post(url, QByteArray::fromStdString(j.dump()), 201);
 
 	if (!async) [[unlikely]]
-	{
-		QEventLoop loop;
-		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-		loop.exec();
-	}
+		while (!rep->isFinished())
+			qApp->processEvents();
 }
 
 QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
@@ -279,9 +263,8 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 		}
 	});
 
-	QEventLoop loop;
-	connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
+	while (!rep->isFinished())
+		qApp->processEvents();
 
 	QVector<TimeEntry> entries;
 	for (const auto &entry : j)
@@ -317,9 +300,8 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 			}
 		});
 
-		QEventLoop loop;
-		connect(rep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-		loop.exec();
+	while (!rep->isFinished())
+		qApp->processEvents();
 
 		return retVal;
 	}
@@ -369,9 +351,8 @@ void ClockifyManager::updateCurrentUser()
 		}
 	});
 
-	QEventLoop loop;
-	connect(userRep, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-	loop.exec();
+	while (!userRep->isFinished())
+		qApp->processEvents();
 }
 
 void ClockifyManager::updateUsers()
