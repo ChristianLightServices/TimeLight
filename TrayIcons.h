@@ -12,6 +12,7 @@
 class TrayIcons : public QObject
 {
 	Q_OBJECT
+
 public:
 	explicit TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent = nullptr);
 	~TrayIcons();
