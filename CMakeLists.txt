@@ -25,12 +25,15 @@ set(SRC_CLOCKIFY
     TimeEntry.cpp
 )
 
-# make sure that Windows doesn't display a console
+# make sure that Windows doesn't display a console and add other Windows-specific stuff
 if(WIN32)
     set(IS_WIN "WIN32")
+    set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
 else()
     set(IS_WIN "")
+    set(APP_ICON_RESOURCE_WINDOWS "")
 endif()
+
 add_executable(ClockifyTrayIcons ${IS_WIN}
     ${SRC_CLOCKIFY}
 
@@ -39,6 +42,7 @@ add_executable(ClockifyTrayIcons ${IS_WIN}
     TrayIcons.cpp
 
     res.qrc
+    ${APP_ICON_RESOURCE_WINDOWS}
 )
 
 target_link_libraries(ClockifyTrayIcons
