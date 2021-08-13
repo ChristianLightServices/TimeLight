@@ -21,7 +21,6 @@ using nlohmann::json;
 const QString ClockifyManager::s_baseUrl{"https://api.clockify.me/api/v1"};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultSuccessCb = [](QNetworkReply *){};
 const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb = [](QNetworkReply *reply) {
-
 	if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code == 0)
 	{
 		std::cerr << "Internet connection lost" << std::endl;
@@ -299,8 +298,8 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 			}
 		});
 
-	while (!rep->isFinished())
-		qApp->processEvents();
+		while (!rep->isFinished())
+			qApp->processEvents();
 
 		return retVal;
 	}
@@ -382,7 +381,6 @@ void ClockifyManager::updateUsers()
 					else // they are guaranteed to have an email address AFAIK
 						m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
 				}
-
 			}
 			m_users.squeeze();
 
