@@ -275,7 +275,6 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 
 ClockifyUser *ClockifyManager::getApiKeyOwner()
 {
-	// TODO: make sure to always use the correct ID for the API key
 	if (!m_ownerId.isEmpty()) [[likely]]
 		return new ClockifyUser{m_ownerId, this};
 	else
