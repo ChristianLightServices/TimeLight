@@ -7,6 +7,7 @@
 #include <QUrlQuery>
 #include <QEventLoop>
 #include <QNetworkCookieJar>
+#include <QNetworkCookie>
 
 #include <iostream>
 #include <nlohmann/json.hpp>
