@@ -29,7 +29,8 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	: QObject{parent},
 	  m_clockifyRunning{new QSystemTrayIcon},
 	  m_runningJob{new QSystemTrayIcon},
-	  m_user{user}
+	  m_user{user},
+	  m_apiKey{ClockifyManager::instance()->apiKey()}
 {
 	QSettings settings;
 	m_defaultProjectId = settings.value("projectId").toString();
