@@ -439,5 +439,8 @@ void TrayIcons::setRunningJobIconTooltip(const QPair<QString, QIcon> &data)
 	{
 		m_runningJob->setIcon(data.second);
 		m_runningJobCurrentIcon = &data.second;
+
+		// we'll use this icon as the window icon
+		qApp->setWindowIcon(data.second);
 	}
 }
