@@ -6,6 +6,7 @@
 #include <QNetworkReply>
 #include <QUrlQuery>
 #include <QEventLoop>
+#include <QNetworkCookieJar>
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -37,11 +38,25 @@ const std::function<void (QNetworkReply *)> ClockifyManager::s_defaultFailureCb 
 };
 QSharedPointer<ClockifyManager> ClockifyManager::s_instance;
 
+class NoCookies : public QNetworkCookieJar
+{
+	virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &) const override
+	{
+		return {};
+	}
+	virtual bool setCookiesFromUrl(const QList<QNetworkCookie> &, const QUrl &) override
+	{
+		return false;
+	}
+};
+
 ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject *parent)
 	: QObject{parent},
 	  m_workspaceId{workspaceId},
 	  m_apiKey{apiKey}
 {
+	m_manager.setCookieJar(new NoCookies);
+
 	// request currently logged in user (the one whose API key we're using) as a validity test
 	// and also in order to cache API key info
 	updateCurrentUser();
