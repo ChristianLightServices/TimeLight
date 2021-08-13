@@ -1,11 +1,11 @@
 <RCC>
     <qresource prefix="/">
-        <file>graypower.png</file>
-        <file>greenlight.png</file>
-        <file>greenpower.png</file>
-        <file>redlight.png</file>
-        <file>redpower.png</file>
-        <file>yellowlight.png</file>
-        <file>graylight.png</file>
+        <file>icons/graylight.png</file>
+        <file>icons/graypower.png</file>
+        <file>icons/greenlight.png</file>
+        <file>icons/greenpower.png</file>
+        <file>icons/redlight.png</file>
+        <file>icons/redpower.png</file>
+        <file>icons/yellowlight.png</file>
     </qresource>
 </RCC>

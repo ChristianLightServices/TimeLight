@@ -59,13 +59,13 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	if (m_defaultProjectId == "" && !m_useLastProject)
 		getNewProjectId();
 
-	s_clockifyOn = {"Clockify is running", QIcon{":/greenpower.png"}};
-	s_clockifyOff = {"Clockify is not running", QIcon{":/redpower.png"}};
-	s_onBreak = {"You are on break", QIcon{":/yellowlight.png"}};
-	s_working = {"You are working", QIcon{":/greenlight.png"}};
-	s_notWorking = {"You are not working", QIcon{":/redlight.png"}};
-	s_powerNotConnected = {"You are offline", QIcon{":/graypower.png"}};
-	s_runningNotConnected = {"You are offline", QIcon{":/graylight.png"}};
+	s_clockifyOn = {"Clockify is running", QIcon{":/icons/greenpower.png"}};
+	s_clockifyOff = {"Clockify is not running", QIcon{":/icons/redpower.png"}};
+	s_onBreak = {"You are on break", QIcon{":/icons/yellowlight.png"}};
+	s_working = {"You are working", QIcon{":/icons/greenlight.png"}};
+	s_notWorking = {"You are not working", QIcon{":/icons/redlight.png"}};
+	s_powerNotConnected = {"You are offline", QIcon{":/icons/graypower.png"}};
+	s_runningNotConnected = {"You are offline", QIcon{":/icons/graylight.png"}};
 
 	setUpTrayIcons();
 
