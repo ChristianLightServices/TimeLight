@@ -31,8 +31,8 @@ public:
 
 	bool isValid() const { return m_isValid; }
 
-	QList<ClockifyProject> &projects();
-	QList<QPair<QString, QString>> &users();
+	QVector<ClockifyProject> &projects();
+	QVector<QPair<QString, QString>> &users();
 
 	QString projectName(const QString &projectId);
 	QString userName(const QString &userId);
@@ -109,10 +109,10 @@ private:
 
 	QString m_ownerId;
 
-	QList<ClockifyProject> m_projects;
+	QVector<ClockifyProject> m_projects;
 
 	// this is ordered as <id, name>
-	QList<QPair<QString, QString>> m_users;
+	QVector<QPair<QString, QString>> m_users;
 
 	QNetworkAccessManager m_manager{this};
 

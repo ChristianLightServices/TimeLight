@@ -100,7 +100,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	m_checkConnectionTimer.start();
 }
 
-QList<ClockifyProject> &ClockifyManager::projects()
+QVector<ClockifyProject> &ClockifyManager::projects()
 {
 	if (m_projectsStale)
 		updateProjects();
@@ -111,7 +111,7 @@ QList<ClockifyProject> &ClockifyManager::projects()
 	return m_projects;
 }
 
-QList<QPair<QString, QString>> &ClockifyManager::users()
+QVector<QPair<QString, QString>> &ClockifyManager::users()
 {
 	if (m_usersStale)
 		updateUsers();
@@ -385,6 +385,7 @@ void ClockifyManager::updateUsers()
 				}
 
 			}
+			m_users.squeeze();
 
 			m_usersLoaded = true;
 			m_usersStale = false;
@@ -419,6 +420,8 @@ void ClockifyManager::updateProjects()
 			for (const auto &item : j)
 				m_projects.push_back({item["id"].get<QString>(),
 									  item["name"].get<QString>()});
+
+			m_projects.squeeze();
 
 			m_projectsLoaded = true;
 			m_projectsStale = false;
