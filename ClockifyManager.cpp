@@ -450,16 +450,16 @@ void ClockifyManager::updateProjects()
 // *****************************************************************************
 
 QNetworkReply *ClockifyManager::get(const QUrl &url,
-									  std::function<void (QNetworkReply *)> successCb,
-									  std::function<void (QNetworkReply *)> failureCb)
+									  const std::function<void (QNetworkReply *)> &successCb,
+									  const std::function<void (QNetworkReply *)> &failureCb)
 {
 	return get(url, 200, successCb, failureCb);
 }
 
 QNetworkReply *ClockifyManager::get(const QUrl &url,
 									int expectedReturnCode,
-									std::function<void (QNetworkReply *)> successCb,
-									std::function<void (QNetworkReply *)> failureCb)
+									const std::function<void (QNetworkReply *)> &successCb,
+									const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -484,8 +484,8 @@ QNetworkReply *ClockifyManager::get(const QUrl &url,
 
 QNetworkReply *ClockifyManager::post(const QUrl &url,
 									  const QByteArray &body,
-									  std::function<void (QNetworkReply *)> successCb,
-									  std::function<void (QNetworkReply *)> failureCb)
+									  const std::function<void (QNetworkReply *)> &successCb,
+									  const std::function<void (QNetworkReply *)> &failureCb)
 {
 	return post(url, body, 200, successCb, failureCb);
 }
@@ -493,8 +493,8 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 QNetworkReply *ClockifyManager::post(const QUrl &url,
 									 const QByteArray &body,
 									 int expectedReturnCode,
-									 std::function<void (QNetworkReply *)> successCb,
-									 std::function<void (QNetworkReply *)> failureCb)
+									 const std::function<void (QNetworkReply *)> &successCb,
+									 const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -519,8 +519,8 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 
 QNetworkReply *ClockifyManager::patch(const QUrl &url,
 									  const QByteArray &body,
-									  std::function<void (QNetworkReply *)> successCb,
-									  std::function<void (QNetworkReply *)> failureCb)
+									  const std::function<void (QNetworkReply *)> &successCb,
+									  const std::function<void (QNetworkReply *)> &failureCb)
 {
 	return patch(url, body, 200, successCb, failureCb);
 }
@@ -528,8 +528,8 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 QNetworkReply *ClockifyManager::patch(const QUrl &url,
 									  const QByteArray &body,
 									  int expectedReturnCode,
-									  std::function<void (QNetworkReply *)> successCb,
-									  std::function<void (QNetworkReply *)> failureCb)
+									  const std::function<void (QNetworkReply *)> &successCb,
+									  const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -552,12 +552,12 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 	return rep;
 }
 
-QNetworkReply *ClockifyManager::head(const QUrl &url, std::function<void (QNetworkReply *)> successCb, std::function<void (QNetworkReply *)> failureCb)
+QNetworkReply *ClockifyManager::head(const QUrl &url, const std::function<void (QNetworkReply *)> &successCb, const std::function<void (QNetworkReply *)> &failureCb)
 {
 	return head(url, 200, successCb, failureCb);
 }
 
-QNetworkReply *ClockifyManager::head(const QUrl &url, int expectedReturnCode, std::function<void (QNetworkReply *)> successCb, std::function<void (QNetworkReply *)> failureCb)
+QNetworkReply *ClockifyManager::head(const QUrl &url, int expectedReturnCode, const std::function<void (QNetworkReply *)> &successCb, const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
