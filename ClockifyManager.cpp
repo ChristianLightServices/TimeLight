@@ -330,7 +330,10 @@ void ClockifyManager::updateCurrentUser()
 		try
 		{
 			json j{json::parse(rep->readAll().toStdString())};
-			m_ownerId = j["id"].get<QString>();
+			if (j.is_array())
+				m_ownerId = j[0]["id"].get<QString>();
+			else
+				m_ownerId = j["id"].get<QString>();
 			m_isValid = true;
 		}
 		catch (const std::exception &ex)
