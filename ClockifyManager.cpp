@@ -160,16 +160,11 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 	bool status = false;
 
 	auto reply = get(url, [&status](QNetworkReply *rep) {
-		try
-		{
-			json j{json::parse(rep->readAll().toStdString())};
-			if (!j.empty()) [[likely]]
-				status = true;
-		}
-		catch (...)
-		{
-			// TODO: add some realistic error handling here
-		}
+		// this seems to normally just return empty if there is no running time entry, but I've put in the braces because
+		// Clockify seems to like changing behavior (i.e. returning items as arrays sometimes and as objects other times)
+		// and because even if Clockify always returns empty, the empty check is first so the braces check won't evaluate
+		if (auto text = rep->readAll(); !text.isEmpty() || text != "{}")
+			 status = true;
 	});
 
 	while (!reply->isFinished())
