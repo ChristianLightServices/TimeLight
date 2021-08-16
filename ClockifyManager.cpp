@@ -61,17 +61,19 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	// and also in order to cache API key info
 	updateCurrentUser();
 
-	m_markUsersAsStaleTimer.setInterval(60 * 60 * 1000); // every hour
-	m_markUsersAsStaleTimer.callOnTimeout(this, [this]() {
-		m_usersStale = true;
+	m_expireUsersTimer.setInterval(15 * 60 * 1000); // every 15 mins
+	m_expireUsersTimer.callOnTimeout(this, [this]() {
+		m_usersLoaded = false;
+		m_users.clear();
 	});
-	m_markUsersAsStaleTimer.setSingleShot(true);
+	m_expireUsersTimer.setSingleShot(true);
 
-	m_markProjectsAsStaleTimer.setInterval(60 * 60 * 1000);
-	m_markProjectsAsStaleTimer.callOnTimeout(this, [this]() {
-		m_projectsStale = true;
+	m_expireProjectsTimer.setInterval(15 * 60 * 1000);
+	m_expireProjectsTimer.callOnTimeout(this, [this]() {
+		m_projectsLoaded = false;
+		m_projects.clear();
 	});
-	m_markProjectsAsStaleTimer.setSingleShot(true);
+	m_expireProjectsTimer.setSingleShot(true);
 
 	// We won't actually populate the user or project list yet; why do it when we probably won't need it for a long time?
 
@@ -102,29 +104,37 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 
 QVector<ClockifyProject> &ClockifyManager::projects()
 {
-	if (m_projectsStale)
-		updateProjects();
+	while (!m_projectsLoaded)
+	{
+		if (!m_loadingProjects)
+			updateProjects();
 
-	while (!m_projectsLoaded) [[unlikely]]
-			qApp->processEvents();
+		qApp->processEvents();
+		if (!m_isValid)
+			qApp->quit();
+	}
 
 	return m_projects;
 }
 
 QVector<QPair<QString, QString>> &ClockifyManager::users()
 {
-	if (m_usersStale)
-		updateUsers();
+	while (!m_usersLoaded)
+	{
+		if (!m_loadingUsers)
+			updateUsers();
 
-	while (!m_usersLoaded) [[unlikely]]
-			qApp->processEvents();
+		qApp->processEvents();
+		if (!m_isValid)
+			qApp->quit();
+	}
 
 	return m_users;
 }
 
 QString ClockifyManager::projectName(const QString &projectId)
 {
-	for (const auto &item : qAsConst(projects()))
+	for (auto &item : projects())
 		if (item.id() == projectId)
 			return item.name();
 
@@ -356,6 +366,8 @@ void ClockifyManager::updateCurrentUser()
 
 void ClockifyManager::updateUsers()
 {
+	m_loadingUsers = true;
+
 	QUrl url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
 	QUrlQuery query;
 	query.addQueryItem("page-size", QString::number(INT_MAX));
@@ -386,19 +398,21 @@ void ClockifyManager::updateUsers()
 			m_users.squeeze();
 
 			m_usersLoaded = true;
-			m_usersStale = false;
-			emit usersLoaded();
-			m_markUsersAsStaleTimer.start();
+			m_expireUsersTimer.start();
 		}
-		catch (...)
+		catch (const std::exception &ex)
 		{
-			emit invalidated();
+			m_usersLoaded = false;
 		}
+
+		m_loadingUsers = false;
 	});
 }
 
 void ClockifyManager::updateProjects()
 {
+	m_loadingProjects = true;
+
 	// get all projects for project list (note that this will return immediately and finish running in the
 	// background; when the user calls projects(), projects() will block if needed until the projects are loaded)
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/projects"};
@@ -422,14 +436,14 @@ void ClockifyManager::updateProjects()
 			m_projects.squeeze();
 
 			m_projectsLoaded = true;
-			m_projectsStale = false;
-			emit projectsLoaded();
-			m_markProjectsAsStaleTimer.start();
+			m_expireProjectsTimer.start();
 		}
-		catch (...)
+		catch (const std::exception &ex)
 		{
-			emit invalidated();
+			m_projectsLoaded = false;
 		}
+
+		m_loadingProjects = false;
 	});
 }
 

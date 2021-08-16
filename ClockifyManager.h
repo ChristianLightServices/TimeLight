@@ -56,9 +56,6 @@ public:
 	static QSharedPointer<ClockifyManager> instance() { return s_instance; }
 
 signals:
-	void projectsLoaded();
-	void usersLoaded();
-
 	void invalidated();
 	void apiKeyChanged();
 
@@ -128,12 +125,12 @@ private:
 	bool m_isValid{false};
 	bool m_projectsLoaded{false};
 	bool m_usersLoaded{false};
-	bool m_projectsStale{true};
-	bool m_usersStale{true};
+	bool m_loadingProjects{false};
+	bool m_loadingUsers{false};
 	bool m_isConnectedToInternet{true}; // assume connected at start
 
-	QTimer m_markUsersAsStaleTimer;
-	QTimer m_markProjectsAsStaleTimer;
+	QTimer m_expireUsersTimer;
+	QTimer m_expireProjectsTimer;
 	QTimer m_checkConnectionTimer;
 
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
