@@ -247,6 +247,7 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 			qApp->processEvents();
 }
 
+// TODO: refactor this to only load small amounts at a time
 QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 {
 	json j;
