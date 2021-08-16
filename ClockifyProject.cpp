@@ -1,11 +1,11 @@
 #include "ClockifyProject.h"
 
+#include "ClockifyManager.h"
 #include "JsonHelper.h"
 
-ClockifyProject::ClockifyProject(QString id, QString name, QString description, QObject *parent)
+ClockifyProject::ClockifyProject(QString id, QString description, QObject *parent)
 	: QObject{parent},
 	  m_id{id},
-	  m_name{name},
 	  m_description{description}
 {
 
@@ -20,6 +20,17 @@ ClockifyProject::ClockifyProject(const ClockifyProject &that)
 ClockifyProject::ClockifyProject()
 	: QObject{nullptr}
 {
+}
+
+QString ClockifyProject::name()
+{
+	if (!m_nameLoaded)
+	{
+		m_name = ClockifyManager::instance()->projectName(m_id);
+		m_nameLoaded = true;
+	}
+
+	return m_name;
 }
 
 ClockifyProject &ClockifyProject::operator=(const ClockifyProject &other)
