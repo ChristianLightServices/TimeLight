@@ -162,8 +162,8 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 	get(url, false, [&status](QNetworkReply *rep) {
 		// this seems to normally just return empty if there is no running time entry, but I've put in the braces because
 		// Clockify seems to like changing behavior (i.e. returning items as arrays sometimes and as objects other times)
-		// and because even if Clockify always returns empty, the empty check is first so the braces check won't evaluate
-		if (auto text = rep->readAll(); !text.isEmpty() || text != "{}")
+		// and because even if Clockify always returns empty, the empty check should not take that long to execute anyway
+		if (auto text = rep->readAll(); !text.isEmpty() && text != "[]")
 			 status = true;
 	});
 
