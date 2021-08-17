@@ -66,41 +66,81 @@ private:
 	void updateUsers();
 	void updateProjects();
 
-	QNetworkReply *get(const QUrl &url,
+	void get(const QUrl &url,
 					   const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 					   const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
-	QNetworkReply *get(const QUrl &url,
+	void get(const QUrl &url,
+					   int expectedReturnCode,
+					   const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+					   const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void get(const QUrl &url,
+					   bool async,
+					   const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+					   const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void get(const QUrl &url,
+					   bool async,
 					   int expectedReturnCode,
 					   const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 					   const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
 
-	QNetworkReply *post(const QUrl &url,
+	void post(const QUrl &url,
 						const QByteArray &body,
 						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
-	QNetworkReply *post(const QUrl &url,
+	void post(const QUrl &url,
 						const QByteArray &body,
 						int expectedReturnCode,
 						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void post(const QUrl &url,
+						const QByteArray &body,
+						bool async,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void post(const QUrl &url,
+						const QByteArray &body,
+						bool async,
+						int expectedReturnCode,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
 
-	QNetworkReply *patch(const QUrl &url,
+	void patch(const QUrl &url,
 						 const QByteArray &body,
 						 const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						 const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
-	QNetworkReply *patch(const QUrl &url,
+	void patch(const QUrl &url,
 						 const QByteArray &body,
 						 int expectedReturnCode,
 						 const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						 const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
-
-	QNetworkReply *head(const QUrl &url,
+	void patch(const QUrl &url,
+						 const QByteArray &body,
+						 bool async,
 						 const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						 const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
-	QNetworkReply *head(const QUrl &url,
+	void patch(const QUrl &url,
+						 const QByteArray &body,
+						 bool async,
 						 int expectedReturnCode,
 						 const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
 						 const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+
+	void head(const QUrl &url,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void head(const QUrl &url,
+						int expectedReturnCode,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void head(const QUrl &url,
+						bool async,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
+	void head(const QUrl &url,
+						bool async,
+						int expectedReturnCode,
+						const std::function<void (QNetworkReply *)> &successCb = s_defaultSuccessCb,
+						const std::function<void (QNetworkReply *)> &failureCb = s_defaultFailureCb);
 
 	QString m_workspaceId;
 	QByteArray m_apiKey;
