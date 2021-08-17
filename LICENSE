@@ -1,0 +1,17 @@
+This project is licensed under the MIT License with Christian Light Internal Software exceptions (reproduced below). Additionally, this project uses the following libraries:
+
+    1. Qt, licensed under the GNU LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.en.html)
+    2. SingleApplication (https://www.gnu.org/licenses/lgpl-3.0.en.html), licensed under the MIT license (https://mit-license.org).
+    3. JSON for Modern C++ (https://github.com/nlohmann/json), licensed under the MIT license (https://mit-license.org).
+-----
+Copyright 2021 Christian Light
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Christian Light Internal Software exceptions:
+
+    1. Employees of Christian Light (whether actively employed by Christian Light or not actively employed by Christian Light) who currently have access to the Software, or formerly had access to the Software, may only distribute the Software to individuals who are currently employed by Christian Light. If an Employee of Christian Light desires to distribute the Software to individuals who are not currently employed by Christian Light, that Employee must recieve explicit written permission from Christian Light's General Manager, Christian Light's Director of IT, or Christian Light's lead programmer before distributing the Software.
