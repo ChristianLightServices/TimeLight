@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QFontDatabase>
+#include <QScreen>
 
 #include <SingleApplication>
 
@@ -249,7 +250,7 @@ void TrayIcons::showAboutDialog()
 								 "[Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
 								 "(power icon, licensed [MIT](https://mit-license.org)).";
 
-	auto showLicense = [this] {
+	auto showLicense = [this](QWidget *parent = nullptr) {
 		QFile licenseFile{":/LICENSE"};
 		QString licenseText;
 		if (licenseFile.open(QIODevice::ReadOnly))
@@ -257,7 +258,7 @@ void TrayIcons::showAboutDialog()
 		else
 			licenseText = "Error: could not load the license. Please contact the Christian Light IT departement for a copy of the license.";
 
-		QDialog dialog;
+		QDialog dialog{parent};
 
 		auto layout = new QVBoxLayout{&dialog};
 
@@ -274,7 +275,9 @@ void TrayIcons::showAboutDialog()
 
 		dialog.setLayout(layout);
 		dialog.setWindowTitle("MIT license with Christian Light Internal Software exceptions");
-		dialog.resize(400, 400);
+		dialog.setModal(true);
+		dialog.resize(600, 600);
+		dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
 		dialog.exec();
 	};
 
@@ -288,13 +291,17 @@ void TrayIcons::showAboutDialog()
 	layout->addWidget(infoLabel);
 
 	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
-	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, showLicense);
+	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [&dialog, &showLicense] {
+		showLicense(&dialog);
+	});
 	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
 
 	layout->addWidget(bb);
 
 	dialog.setLayout(layout);
 	dialog.setWindowTitle("About " + qApp->applicationName());
+	dialog.resize(500, dialog.heightForWidth(500));
+	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
 	dialog.exec();
 }
 
