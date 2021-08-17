@@ -7,5 +7,6 @@
         <file>icons/redlight.png</file>
         <file>icons/redpower.png</file>
         <file>icons/yellowlight.png</file>
+        <file>LICENSE</file>
     </qresource>
 </RCC>

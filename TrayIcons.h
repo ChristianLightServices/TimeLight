@@ -29,6 +29,9 @@ private slots:
 	void getNewProjectId();
 	void getNewApiKey();
 
+	void showAboutDialog();
+//	void showLicenseDialog();
+
 private:
 	void setUpTrayIcons();
 

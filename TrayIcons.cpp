@@ -5,7 +5,13 @@
 #include <QMenu>
 #include <QInputDialog>
 #include <QDesktopServices>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QTextBrowser>
 #include <QMessageBox>
+#include <QFile>
 
 #include <SingleApplication>
 
@@ -232,17 +238,68 @@ void TrayIcons::getNewApiKey()
 	settings.setValue("apiKey", m_apiKey);
 }
 
-void TrayIcons::setUpTrayIcons()
+void TrayIcons::showAboutDialog()
 {
-	auto m_clockifyRunningMenu = new QMenu;
-	auto m_runningJobMenu = new QMenu;
-
-	static QString licenseInfo = "ClockifyTrayIcons copyright © 2020. Licensed " \
-								 "[GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html).\n\n" \
+	// put this into a variable to handle this gonzo string more nicely
+	constexpr auto licenseInfo = "ClockifyTrayIcons copyright © 2020. Licensed " \
+								 "under the MIT license with Christian Light Internal Software exceptions.\n\n" \
 								 "Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
 								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and " \
 								 "[Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
 								 "(power icon, licensed [MIT](https://mit-license.org)).";
+
+	auto showLicense = [this] {
+		QFile licenseFile{":/LICENSE"};
+		QString licenseText;
+		if (licenseFile.open(QIODevice::ReadOnly))
+			licenseText = licenseFile.readAll();
+		else
+			licenseText = "Error: could not load the license. Please contact the Christian Light IT departement for a copy of the license.";
+
+		QDialog dialog;
+
+		auto layout = new QVBoxLayout{&dialog};
+
+		auto licenseView = new QTextBrowser{&dialog};
+		licenseView->setText(licenseText);
+		licenseView->setOpenExternalLinks(true);
+		layout->addWidget(licenseView);
+
+		auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
+		connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+
+		layout->addWidget(bb);
+
+		dialog.setLayout(layout);
+		dialog.setWindowTitle("MIT license with Christian Light Internal Software exceptions");
+		dialog.resize(400, 400);
+		dialog.exec();
+	};
+
+	QDialog dialog;
+
+	auto layout = new QVBoxLayout{&dialog};
+
+	auto infoLabel = new QLabel{licenseInfo, &dialog};
+	infoLabel->setTextFormat(Qt::MarkdownText);
+	infoLabel->setWordWrap(true);
+	layout->addWidget(infoLabel);
+
+	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
+	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, showLicense);
+	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+
+	layout->addWidget(bb);
+
+	dialog.setLayout(layout);
+	dialog.setWindowTitle("About " + qApp->applicationName());
+	dialog.exec();
+}
+
+void TrayIcons::setUpTrayIcons()
+{
+	auto m_clockifyRunningMenu = new QMenu;
+	auto m_runningJobMenu = new QMenu;
 
 	// set up the menu actions
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [this]() {
@@ -272,11 +329,7 @@ void TrayIcons::setUpTrayIcons()
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
 	connect(m_clockifyRunningMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-	connect(m_clockifyRunningMenu->addAction("About"), &QAction::triggered, this, []() {
-		QMessageBox box{QMessageBox::Information,"About ClockifyTrayIcons", licenseInfo, QMessageBox::Ok};
-		box.setTextFormat(Qt::MarkdownText);
-		box.exec();
-	});
+	connect(m_clockifyRunningMenu->addAction("About"), &QAction::triggered, this, &TrayIcons::showAboutDialog);
 	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [this]() {
@@ -332,11 +385,7 @@ void TrayIcons::setUpTrayIcons()
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
 	connect(m_runningJobMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-	connect(m_runningJobMenu->addAction("About"), &QAction::triggered, this, []() {
-		QMessageBox box{QMessageBox::Information,"About ClockifyTrayIcons", licenseInfo, QMessageBox::Ok};
-		box.setTextFormat(Qt::MarkdownText);
-		box.exec();
-	});
+	connect(m_runningJobMenu->addAction("About"), &QAction::triggered, this, &TrayIcons::showAboutDialog);
 	connect(m_runningJobMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	// set up the actions on icon click
