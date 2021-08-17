@@ -10,7 +10,7 @@ TimeEntry::TimeEntry(nlohmann::json entry, QObject *parent)
 	{
 		m_id = entry["id"].get<QString>();
 		auto projectId = entry["projectId"].get<QString>();
-		m_project = {projectId, entry["description"].get<QString>()};
+		m_project = {projectId, ClockifyManager::instance()->projectName(projectId), entry["description"].get<QString>()};
 		m_userId = entry["userId"].get<QString>();
 		m_start = entry["timeInterval"]["start"].get<QDateTime>();
 		m_end = entry["timeInterval"]["end"].get<QDateTime>();
