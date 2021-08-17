@@ -12,6 +12,7 @@
 #include <QTextBrowser>
 #include <QMessageBox>
 #include <QFile>
+#include <QFontDatabase>
 
 #include <SingleApplication>
 
@@ -263,6 +264,7 @@ void TrayIcons::showAboutDialog()
 		auto licenseView = new QTextBrowser{&dialog};
 		licenseView->setText(licenseText);
 		licenseView->setOpenExternalLinks(true);
+		licenseView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 		layout->addWidget(licenseView);
 
 		auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
