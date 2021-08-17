@@ -78,7 +78,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	// We won't actually populate the user or project list yet; why do it when we probably won't need it for a long time?
 
 	auto checkInternet = [this] {
-		auto rep = head(QUrl{"https://clockify.me"}, [this](QNetworkReply *) {
+		head(QUrl{"https://clockify.me"}, [this](QNetworkReply *) {
 			// a changed internet connection is rather unlikely
 			if (!m_isConnectedToInternet) [[unlikely]]
 			{
@@ -159,16 +159,13 @@ bool ClockifyManager::userHasRunningTimeEntry(const QString &userId)
 
 	bool status = false;
 
-	auto reply = get(url, [&status](QNetworkReply *rep) {
+	get(url, false, [&status](QNetworkReply *rep) {
 		// this seems to normally just return empty if there is no running time entry, but I've put in the braces because
 		// Clockify seems to like changing behavior (i.e. returning items as arrays sometimes and as objects other times)
 		// and because even if Clockify always returns empty, the empty check is first so the braces check won't evaluate
 		if (auto text = rep->readAll(); !text.isEmpty() || text != "{}")
 			 status = true;
 	});
-
-	while (!reply->isFinished())
-		qApp->processEvents();
 
 	return status;
 }
@@ -179,12 +176,7 @@ QDateTime ClockifyManager::stopRunningTimeEntry(const QString &userId, bool asyn
 	json j{{"end", now.toString("yyyy-MM-ddThh:mm:ssZ")}};
 
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
-	auto rep = patch(url, QByteArray::fromStdString(j.dump()));
-
-	if (!async) [[likely]]
-		while (!rep->isFinished())
-			qApp->processEvents();
-
+	patch(url, QByteArray::fromStdString(j.dump()), async);
 	return now;
 }
 
@@ -197,7 +189,7 @@ TimeEntry ClockifyManager::getRunningTimeEntry(const QString &userId)
 
 	json j;
 
-	auto reply = get(url, [&j](QNetworkReply *rep) {
+	get(url, false, [&j](QNetworkReply *rep) {
 		try
 		{
 			j = json::parse(rep->readAll().toStdString());
@@ -207,9 +199,6 @@ TimeEntry ClockifyManager::getRunningTimeEntry(const QString &userId)
 			j = {};
 		}
 	});
-
-	while (!reply->isFinished())
-		qApp->processEvents();
 
 	return TimeEntry{j[0]};
 }
@@ -240,11 +229,7 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 		j += {"description", description};
 
 	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
-	auto rep = post(url, QByteArray::fromStdString(j.dump()), 201);
-
-	if (!async) [[unlikely]]
-		while (!rep->isFinished())
-			qApp->processEvents();
+	post(url, QByteArray::fromStdString(j.dump()), async, 201);
 }
 
 // TODO: refactor this to only load small amounts at a time
@@ -252,7 +237,7 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 {
 	json j;
 
-	auto rep = get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"}, [&j](QNetworkReply *rep) {
+	get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"}, false, [&j](QNetworkReply *rep) {
 		try
 		{
 			j = json::parse(rep->readAll().toStdString());
@@ -269,9 +254,6 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
 		}
 	});
 
-	while (!rep->isFinished())
-		qApp->processEvents();
-
 	QVector<TimeEntry> entries;
 	for (const auto &entry : j)
 		entries.push_back(TimeEntry{entry});
@@ -287,7 +269,7 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 	{
 		ClockifyUser *retVal{nullptr};
 
-		auto rep = get(QUrl{s_baseUrl + "/user"}, [this, &retVal](QNetworkReply *rep) {
+		get(QUrl{s_baseUrl + "/user"}, false, [this, &retVal](QNetworkReply *rep) {
 			try
 			{
 				json j{json::parse(rep->readAll().toStdString())};
@@ -304,9 +286,6 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 				retVal = nullptr;
 			}
 		});
-
-		while (!rep->isFinished())
-			qApp->processEvents();
 
 		return retVal;
 	}
@@ -327,7 +306,7 @@ bool ClockifyManager::init(QString workspaceId, QByteArray apiKey)
 
 void ClockifyManager::updateCurrentUser()
 {
-	auto userRep = get(s_baseUrl + "/user", [this](QNetworkReply *rep) {
+	get(s_baseUrl + "/user", false, [this](QNetworkReply *rep) {
 		try
 		{
 			json j{json::parse(rep->readAll().toStdString())};
@@ -358,9 +337,6 @@ void ClockifyManager::updateCurrentUser()
 			return;
 		}
 	});
-
-	while (!userRep->isFinished())
-		qApp->processEvents();
 }
 
 void ClockifyManager::updateUsers()
@@ -450,14 +426,31 @@ void ClockifyManager::updateProjects()
 // *****     BEYOND THIS POINT THERE ARE ONLY FUNCTIONS FOR REST STUFF     *****
 // *****************************************************************************
 
-QNetworkReply *ClockifyManager::get(const QUrl &url,
+void ClockifyManager::get(const QUrl &url,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return get(url, 200, successCb, failureCb);
+	return get(url, true, 200, successCb, failureCb);
 }
 
-QNetworkReply *ClockifyManager::get(const QUrl &url,
+void ClockifyManager::get(const QUrl &url,
+									int expectedReturnCode,
+									const std::function<void (QNetworkReply *)> &successCb,
+									const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return get(url, true, expectedReturnCode, successCb, failureCb);
+}
+
+void ClockifyManager::get(const QUrl &url,
+									bool async,
+									const std::function<void (QNetworkReply *)> &successCb,
+									const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return get(url, async, 200, successCb, failureCb);
+}
+
+void ClockifyManager::get(const QUrl &url,
+									bool async,
 									int expectedReturnCode,
 									const std::function<void (QNetworkReply *)> &successCb,
 									const std::function<void (QNetworkReply *)> &failureCb)
@@ -469,33 +462,65 @@ QNetworkReply *ClockifyManager::get(const QUrl &url,
 	auto rep = m_manager.get(req);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
-	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
+	bool *done = async ? nullptr : new bool{false};
+
+	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode, done]() {
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
+
+		if (done != nullptr)
+			*done = true;
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
 		rep->deleteLater();
 	});
 
-	return rep;
+	if (!async)
+		while (!(*done))
+			qApp->processEvents();
+
+	if (done)
+	{
+		delete done;
+		done = nullptr; // in case we are doing async, this is required to make the lamba's done setting logic work
+	}
 }
 
-QNetworkReply *ClockifyManager::post(const QUrl &url,
+void ClockifyManager::post(const QUrl &url,
 									  const QByteArray &body,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return post(url, body, 200, successCb, failureCb);
+	return post(url, body, true, 200, successCb, failureCb);
 }
 
-QNetworkReply *ClockifyManager::post(const QUrl &url,
+void ClockifyManager::post(const QUrl &url,
 									 const QByteArray &body,
 									 int expectedReturnCode,
 									 const std::function<void (QNetworkReply *)> &successCb,
 									 const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return post(url, body, true, expectedReturnCode, successCb, failureCb);
+}
+
+void ClockifyManager::post(const QUrl &url,
+						   const QByteArray &body,
+						   bool async,
+						   const std::function<void (QNetworkReply *)> &successCb,
+						   const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return post(url, body, async, 200, successCb, failureCb);
+}
+
+void ClockifyManager::post(const QUrl &url,
+						   const QByteArray &body,
+						   bool async,
+						   int expectedReturnCode,
+						   const std::function<void (QNetworkReply *)> &successCb,
+						   const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -504,33 +529,65 @@ QNetworkReply *ClockifyManager::post(const QUrl &url,
 	auto rep = m_manager.post(req, body);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
-	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
+	bool *done = async ? nullptr : new bool{false};
+
+	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode, done]() {
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
+
+		if (done != nullptr)
+			*done = true;
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
 		rep->deleteLater();
 	});
 
-	return rep;
+	if (!async)
+		while (!(*done))
+			qApp->processEvents();
+
+	if (done)
+	{
+		delete done;
+		done = nullptr;
+	}
 }
 
-QNetworkReply *ClockifyManager::patch(const QUrl &url,
+void ClockifyManager::patch(const QUrl &url,
 									  const QByteArray &body,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return patch(url, body, 200, successCb, failureCb);
+	return patch(url, body, true, 200, successCb, failureCb);
 }
 
-QNetworkReply *ClockifyManager::patch(const QUrl &url,
+void ClockifyManager::patch(const QUrl &url,
 									  const QByteArray &body,
 									  int expectedReturnCode,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return patch(url, body, true, expectedReturnCode, successCb, failureCb);
+}
+
+void ClockifyManager::patch(const QUrl &url,
+							const QByteArray &body,
+							bool async,
+							const std::function<void (QNetworkReply *)> &successCb,
+							const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return patch(url, body, async, 200, successCb, failureCb);
+}
+
+void ClockifyManager::patch(const QUrl &url,
+							const QByteArray &body,
+							bool async,
+							int expectedReturnCode,
+							const std::function<void (QNetworkReply *)> &successCb,
+							const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -539,26 +596,61 @@ QNetworkReply *ClockifyManager::patch(const QUrl &url,
 	auto rep = m_manager.sendCustomRequest(req, "PATCH", body);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
-	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
+	bool *done = async ? nullptr : new bool{false};
+
+	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode, done]() {
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
+
+		if (done != nullptr)
+			*done = true;
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
 		rep->deleteLater();
 	});
 
-	return rep;
+	if (!async)
+		while (!(*done))
+			qApp->processEvents();
+
+	if (done)
+	{
+		delete done;
+		done = nullptr;
+	}
 }
 
-QNetworkReply *ClockifyManager::head(const QUrl &url, const std::function<void (QNetworkReply *)> &successCb, const std::function<void (QNetworkReply *)> &failureCb)
+void ClockifyManager::head(const QUrl &url,
+									 const std::function<void (QNetworkReply *)> &successCb,
+									 const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return head(url, 200, successCb, failureCb);
+	return head(url, true, 200, successCb, failureCb);
 }
 
-QNetworkReply *ClockifyManager::head(const QUrl &url, int expectedReturnCode, const std::function<void (QNetworkReply *)> &successCb, const std::function<void (QNetworkReply *)> &failureCb)
+void ClockifyManager::head(const QUrl &url,
+						   int expectedReturnCode,
+						   const std::function<void (QNetworkReply *)> &successCb,
+						   const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return head(url, true, expectedReturnCode, successCb, failureCb);
+}
+
+void ClockifyManager::head(const QUrl &url,
+						   bool async,
+						   const std::function<void (QNetworkReply *)> &successCb,
+						   const std::function<void (QNetworkReply *)> &failureCb)
+{
+	return head(url, async, 200, successCb, failureCb);
+}
+
+void ClockifyManager::head(const QUrl &url,
+						   bool async,
+						   int expectedReturnCode,
+						   const std::function<void (QNetworkReply *)> &successCb,
+						   const std::function<void (QNetworkReply *)> &failureCb)
 {
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -567,16 +659,29 @@ QNetworkReply *ClockifyManager::head(const QUrl &url, int expectedReturnCode, co
 	auto rep = m_manager.head(req);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
 
-	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode]() {
+	bool *done = async ? nullptr : new bool{false};
+
+	connect(rep, &QNetworkReply::finished, this, [this, rep, expectedReturnCode, done]() {
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode) [[likely]]
 			m_pendingReplies[rep].first(rep);
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
+
+		if (done != nullptr)
+			*done = true;
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
 		rep->deleteLater();
 	});
 
-	return rep;
+	if (!async)
+		while (!(*done))
+			qApp->processEvents();
+
+	if (done)
+	{
+		delete done;
+		done = nullptr;
+	}
 }
