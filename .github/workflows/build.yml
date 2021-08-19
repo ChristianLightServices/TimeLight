@@ -1,0 +1,113 @@
+name: Build
+
+on: push
+
+jobs:
+  linux:
+    name: Linux desktop
+    runs-on: ubuntu-latest
+    steps:
+      # gotta get Qt set up first
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.9.0
+
+      - name: Set up JSON
+        uses: actions/checkout@v2
+        with:
+          repository: 'nlohmann/json'
+          submodules: 'recursive'
+
+      - name: Install JSON
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cmake --install .
+          cd ..
+
+        # grab the source
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cd ..
+
+  windows:
+    name: Windows desktop
+    runs-on: windows-latest
+    steps:
+      # gotta get Qt set up first
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.9.0
+
+      # get the build environment set up
+      - name: Add msbuild to PATH
+        uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      - name: Set up JSON
+        uses: actions/checkout@v2
+        with:
+          repository: 'nlohmann/json'
+          submodules: 'recursive'
+
+      - name: Install JSON
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cmake --install .
+          cd ..
+
+        # grab the source
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cd ..
+
+  macos:
+    name: macOS desktop
+    runs-on: macos-latest
+    steps:
+      # gotta get Qt set up first
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.9.0
+
+      - name: Set up JSON
+        uses: actions/checkout@v2
+        with:
+          repository: 'nlohmann/json'
+          submodules: 'recursive'
+
+      - name: Install JSON
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cmake --install .
+          cd ..
+
+        # grab the source
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cd ..
