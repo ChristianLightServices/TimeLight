@@ -7,7 +7,6 @@ jobs:
     name: Linux desktop
     runs-on: ubuntu-latest
     steps:
-      # gotta get Qt set up first
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.9.0
         with:
@@ -27,7 +26,6 @@ jobs:
           sudo cmake --install .
           cd ..
 
-        # grab the source
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -44,7 +42,6 @@ jobs:
     name: Windows desktop
     runs-on: windows-latest
     steps:
-      # gotta get Qt set up first
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.9.0
         with:
@@ -64,7 +61,6 @@ jobs:
           cmake --install .
           cd ..
 
-        # grab the source
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -81,7 +77,6 @@ jobs:
     name: macOS desktop
     runs-on: macos-latest
     steps:
-      # gotta get Qt set up first
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.9.0
         with:
@@ -101,7 +96,6 @@ jobs:
           cmake --install .
           cd ..
 
-        # grab the source
       - name: Checkout code
         uses: actions/checkout@v2
         with:
