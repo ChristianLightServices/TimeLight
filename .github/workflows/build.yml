@@ -50,10 +50,6 @@ jobs:
         with:
           version: 5.15.2
 
-      # get the build environment set up
-      - name: Add msbuild to PATH
-        uses: seanmiddleditch/gha-setup-vsdevenv@master
-
       - name: Set up JSON
         uses: actions/checkout@v2
         with:
