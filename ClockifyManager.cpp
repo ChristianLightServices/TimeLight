@@ -474,7 +474,7 @@ void ClockifyManager::get(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-	});
+	}, Qt::DirectConnection);
 
 	if (!async)
 		while (!(*done))
@@ -542,7 +542,7 @@ void ClockifyManager::post(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-	});
+	}, Qt::DirectConnection);
 
 	if (!async)
 		while (!(*done))
@@ -610,7 +610,7 @@ void ClockifyManager::patch(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-	});
+	}, Qt::DirectConnection);
 
 	if (!async)
 		while (!(*done))
@@ -674,7 +674,7 @@ void ClockifyManager::head(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-	});
+	}, Qt::DirectConnection);
 
 	if (!async)
 		while (!(*done))
