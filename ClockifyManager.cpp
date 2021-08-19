@@ -373,7 +373,6 @@ void ClockifyManager::updateUsers()
 						m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
 				}
 			}
-			m_users.squeeze();
 
 			m_usersLoaded = true;
 			m_expireUsersTimer.start();
@@ -410,8 +409,6 @@ void ClockifyManager::updateProjects()
 			for (const auto &item : j)
 				m_projects.push_back({item["id"].get<QString>(),
 									  item["name"].get<QString>()});
-
-			m_projects.squeeze();
 
 			m_projectsLoaded = true;
 			m_expireProjectsTimer.start();
@@ -477,7 +474,6 @@ void ClockifyManager::get(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-		m_pendingReplies.squeeze();
 	});
 
 	if (!async)
@@ -546,7 +542,6 @@ void ClockifyManager::post(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-		m_pendingReplies.squeeze();
 	});
 
 	if (!async)
@@ -615,7 +610,6 @@ void ClockifyManager::patch(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-		m_pendingReplies.squeeze();
 	});
 
 	if (!async)
@@ -680,7 +674,6 @@ void ClockifyManager::head(const QUrl &url,
 			*done = true;
 
 		m_pendingReplies.remove(rep);
-		m_pendingReplies.squeeze();
 	});
 
 	if (!async)
