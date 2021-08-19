@@ -12,7 +12,7 @@ jobs:
         with:
           version: 5.15.2
 
-      - name: Set up JSON
+      - name: Fetch JSON
         uses: actions/checkout@v2
         with:
           repository: 'nlohmann/json'
@@ -47,7 +47,7 @@ jobs:
         with:
           version: 5.15.2
 
-      - name: Set up JSON
+      - name: Fetch JSON
         uses: actions/checkout@v2
         with:
           repository: 'nlohmann/json'
@@ -82,7 +82,7 @@ jobs:
         with:
           version: 5.15.2
 
-      - name: Set up JSON
+      - name: Fetch JSON
         uses: actions/checkout@v2
         with:
           repository: 'nlohmann/json'
