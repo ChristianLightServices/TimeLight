@@ -56,6 +56,7 @@ ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject
 	  m_apiKey{apiKey}
 {
 	m_manager.setCookieJar(new NoCookies);
+	m_manager.setAutoDeleteReplies(true);
 
 	// request currently logged in user (the one whose API key we're using) as a validity test
 	// and also in order to cache API key info
@@ -110,6 +111,7 @@ QVector<ClockifyProject> &ClockifyManager::projects()
 			updateProjects();
 
 		qApp->processEvents();
+		qApp->sendPostedEvents();
 		if (!m_isValid)
 			qApp->quit();
 	}
@@ -125,6 +127,7 @@ QVector<QPair<QString, QString>> &ClockifyManager::users()
 			updateUsers();
 
 		qApp->processEvents();
+		qApp->sendPostedEvents();
 		if (!m_isValid)
 			qApp->quit();
 	}
@@ -475,12 +478,14 @@ void ClockifyManager::get(const QUrl &url,
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
-		rep->deleteLater();
 	});
 
 	if (!async)
 		while (!(*done))
+		{
 			qApp->processEvents();
+			qApp->sendPostedEvents();
+		}
 
 	if (done)
 	{
@@ -542,12 +547,14 @@ void ClockifyManager::post(const QUrl &url,
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
-		rep->deleteLater();
 	});
 
 	if (!async)
 		while (!(*done))
+		{
 			qApp->processEvents();
+			qApp->sendPostedEvents();
+		}
 
 	if (done)
 	{
@@ -609,12 +616,14 @@ void ClockifyManager::patch(const QUrl &url,
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
-		rep->deleteLater();
 	});
 
 	if (!async)
 		while (!(*done))
+		{
 			qApp->processEvents();
+			qApp->sendPostedEvents();
+		}
 
 	if (done)
 	{
@@ -672,12 +681,14 @@ void ClockifyManager::head(const QUrl &url,
 
 		m_pendingReplies.remove(rep);
 		m_pendingReplies.squeeze();
-		rep->deleteLater();
 	});
 
 	if (!async)
 		while (!(*done))
+		{
 			qApp->processEvents();
+			qApp->sendPostedEvents();
+		}
 
 	if (done)
 	{
