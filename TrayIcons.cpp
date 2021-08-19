@@ -161,7 +161,6 @@ void TrayIcons::setUser(QSharedPointer<ClockifyUser> user)
 
 void TrayIcons::updateTrayIcons()
 {
-
 	if (!ClockifyManager::instance()->isConnectedToInternet()) [[unlikely]]
 	{
 		setClockifyRunningIconTooltip(s_powerNotConnected);
@@ -250,37 +249,6 @@ void TrayIcons::showAboutDialog()
 								 "[Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
 								 "(power icon, licensed [MIT](https://mit-license.org)).";
 
-	auto showLicense = [this](QWidget *parent = nullptr) {
-		QFile licenseFile{":/LICENSE"};
-		QString licenseText;
-		if (licenseFile.open(QIODevice::ReadOnly))
-			licenseText = licenseFile.readAll();
-		else
-			licenseText = "Error: could not load the license. Please contact the Christian Light IT departement for a copy of the license.";
-
-		QDialog dialog{parent};
-
-		auto layout = new QVBoxLayout{&dialog};
-
-		auto licenseView = new QTextBrowser{&dialog};
-		licenseView->setText(licenseText);
-		licenseView->setOpenExternalLinks(true);
-		licenseView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-		layout->addWidget(licenseView);
-
-		auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
-		connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-
-		layout->addWidget(bb);
-
-		dialog.setLayout(layout);
-		dialog.setWindowTitle("MIT license with Christian Light Internal Software exceptions");
-		dialog.setModal(true);
-		dialog.resize(600, 600);
-		dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
-		dialog.exec();
-	};
-
 	QDialog dialog;
 
 	auto layout = new QVBoxLayout{&dialog};
@@ -291,8 +259,8 @@ void TrayIcons::showAboutDialog()
 	layout->addWidget(infoLabel);
 
 	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
-	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [&dialog, &showLicense] {
-		showLicense(&dialog);
+	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, &dialog] {
+		showLicenseDialog(&dialog);
 	});
 	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
 
@@ -301,6 +269,38 @@ void TrayIcons::showAboutDialog()
 	dialog.setLayout(layout);
 	dialog.setWindowTitle("About " + qApp->applicationName());
 	dialog.resize(500, dialog.heightForWidth(500));
+	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
+	dialog.exec();
+}
+
+void TrayIcons::showLicenseDialog(QWidget *parent)
+{
+	QFile licenseFile{":/LICENSE"};
+	QString licenseText;
+	if (licenseFile.open(QIODevice::ReadOnly))
+		licenseText = licenseFile.readAll();
+	else
+		licenseText = "Error: could not load the license. Please contact the Christian Light IT departement for a copy of the license.";
+
+	QDialog dialog{parent};
+
+	auto layout = new QVBoxLayout{&dialog};
+
+	auto licenseView = new QTextBrowser{&dialog};
+	licenseView->setText(licenseText);
+	licenseView->setOpenExternalLinks(true);
+	licenseView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	layout->addWidget(licenseView);
+
+	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
+	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+
+	layout->addWidget(bb);
+
+	dialog.setLayout(layout);
+	dialog.setWindowTitle("MIT license with Christian Light Internal Software exceptions");
+	dialog.setModal(true);
+	dialog.resize(600, 600);
 	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
 	dialog.exec();
 }
