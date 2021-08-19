@@ -30,7 +30,7 @@ private slots:
 	void getNewApiKey();
 
 	void showAboutDialog();
-//	void showLicenseDialog();
+	void showLicenseDialog(QWidget *parent = nullptr);
 
 private:
 	void setUpTrayIcons();
