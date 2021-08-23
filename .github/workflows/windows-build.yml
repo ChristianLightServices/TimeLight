@@ -9,6 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         qt-version: ['5.15.2', '6.1.2']
+
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
