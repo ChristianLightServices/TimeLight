@@ -1,6 +1,14 @@
 name: Linux build
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      packageRelease:
+        description: 'Package binaries for release and upload them'
+        required: false
+        default: false
+
 jobs:
   linux:
     name: Linux desktop (Qt ${{ matrix.qt-version }})
@@ -41,3 +49,23 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
           cmake --build .
           cd ..
+
+      # now we can deploy the release if necessary
+      - name: Install LinuxDeploy
+        if: ${{ github.event.inputs.packageRelease }}
+        uses: miurahr/install-linuxdeploy-action@v1
+        with:
+          plugins: qt appimage
+          dir: ${{ github.workspace }}
+
+      - name: Build release package
+        if: ${{ github.event.inputs.packageRelease }}
+        run: |
+          linuxdeploy-x86_64.AppImage --plugin qt --output appimage --desktop-file ClockifyTrayIcons.desktop --icon-file icons/ClockifyTrayIcons.svg --executable build/ClockifyTrayIcons --appdir AppDir
+
+      - name: Upload release package
+        if: ${{ github.event.inputs.packageRelease }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux package (64-bit, Qt ${{ matrix.qt-version }})
+          path: ClockifyTrayIcons-*-x86_64.AppImage
