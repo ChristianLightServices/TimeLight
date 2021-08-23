@@ -40,3 +40,9 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
           cmake --build .
           cd ..
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS_Qt-${{ matrix.qt-version }}_binary
+          path: build/ClockifyTrayIcons
