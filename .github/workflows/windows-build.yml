@@ -1,6 +1,14 @@
 name: Windows build
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      packageRelease:
+        description: 'Package binaries for release and upload them'
+        required: false
+        default: false
+
 jobs:
   windows:
     name: Windows desktop (Qt ${{ matrix.qt-version }})
@@ -45,5 +53,22 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
-          name: Windows_Qt-${{ matrix.qt-version }}_binary
+          name: Windows binary (Qt ${{ matrix.qt-version }})
           path: build/Debug/ClockifyTrayIcons.exe # why this is in "build/Debug" when it is a MinSizeRel build, I have no idea
+
+      - name: Build release package
+        if: ${{ github.event.inputs.packageRelease }}
+        run: |
+          mkdir release_dir
+          cd release_dir
+          cp ../build/Debug/ClockifyTrayIcons.exe .
+          windeployqt ClockifyTrayIcons.exe
+          cd ..
+          7z a -tzip ClockifyTrayIcons.zip release_dir
+
+      - name: Upload release package
+        if: ${{ github.event.inputs.packageRelease }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows package (64-bit, Qt ${{ matrix.qt-version }})
+          path: ClockifyTrayIcons.zip

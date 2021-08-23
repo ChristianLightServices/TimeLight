@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=ClockifyTrayIcons
+Exec=ClockifyTrayIcons
+Icon=ClockifyTrayIcons
+X-DocPath=kcalc/index.html
+Comment=Two simple tray icons for controlling Clockify.
+GenericName=Clockify tray icons
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Qt;Utility;
+
