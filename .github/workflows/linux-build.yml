@@ -1,0 +1,42 @@
+name: Linux build
+
+on: push
+jobs:
+  linux:
+    name: Linux desktop (Qt ${{ matrix.qt-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        qt-version: ['5.15.2', '6.1.2']
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.9.0
+        with:
+          version: ${{ matrix.qt-version }}
+
+      - name: Fetch JSON
+        uses: actions/checkout@v2
+        with:
+          repository: 'nlohmann/json'
+          submodules: 'recursive'
+
+      - name: Install JSON
+        run: |
+          mkdir build && cd build
+          cmake -DJSON_BuildTests=OFF ..
+          cmake --build .
+          sudo cmake --install .
+          cd ..
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          cd ..
