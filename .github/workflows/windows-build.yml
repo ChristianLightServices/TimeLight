@@ -59,6 +59,7 @@ jobs:
 
       - name: Build release package
         if: ${{ github.event.inputs.packageRelease }}
+        # Windows deployments tend to be big, so we'll zip them before uploading
         run: |
           mkdir release_dir
           cd release_dir
