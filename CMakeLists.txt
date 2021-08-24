@@ -27,28 +27,46 @@ set(SRC_CLOCKIFY
 
 # make sure that Windows doesn't display a console and add other Windows-specific stuff
 if(WIN32)
-    set(IS_WIN "WIN32")
+	set(OS_HACKS "WIN32")
     set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
+elseif(APPLE)
+	set(OS_HACKS "MACOSX_BUNDLE")
+	set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
 else()
-    set(IS_WIN "")
+	set(OS_HACKS "")
     set(APP_ICON_RESOURCE_WINDOWS "")
 endif()
 
-add_executable(ClockifyTrayIcons ${IS_WIN}
-    ${SRC_CLOCKIFY}
+set(SRC
+	${SRC_CLOCKIFY}
 
-    ClockifyTrayIcons.cpp
-    SelectDefaultProjectDialog.cpp
-    TrayIcons.cpp
+	ClockifyTrayIcons.cpp
+	SelectDefaultProjectDialog.cpp
+	TrayIcons.cpp
 
-    res.qrc
-    ${APP_ICON_RESOURCE_WINDOWS}
+	res.qrc
+	${APP_ICON_RESOURCE_WINDOWS}
 )
 
-target_link_libraries(ClockifyTrayIcons
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Widgets
-    SingleApplication::SingleApplication
-    nlohmann_json::nlohmann_json
+set(LIBRARIES
+	Qt${QT_VERSION_MAJOR}::Network
+	Qt${QT_VERSION_MAJOR}::Widgets
+	SingleApplication::SingleApplication
+	nlohmann_json::nlohmann_json
 )
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+	qt_add_executable(ClockifyTrayIcons ${OS_HACKS} MANUAL_FINALIZATION ${SRC})
+else()
+	set(LIBRARIES
+		Qt${QT_VERSION_MAJOR}::Core
+		${LIBRARIES}
+	)
+    add_executable(ClockifyTrayIcons ${OS_HACKS} ${SRC})
+endif()
+
+target_link_libraries(ClockifyTrayIcons PRIVATE ${LIBRARIES})
+
+if(QT_VERSION_MAJOR EQUAL 6)
+	qt_finalize_executable(ClockifyTrayIcons)
+endif()
