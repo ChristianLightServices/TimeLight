@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows binary (Qt ${{ matrix.qt-version }})
-          path: build/Debug/ClockifyTrayIcons.exe # why this is in "build/Debug" when it is a MinSizeRel build, I have no idea
+          path: build\Debug\ClockifyTrayIcons.exe # why this is in "build\Debug" when it is a MinSizeRel build, I have no idea
           retention-days: 7
 
       - name: Build release package
@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp ../build/Debug/ClockifyTrayIcons.exe .
+          cp ..\build\Debug\ClockifyTrayIcons.exe .
           windeployqt ClockifyTrayIcons.exe
           cd ..
           7z a -tzip ClockifyTrayIcons.zip release_dir
