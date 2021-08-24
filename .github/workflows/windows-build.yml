@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp ../build/Debug/ClockifyTrayIcons.exe .
+          cp ..\build\Debug\ClockifyTrayIcons.exe .
           windeployqt ClockifyTrayIcons.exe
           cd ..
           7z a -tzip ClockifyTrayIcons.zip release_dir
