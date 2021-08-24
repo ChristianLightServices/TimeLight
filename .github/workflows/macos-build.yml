@@ -63,6 +63,7 @@ jobs:
         with:
           name: macOS binary (Qt ${{ matrix.qt-version }})
           path: upload_dir
+          retention-days: 7
 
       - name: Build release package
         if: ${{ github.event.inputs.packageRelease }}
@@ -79,3 +80,4 @@ jobs:
         with:
           name: macOS package (64-bit, Qt ${{ matrix.qt-version }})
           path: release_dir/ClockifyTrayIcons.dmg
+          retention-days: 7

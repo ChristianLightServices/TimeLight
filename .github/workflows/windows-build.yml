@@ -55,6 +55,7 @@ jobs:
         with:
           name: Windows binary (Qt ${{ matrix.qt-version }})
           path: build/Debug/ClockifyTrayIcons.exe # why this is in "build/Debug" when it is a MinSizeRel build, I have no idea
+          retention-days: 7
 
       - name: Build release package
         if: ${{ github.event.inputs.packageRelease }}
@@ -72,3 +73,4 @@ jobs:
         with:
           name: Windows package (64-bit, Qt ${{ matrix.qt-version }})
           path: ClockifyTrayIcons.zip
+          retention-days: 7
