@@ -46,7 +46,7 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build .
           cd ..
 
@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows binary (Qt ${{ matrix.qt-version }})
-          path: build/Debug/ClockifyTrayIcons.exe # why this is in "build/Debug" when it is a MinSizeRel build, I have no idea
+          path: build/Release/ClockifyTrayIcons.exe
           retention-days: 7
 
       - name: Build release package
@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp ..\build\Debug\ClockifyTrayIcons.exe .
+          cp ..\build\Release\ClockifyTrayIcons.exe .
           windeployqt ClockifyTrayIcons.exe
           cd ..
           7z a -tzip ClockifyTrayIcons.zip release_dir
