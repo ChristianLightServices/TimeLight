@@ -3,6 +3,7 @@
 // Used by winres.rc
 //
 #define APPICON                         5
+#define APPVERSION                      65535
 
 // Next default values for new objects
 // 
