@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DJSON_BuildTests=OFF ..
-          cmake --build .
+          cmake --build . --config Release
           sudo cmake --install .
           cd ..
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build .
+          cmake --build . --config Release
           cd ..
 
       # now we can deploy the release if necessary
