@@ -46,7 +46,7 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build .
           cd ..
 
