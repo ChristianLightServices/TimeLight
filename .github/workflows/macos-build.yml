@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DJSON_BuildTests=OFF ..
-          cmake --build .
+          cmake --build . --config Release
           cmake --install .
           cd ..
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build .
+          cmake --build . --config Release
           cd ..
 
       # If Apple didn't insist on bundling apps as folders, this wouldn't be necessary; however, this is done to ensure that the .app folder remains intact
