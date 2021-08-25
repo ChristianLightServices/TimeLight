@@ -75,3 +75,9 @@ CMakeLists.txt.user
 
 # Debugging stuff
 heaptrack*.gz
+
+# AppImage generation
+AppDir/
+appdir/
+*.AppImage
+*.appimage
