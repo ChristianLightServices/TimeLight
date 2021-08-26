@@ -24,20 +24,6 @@ jobs:
         with:
           version: ${{ matrix.qt-version }}
 
-      - name: Fetch JSON
-        uses: actions/checkout@v2
-        with:
-          repository: 'nlohmann/json'
-          submodules: 'recursive'
-
-      - name: Install JSON
-        run: |
-          mkdir build && cd build
-          cmake -DJSON_BuildTests=OFF ..
-          cmake --build . --config Release
-          sudo cmake --install .
-          cd ..
-
       - name: Checkout code
         uses: actions/checkout@v2
         with:
