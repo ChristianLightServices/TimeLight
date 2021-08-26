@@ -13,7 +13,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets REQUIRED)
-find_package(nlohmann_json 3.2.0 REQUIRED)
+
+# some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+# (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
+# this is quiet because it just might not be found the first time around
+find_package(nlohmann_json 3.2.0 QUIET)
+
+if(NOT nlohmann_json_FOUND)
+	include(FetchContent)
+
+	FetchContent_Declare(json
+	  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+	  GIT_TAG v3.10.0)
+
+    FetchContent_GetProperties(json)
+	if(NOT json_POPULATED)
+	  FetchContent_Populate(json)
+	  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endif()
 
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
