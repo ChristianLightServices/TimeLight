@@ -2,6 +2,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by winres.rc
 //
+
+#include "version.h"
+
 #define APPICON                         5
 #define APPVERSION                      65535
 

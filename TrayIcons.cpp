@@ -21,6 +21,7 @@
 #include "ClockifyUser.h"
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
+#include "version.h"
 
 const auto WORKSPACE{"5e207622ba05e2483903da0d"};
 const auto TIME_301{"5e20d8e0ba05e2483904a186"};
@@ -242,7 +243,7 @@ void TrayIcons::getNewApiKey()
 void TrayIcons::showAboutDialog()
 {
 	// put this into a variable to handle this gonzo string more nicely
-	constexpr auto licenseInfo = "ClockifyTrayIcons copyright © 2020. Licensed " \
+	constexpr auto licenseInfo = "ClockifyTrayIcons " VERSION_STR " copyright © 2020. Licensed " \
 								 "under the MIT license with Christian Light Internal Software exceptions.\n\n" \
 								 "Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
 								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and " \
