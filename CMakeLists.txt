@@ -36,6 +36,8 @@ endif()
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
+configure_file(version.h.in version.h)
+
 set(SRC_CLOCKIFY
     ClockifyProject.cpp
     ClockifyManager.cpp

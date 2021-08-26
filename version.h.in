@@ -1,0 +1,16 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define VERSION_MAJOR @ClockifyTrayIcons_VERSION_MAJOR@
+#define VERSION_MINOR @ClockifyTrayIcons_VERSION_MINOR@
+#define VERSION_PATCH @ClockifyTrayIcons_VERSION_PATCH@
+#define VERSION_TWEAK @ClockifyTrayIcons_VERSION_TWEAK@
+
+#define VERSION_MAJOR_STR "@ClockifyTrayIcons_VERSION_MAJOR@"
+#define VERSION_MINOR_STR "@ClockifyTrayIcons_VERSION_MINOR@"
+#define VERSION_PATCH_STR "@ClockifyTrayIcons_VERSION_PATCH@"
+#define VERSION_TWEAK_STR "@ClockifyTrayIcons_VERSION_TWEAK@"
+
+#define VERSION_STR "@ClockifyTrayIcons_VERSION_MAJOR@.@ClockifyTrayIcons_VERSION_MINOR@.@ClockifyTrayIcons_VERSION_PATCH@.@ClockifyTrayIcons_VERSION_TWEAK@"
+
+#endif // VERSION_H
