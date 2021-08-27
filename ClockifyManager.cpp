@@ -50,9 +50,8 @@ class NoCookies : public QNetworkCookieJar
 	}
 };
 
-ClockifyManager::ClockifyManager(QString workspaceId, QByteArray apiKey, QObject *parent)
+ClockifyManager::ClockifyManager(QByteArray apiKey, QObject *parent)
 	: QObject{parent},
-	  m_workspaceId{workspaceId},
 	  m_apiKey{apiKey}
 {
 	m_manager.setCookieJar(new NoCookies);
@@ -294,6 +293,36 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 	}
 }
 
+QVector<ClockifyWorkspace> ClockifyManager::getOwnerWorkspaces()
+{
+	QVector<ClockifyWorkspace> workspaces;
+
+	get(QUrl{s_baseUrl + "/workspaces"}, false, [this, &workspaces](QNetworkReply *rep) {
+		try
+		{
+			json j{json::parse(rep->readAll().toStdString())};
+			for (const auto &workspace : j)
+			{
+				try
+				{
+					workspaces.push_back(ClockifyWorkspace{workspace["id"].get<QString>(), workspace["name"].get<QString>()});
+				}
+				catch (const std::exception &ex)
+				{
+					std::cerr << "Error while parsing workspace: " << ex.what() << std::endl;
+					std::cerr << workspace.dump(4) << std::endl;
+				}
+			}
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "Error while loading workspaces: " << ex.what() << std::endl;
+		}
+	});
+
+	return workspaces;
+}
+
 void ClockifyManager::setApiKey(const QString &apiKey)
 {
 	m_apiKey = apiKey.toUtf8();
@@ -301,9 +330,15 @@ void ClockifyManager::setApiKey(const QString &apiKey)
 	emit apiKeyChanged();
 }
 
-bool ClockifyManager::init(QString workspaceId, QByteArray apiKey)
+void ClockifyManager::setWorkspaceId(const QString &workspaceId)
 {
-	s_instance.reset(new ClockifyManager{workspaceId, apiKey, nullptr});
+	// TODO: validate this
+	m_workspaceId = workspaceId;
+}
+
+bool ClockifyManager::init(QByteArray apiKey)
+{
+	s_instance.reset(new ClockifyManager{apiKey, nullptr});
 	return true;
 }
 
@@ -314,9 +349,15 @@ void ClockifyManager::updateCurrentUser()
 		{
 			json j{json::parse(rep->readAll().toStdString())};
 			if (j.is_array())
+			{
 				m_ownerId = j[0]["id"].get<QString>();
+				m_workspaceId = j[0]["defaultWorkspace"].get<QString>();
+			}
 			else
+			{
 				m_ownerId = j["id"].get<QString>();
+				m_workspaceId = j["defaultWorkspace"].get<QString>();
+			}
 			m_isValid = true;
 		}
 		catch (const std::exception &ex)

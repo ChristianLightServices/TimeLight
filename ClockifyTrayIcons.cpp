@@ -15,6 +15,7 @@
 #include "ClockifyManager.h"
 #include "ClockifyUser.h"
 #include "TrayIcons.h"
+#include "SelectDefaultWorkspaceDialog.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,9 +39,7 @@ int main(int argc, char *argv[])
 		settings.setValue("apiKey", apiKey);
 	}
 
-	const QByteArray WORKSPACE{"5e207622ba05e2483903da0d"};
-
-	ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
+	ClockifyManager::init(apiKey.toUtf8());
 	while (!ClockifyManager::instance()->isValid())
 	{
 		bool ok{false};
