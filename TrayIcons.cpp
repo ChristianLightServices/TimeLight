@@ -284,7 +284,12 @@ void TrayIcons::getNewBreakTimeId()
 											 &ok);
 
 	if (ok)
+	{
 		m_breakTimeId = projectIds[projectNames.indexOf(workspaceId)];
+
+		QSettings settings;
+		settings.setValue("breakTimeId", m_breakTimeId);
+	}
 }
 
 void TrayIcons::showAboutDialog()
