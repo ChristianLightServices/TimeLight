@@ -24,8 +24,6 @@
 #include "SelectDefaultWorkspaceDialog.h"
 #include "version.h"
 
-const auto TIME_301{"5e20d8e0ba05e2483904a186"};
-
 QPair<QString, QIcon> TrayIcons::s_clockifyOn;
 QPair<QString, QIcon> TrayIcons::s_clockifyOff;
 QPair<QString, QIcon> TrayIcons::s_onBreak;
@@ -65,6 +63,7 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	m_disableDescription = settings.value("disableDescription", false).toBool();
 	m_useLastProject = settings.value("useLastProject", true).toBool();
 	m_useLastDescription = settings.value("useLastDescription", true).toBool();
+	m_breakTimeId = settings.value("breakTimeId").toString();
 	QString workspaceId = settings.value("workspaceId").toString();
 
 	while (m_defaultProjectId == "" && !m_useLastProject)
@@ -75,6 +74,9 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 		getNewWorkspaceId();
 		workspaceId = ClockifyManager::instance()->workspaceId();
 	}
+
+	while (m_breakTimeId.isEmpty())
+		getNewBreakTimeId();
 
 	s_clockifyOn = {"Clockify is running", QIcon{":/icons/greenpower.png"}};
 	s_clockifyOff = {"Clockify is not running", QIcon{":/icons/redpower.png"}};
@@ -123,7 +125,7 @@ ClockifyProject TrayIcons::defaultProject() const
 				std::cerr << "getting project id failed\n";
 				continue; // no project id to see here, move along
 			}
-			else if (entry.project().id() != TIME_301)
+			else if (entry.project().id() != m_breakTimeId)
 			{
 				projectId = entry.project().id();
 				projectIdLoaded = true;
@@ -146,7 +148,7 @@ ClockifyProject TrayIcons::defaultProject() const
 
 		for (const auto &entry : entries)
 		{
-			if (entry.project().id() != TIME_301)
+			if (entry.project().id() != m_breakTimeId)
 			{
 				description = entry.project().description();
 				descriptionLoaded = true;
@@ -179,7 +181,7 @@ void TrayIcons::updateTrayIcons()
 		setClockifyRunningIconTooltip(s_clockifyOn);
 
 		try {
-			if (m_user->getRunningTimeEntry().project().id() == TIME_301)
+			if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
 				setRunningJobIconTooltip(s_onBreak);
 			else
 				setRunningJobIconTooltip(s_working);
@@ -257,6 +259,32 @@ void TrayIcons::getNewWorkspaceId()
 		QSettings settings;
 		settings.setValue("workspaceId", dialog.selectedWorkspaceId());
 	}
+}
+
+void TrayIcons::getNewBreakTimeId()
+{
+	auto ok{false};
+	auto projects = ClockifyManager::instance()->projects();
+
+	QStringList projectIds;
+	QStringList projectNames;
+
+	for (const auto &project : qAsConst(projects))
+	{
+		projectIds.push_back(project.id());
+		projectNames.push_back(project.name());
+	}
+
+	auto workspaceId = QInputDialog::getItem(nullptr,
+											 "Select break time project",
+											 "Select the project used for break time:",
+											 projectNames,
+											 projectIds.indexOf(m_breakTimeId),
+											 false,
+											 &ok);
+
+	if (ok)
+		m_breakTimeId = projectIds[projectNames.indexOf(workspaceId)];
 }
 
 void TrayIcons::showAboutDialog()
@@ -375,14 +403,14 @@ void TrayIcons::setUpTrayIcons()
 		{
 			try
 			{
-				if (m_user->getRunningTimeEntry().project().id() == TIME_301)
+				if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
 					return;
 			}
 			catch (const std::exception &) {}
 
 			start = m_user->stopCurrentTimeEntry();
 		}
-		m_user->startTimeEntry(TIME_301, start);
+		m_user->startTimeEntry(m_breakTimeId, start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [this]() {
@@ -398,7 +426,7 @@ void TrayIcons::setUpTrayIcons()
 		{
 			try
 			{
-				if (m_user->getRunningTimeEntry().project().id() != TIME_301)
+				if (m_user->getRunningTimeEntry().project().id() != m_breakTimeId)
 					return;
 			}
 			catch (const std::exception &) {}
@@ -464,7 +492,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user->hasRunningTimeEntry())
 		{
-			if (m_user->getRunningTimeEntry().project().id() == TIME_301)
+			if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
 			{
 				auto time = m_user->stopCurrentTimeEntry();
 				auto project = defaultProject();
@@ -473,7 +501,7 @@ void TrayIcons::setUpTrayIcons()
 			else
 			{
 				auto time = m_user->stopCurrentTimeEntry();
-				m_user->startTimeEntry(TIME_301, time);
+				m_user->startTimeEntry(m_breakTimeId, time);
 			}
 		}
 		else
