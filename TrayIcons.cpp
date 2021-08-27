@@ -67,7 +67,7 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	m_useLastDescription = settings.value("useLastDescription", true).toBool();
 	QString workspaceId = settings.value("workspaceId").toString();
 
-	if (m_defaultProjectId == "" && !m_useLastProject)
+	while (m_defaultProjectId == "" && !m_useLastProject)
 		getNewProjectId();
 
 	while (workspaceId.isEmpty())
