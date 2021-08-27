@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 project(ClockifyTrayIcons VERSION 0.0.0.1 LANGUAGES CXX)
 
+set(ClockifyTrayIcons_VERSION_STR "${ClockifyTrayIcons_VERSION_MAJOR}.${ClockifyTrayIcons_VERSION_MINOR}.${ClockifyTrayIcons_VERSION_PATCH}.${ClockifyTrayIcons_VERSION_TWEAK}")
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -45,13 +47,13 @@ set(SRC_CLOCKIFY
     TimeEntry.cpp
 )
 
-# make sure that Windows doesn't display a console and add other Windows-specific stuff
+# put in some platform-specific configuration stuff
 if(WIN32)
 	set(OS_HACKS "WIN32")
     set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
 elseif(APPLE)
 	set(OS_HACKS "MACOSX_BUNDLE")
-	set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
+	set(APP_ICON_RESOURCE_WINDOWS "")
 else()
 	set(OS_HACKS "")
     set(APP_ICON_RESOURCE_WINDOWS "")
@@ -83,6 +85,19 @@ else()
 		${LIBRARIES}
 	)
     add_executable(ClockifyTrayIcons ${OS_HACKS} ${SRC})
+endif()
+
+if(APPLE)
+	set_target_properties(ClockifyTrayIcons
+		PROPERTIES
+		MACOSX_BUNDLE_BUNDLE_NAME "ClockifyTrayIcons"
+		MACOSX_BUNDLE_BUNDLE_VERSION ${ClockifyTrayIcons_VERSION_STR}
+		MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
+		MACOSX_BUNDLE_GUI_IDENTIFIER "org.christianlight.ClockifyTrayIcons"
+		MACOSX_BUNDLE_INFO_STRING "ClockifyTrayIcons"
+		MACOSX_BUNDLE_LONG_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
+		MACOSX_BUNDLE_SHORT_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
+	)
 endif()
 
 target_link_libraries(ClockifyTrayIcons PRIVATE ${LIBRARIES})
