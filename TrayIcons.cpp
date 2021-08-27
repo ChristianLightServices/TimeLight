@@ -387,6 +387,7 @@ void TrayIcons::setUpTrayIcons()
 	});
 	connect(m_clockifyRunningMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
 	connect(m_clockifyRunningMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
+	connect(m_clockifyRunningMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
 	connect(m_clockifyRunningMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
 	connect(m_clockifyRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
@@ -444,6 +445,7 @@ void TrayIcons::setUpTrayIcons()
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
 	connect(m_runningJobMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
+	connect(m_runningJobMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
 	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
 	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
