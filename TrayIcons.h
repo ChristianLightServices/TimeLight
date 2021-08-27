@@ -29,6 +29,7 @@ private slots:
 	void getNewProjectId();
 	void getNewApiKey();
 	void getNewWorkspaceId();
+	void getNewBreakTimeId();
 
 	void showAboutDialog();
 	void showLicenseDialog(QWidget *parent = nullptr);
@@ -57,6 +58,7 @@ private:
 	bool m_disableDescription;
 	QString m_defaultProjectId;
 	QString m_defaultDescription;
+	QString m_breakTimeId;
 
 	QTimer m_eventLoop;
 
