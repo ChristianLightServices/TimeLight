@@ -11,6 +11,6 @@
 #define VERSION_PATCH_STR "@ClockifyTrayIcons_VERSION_PATCH@"
 #define VERSION_TWEAK_STR "@ClockifyTrayIcons_VERSION_TWEAK@"
 
-#define VERSION_STR "@ClockifyTrayIcons_VERSION_MAJOR@.@ClockifyTrayIcons_VERSION_MINOR@.@ClockifyTrayIcons_VERSION_PATCH@.@ClockifyTrayIcons_VERSION_TWEAK@"
+#define VERSION_STR "@ClockifyTrayIcons_VERSION_STR@"
 
 #endif // VERSION_H
