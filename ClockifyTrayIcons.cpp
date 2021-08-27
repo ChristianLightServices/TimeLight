@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		if (!ok)
 			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
-		ClockifyManager::init(apiKey.toUtf8());
+		ClockifyManager::instance()->setApiKey(apiKey);
 	}
 	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
 		while (!ClockifyManager::instance()->isValid())
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 			if (!ok)
 				QApplication::exit(1);
 			settings.setValue("apiKey", apiKey);
-			ClockifyManager::init(apiKey.toUtf8());
+			ClockifyManager::instance()->setApiKey(apiKey);
 		}
 	});
 
