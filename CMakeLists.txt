@@ -50,13 +50,13 @@ set(SRC_CLOCKIFY
 # put in some platform-specific configuration stuff
 if(WIN32)
 	set(OS_HACKS "WIN32")
-    set(APP_ICON_RESOURCE_WINDOWS "winres.rc")
+	set(APP_ICON_RESOURCE "winres.rc")
 elseif(APPLE)
 	set(OS_HACKS "MACOSX_BUNDLE")
-	set(APP_ICON_RESOURCE_WINDOWS "")
+	set(APP_ICON_RESOURCE "icons/macicon.icns")
 else()
 	set(OS_HACKS "")
-    set(APP_ICON_RESOURCE_WINDOWS "")
+	set(APP_ICON_RESOURCE "")
 endif()
 
 set(SRC
@@ -67,7 +67,7 @@ set(SRC
 	TrayIcons.cpp
 
 	res.qrc
-	${APP_ICON_RESOURCE_WINDOWS}
+	${APP_ICON_RESOURCE}
 )
 
 set(LIBRARIES
@@ -88,8 +88,7 @@ else()
 endif()
 
 if(APPLE)
-	set_target_properties(ClockifyTrayIcons
-		PROPERTIES
+	set_target_properties(ClockifyTrayIcons PROPERTIES
 		MACOSX_BUNDLE_BUNDLE_NAME "ClockifyTrayIcons"
 		MACOSX_BUNDLE_BUNDLE_VERSION ${ClockifyTrayIcons_VERSION_STR}
 		MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
@@ -97,6 +96,7 @@ if(APPLE)
 		MACOSX_BUNDLE_INFO_STRING "ClockifyTrayIcons"
 		MACOSX_BUNDLE_LONG_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
 		MACOSX_BUNDLE_SHORT_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
+		MACOSX_BUNDLE_ICON_FILE "icons/macicon.icns"
 	)
 endif()
 
