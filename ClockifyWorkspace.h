@@ -9,7 +9,9 @@ class ClockifyWorkspace : public QObject
 
 public:
 	explicit ClockifyWorkspace(const QString &id, const QString &name, QObject *parent = nullptr);
-	explicit ClockifyWorkspace(const ClockifyWorkspace &other);
+	explicit ClockifyWorkspace(const ClockifyWorkspace &that);
+
+	ClockifyWorkspace &operator=(const ClockifyWorkspace &other);
 
 	QString id() const { return m_id; }
 	QString name() const { return m_name; }

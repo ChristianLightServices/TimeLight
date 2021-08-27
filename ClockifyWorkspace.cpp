@@ -8,10 +8,16 @@ ClockifyWorkspace::ClockifyWorkspace(const QString &id, const QString &name, QOb
 
 }
 
-ClockifyWorkspace::ClockifyWorkspace(const ClockifyWorkspace &other)
-	: QObject{other.parent()},
-	  m_id{other.m_id},
-	  m_name{other.m_name}
+ClockifyWorkspace::ClockifyWorkspace(const ClockifyWorkspace &that)
+	: QObject{that.parent()}
 {
+	*this = that;
+}
 
+ClockifyWorkspace &ClockifyWorkspace::operator=(const ClockifyWorkspace &other)
+{
+	this->m_id = other.m_id;
+	this->m_name = other.m_name;
+
+	return *this;
 }
