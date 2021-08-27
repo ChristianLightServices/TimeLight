@@ -21,9 +21,9 @@
 #include "ClockifyUser.h"
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
+#include "SelectDefaultWorkspaceDialog.h"
 #include "version.h"
 
-const auto WORKSPACE{"redacted"};
 const auto BREAKTIME{"redacted"};
 
 QPair<QString, QIcon> TrayIcons::s_clockifyOn;
@@ -65,9 +65,16 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	m_disableDescription = settings.value("disableDescription", false).toBool();
 	m_useLastProject = settings.value("useLastProject", true).toBool();
 	m_useLastDescription = settings.value("useLastDescription", true).toBool();
+	QString workspaceId = settings.value("workspaceId").toString();
 
 	if (m_defaultProjectId == "" && !m_useLastProject)
 		getNewProjectId();
+
+	while (workspaceId.isEmpty())
+	{
+		getNewWorkspaceId();
+		workspaceId = ClockifyManager::instance()->workspaceId();
+	}
 
 	s_clockifyOn = {"Clockify is running", QIcon{":/icons/greenpower.png"}};
 	s_clockifyOff = {"Clockify is not running", QIcon{":/icons/redpower.png"}};
@@ -240,6 +247,18 @@ void TrayIcons::getNewApiKey()
 	settings.setValue("apiKey", m_apiKey);
 }
 
+void TrayIcons::getNewWorkspaceId()
+{
+	SelectDefaultWorkspaceDialog dialog{ClockifyManager::instance()->getOwnerWorkspaces(), this};
+	if (dialog.getNewWorkspace())
+	{
+		ClockifyManager::instance()->setWorkspaceId(dialog.selectedWorkspaceId());
+
+		QSettings settings;
+		settings.setValue("workspaceId", dialog.selectedWorkspaceId());
+	}
+}
+
 void TrayIcons::showAboutDialog()
 {
 	// put this into a variable to handle this gonzo string more nicely
@@ -334,6 +353,7 @@ void TrayIcons::setUpTrayIcons()
 		}
 	});
 	connect(m_clockifyRunningMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_clockifyRunningMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
 	connect(m_clockifyRunningMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
 	connect(m_clockifyRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
@@ -390,6 +410,7 @@ void TrayIcons::setUpTrayIcons()
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_runningJobMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
 	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
 	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});

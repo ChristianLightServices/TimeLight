@@ -44,6 +44,7 @@ set(SRC_CLOCKIFY
     ClockifyProject.cpp
     ClockifyManager.cpp
     ClockifyUser.cpp
+	ClockifyWorkspace.cpp
     TimeEntry.cpp
 )
 
@@ -64,6 +65,7 @@ set(SRC
 
 	ClockifyTrayIcons.cpp
 	SelectDefaultProjectDialog.cpp
+	SelectDefaultWorkspaceDialog.cpp
 	TrayIcons.cpp
 
 	res.qrc

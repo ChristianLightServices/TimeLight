@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 
 #include "ClockifyProject.h"
+#include "ClockifyWorkspace.h"
 
 using json = nlohmann::json;
 
@@ -27,7 +28,7 @@ class ClockifyManager : public QObject
 	Q_PROPERTY(bool isValid READ isValid CONSTANT)
 
 public:
-	explicit ClockifyManager(QString workspaceId, QByteArray apiKey, QObject *parent = nullptr);
+	explicit ClockifyManager(QByteArray apiKey, QObject *parent = nullptr);
 
 	bool isValid() const { return m_isValid; }
 
@@ -48,11 +49,15 @@ public:
 
 	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();
+	QVector<ClockifyWorkspace> getOwnerWorkspaces();
 
 	QString apiKey() const { return m_apiKey; }
-	void setApiKey(const QString &apiKey);
+	QString workspaceId() const { return m_workspaceId; }
 
-	static bool init(QString workspaceId, QByteArray apiKey);
+	void setApiKey(const QString &apiKey);
+	void setWorkspaceId(const QString &workspaceId);
+
+	static bool init(QByteArray apiKey);
 	static QSharedPointer<ClockifyManager> instance() { return s_instance; }
 
 signals:

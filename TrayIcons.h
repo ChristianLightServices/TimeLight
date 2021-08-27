@@ -28,6 +28,7 @@ private slots:
 	void updateTrayIcons();
 	void getNewProjectId();
 	void getNewApiKey();
+	void getNewWorkspaceId();
 
 	void showAboutDialog();
 	void showLicenseDialog(QWidget *parent = nullptr);

@@ -15,6 +15,7 @@
 #include "ClockifyManager.h"
 #include "ClockifyUser.h"
 #include "TrayIcons.h"
+#include "SelectDefaultWorkspaceDialog.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,9 +39,7 @@ int main(int argc, char *argv[])
 		settings.setValue("apiKey", apiKey);
 	}
 
-	const QByteArray WORKSPACE{"redacted"};
-
-	ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
+	ClockifyManager::init(apiKey.toUtf8());
 	while (!ClockifyManager::instance()->isValid())
 	{
 		bool ok{false};
@@ -53,7 +52,7 @@ int main(int argc, char *argv[])
 		if (!ok)
 			QApplication::exit(1);
 		settings.setValue("apiKey", apiKey);
-		ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
+		ClockifyManager::init(apiKey.toUtf8());
 	}
 	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
 		while (!ClockifyManager::instance()->isValid())
@@ -68,7 +67,7 @@ int main(int argc, char *argv[])
 			if (!ok)
 				QApplication::exit(1);
 			settings.setValue("apiKey", apiKey);
-			ClockifyManager::init(WORKSPACE, apiKey.toUtf8());
+			ClockifyManager::init(apiKey.toUtf8());
 		}
 	});
 
