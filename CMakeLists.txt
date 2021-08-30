@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(ClockifyTrayIcons VERSION 0.0.0.1 LANGUAGES CXX)
+project(ClockifyTrayIcons VERSION 1.0.0.0 LANGUAGES CXX)
 
 set(ClockifyTrayIcons_VERSION_STR "${ClockifyTrayIcons_VERSION_MAJOR}.${ClockifyTrayIcons_VERSION_MINOR}.${ClockifyTrayIcons_VERSION_PATCH}.${ClockifyTrayIcons_VERSION_TWEAK}")
 
