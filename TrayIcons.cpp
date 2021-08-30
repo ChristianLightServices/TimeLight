@@ -296,10 +296,10 @@ void TrayIcons::showAboutDialog()
 {
 	// put this into a variable to handle this gonzo string more nicely
 	constexpr auto licenseInfo = "ClockifyTrayIcons " VERSION_STR " copyright © 2020. Licensed " \
-								 "under the MIT license with Christian Light Internal Software exceptions.\n\n" \
-								 "Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
-								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and " \
-								 "[Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
+								 "under the MIT license.\n\nIcons from " \
+								 "[1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
+								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))" \
+								 " and [Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
 								 "(power icon, licensed [MIT](https://mit-license.org)).";
 
 	QDialog dialog;
