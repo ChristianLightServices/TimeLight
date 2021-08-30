@@ -42,23 +42,6 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	QSettings settings;
 	m_defaultProjectId = settings.value("projectId").toString();
 
-	// migration for the old default project id logic
-	// TODO: remove once everybody has been migrated
-	if (m_defaultProjectId == "last-entered-code") [[likely]]
-	{
-		settings.setValue("useLastProject", true);
-		settings.setValue("useLastDescription", true);
-
-		m_defaultProjectId.clear();
-		settings.setValue("projectId", m_defaultProjectId);
-	}
-	else if (!m_defaultProjectId.isEmpty() && !settings.allKeys().contains("useLastProject")) [[likely]]
-	{
-		settings.setValue("useLastProject", false);
-		settings.setValue("useLastDescription", false);
-	}
-	// end of migration
-
 	m_defaultDescription = settings.value("description").toString();
 	m_disableDescription = settings.value("disableDescription", false).toBool();
 	m_useLastProject = settings.value("useLastProject", true).toBool();
