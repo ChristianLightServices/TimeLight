@@ -4,6 +4,12 @@
 
 Ever fancy a simpler way to use Clockify? Here it is: two buttons that sit in your system tray that, when clicked, switch you between Clockify on, Clockify off, and break time.
 
+## Usage
+
+The icon with the power symbol on it will, when clicked, switch Clockify on and off. The other icon will switch Clockify from work time to break time and back.
+
+When you first run ClockifyTrayIcons, it will ask you to enter your API key. This is found under your [account settings](https://clockify.me/user/settings). Then you will be asked to select the workspace to track time on; finally, you will need to select which project you want to use for break time. By default, ClockifyTrayIcons assumes that you want it to use the last non-break time project as the work time project (that is, when starting a work time entry, ClockifyTrayIcons will look at the last entry you made that doesn't have break time as its project and use the project from that entry). This can be changed by right-clicking on either of the icons and selecting "Change default project."
+
 ## Building
 
 Make sure you have Qt installed and available. Then, it's a simple matter of:
