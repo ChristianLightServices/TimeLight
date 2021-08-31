@@ -63,7 +63,7 @@ endif()
 set(SRC
 	${SRC_CLOCKIFY}
 
-	ClockifyTrayIcons.cpp
+	main.cpp
 	SelectDefaultProjectDialog.cpp
 	SelectDefaultWorkspaceDialog.cpp
 	TrayIcons.cpp
