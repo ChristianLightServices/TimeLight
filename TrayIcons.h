@@ -24,6 +24,9 @@ public:
 
 signals:
 
+public slots:
+	void setEventLoopInterval(int interval);
+
 private slots:
 	void updateTrayIcons();
 	void getNewProjectId();
@@ -61,6 +64,7 @@ private:
 	QString m_breakTimeId;
 
 	QTimer m_eventLoop;
+	int m_eventLoopInterval{};
 
 	static QPair<QString, QIcon> s_clockifyOn;
 	static QPair<QString, QIcon> s_clockifyOff;

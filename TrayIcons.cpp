@@ -47,6 +47,7 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 	m_useLastProject = settings.value("useLastProject", true).toBool();
 	m_useLastDescription = settings.value("useLastDescription", true).toBool();
 	m_breakTimeId = settings.value("breakTimeId").toString();
+	m_eventLoopInterval = settings.value("eventLoopInterval", 500).toInt();
 	QString workspaceId = settings.value("workspaceId").toString();
 
 	while (m_defaultProjectId == "" && !m_useLastProject)
@@ -71,7 +72,7 @@ TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
 
 	setUpTrayIcons();
 
-	m_eventLoop.setInterval(500);
+	m_eventLoop.setInterval(m_eventLoopInterval);
 	m_eventLoop.setSingleShot(false);
 	m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
 	m_eventLoop.start();
@@ -341,6 +342,15 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 	dialog.exec();
 }
 
+void TrayIcons::setEventLoopInterval(int interval)
+{
+	m_eventLoopInterval = interval;
+	m_eventLoop.setInterval(m_eventLoopInterval);
+
+	QSettings settings;
+	settings.setValue("eventLoopInterval", m_eventLoopInterval);
+}
+
 void TrayIcons::setUpTrayIcons()
 {
 	auto m_clockifyRunningMenu = new QMenu;
@@ -372,6 +382,22 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
 	connect(m_clockifyRunningMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
 	connect(m_clockifyRunningMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_clockifyRunningMenu->addAction("Change update interval"), &QAction::triggered, this, [this] {
+		bool ok{};
+		auto interval = QInputDialog::getDouble(nullptr,
+												"Change update interval",
+												"Choose the new interval:",
+												static_cast<double>(m_eventLoopInterval) / 1000,
+												0,
+												10,
+												1,
+												&ok,
+												Qt::WindowFlags{},
+												0.5);
+
+		if (ok)
+			setEventLoopInterval(interval * 1000);
+	});
 	connect(m_clockifyRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
@@ -430,6 +456,22 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_runningJobMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
 	connect(m_runningJobMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
 	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_runningJobMenu->addAction("Change update interval"), &QAction::triggered, this, [this] {
+		bool ok{};
+		auto interval = QInputDialog::getDouble(nullptr,
+												"Change update interval",
+												"Choose the new interval:",
+												static_cast<double>(m_eventLoopInterval) / 1000,
+												0,
+												10,
+												1,
+												&ok,
+												Qt::WindowFlags{},
+												0.5);
+
+		if (ok)
+			setEventLoopInterval(interval * 1000);
+	});
 	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
