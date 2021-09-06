@@ -297,7 +297,7 @@ QVector<ClockifyWorkspace> ClockifyManager::getOwnerWorkspaces()
 {
 	QVector<ClockifyWorkspace> workspaces;
 
-	get(QUrl{s_baseUrl + "/workspaces"}, false, [this, &workspaces](QNetworkReply *rep) {
+	get(QUrl{s_baseUrl + "/workspaces"}, false, [&workspaces](QNetworkReply *rep) {
 		try
 		{
 			json j{json::parse(rep->readAll().toStdString())};
