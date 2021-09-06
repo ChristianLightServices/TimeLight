@@ -418,7 +418,7 @@ void ClockifyManager::updateUsers()
 			m_usersLoaded = true;
 			m_expireUsersTimer.start();
 		}
-		catch (const std::exception &ex)
+		catch (const std::exception &)
 		{
 			m_usersLoaded = false;
 		}
@@ -454,7 +454,7 @@ void ClockifyManager::updateProjects()
 			m_projectsLoaded = true;
 			m_expireProjectsTimer.start();
 		}
-		catch (const std::exception &ex)
+		catch (const std::exception &)
 		{
 			m_projectsLoaded = false;
 		}
