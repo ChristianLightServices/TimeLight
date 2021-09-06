@@ -389,7 +389,8 @@ void ClockifyManager::updateUsers()
 
 	QUrl url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
 	QUrlQuery query;
-	query.addQueryItem("page-size", QString::number(INT_MAX));
+	// this would be INT_MAX but Clockify doesn't allow page sizes greater than 5000
+	query.addQueryItem("page-size", QString::number(5000));
 	url.setQuery(query);
 
 	get(url, [this](QNetworkReply *rep) {
@@ -437,7 +438,7 @@ void ClockifyManager::updateProjects()
 
 	// let's get _all_ the projects! *evil laughter*
 	QUrlQuery query;
-	query.addQueryItem("page-size", QString::number(INT_MAX));
+	query.addQueryItem("page-size", QString::number(5000));
 	url.setQuery(query);
 
 	get(url, [this](QNetworkReply *rep) {
