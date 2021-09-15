@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 									   QString{},
 									   &ok);
 		if (!ok)
-			QApplication::exit(1);
+			return 1;
 		settings.setValue("apiKey", apiKey);
 		ClockifyManager::instance()->setApiKey(apiKey);
 	}
