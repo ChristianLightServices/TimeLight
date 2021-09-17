@@ -23,16 +23,17 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets REQUIRED)
 find_package(nlohmann_json 3.2.0 QUIET)
 
 if(NOT nlohmann_json_FOUND)
-	include(FetchContent)
+    include(FetchContent)
 
-	FetchContent_Declare(json
-	  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-	  GIT_TAG v3.10.0)
+    FetchContent_Declare(json
+      GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+      GIT_TAG v3.10.0
+    )
 
     FetchContent_GetProperties(json)
-	if(NOT json_POPULATED)
-	  FetchContent_Populate(json)
-	  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+    if(NOT json_POPULATED)
+      FetchContent_Populate(json)
+      add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 endif()
 
@@ -51,7 +52,7 @@ set(SRC_CLOCKIFY
 
 # put in some platform-specific configuration stuff
 if(WIN32)
-	set(OS_HACKS "WIN32")
+        set(OS_HACKS "WIN32")
 	set(APP_ICON_RESOURCE "winres.rc")
 elseif(APPLE)
 	set(OS_HACKS "MACOSX_BUNDLE")
