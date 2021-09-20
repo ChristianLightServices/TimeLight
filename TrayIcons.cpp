@@ -312,19 +312,20 @@ void TrayIcons::showAboutDialog()
 
 void TrayIcons::showLicenseDialog(QWidget *parent)
 {
-	QFile licenseFile{":/LICENSE"};
-	QString licenseText;
-	if (licenseFile.open(QIODevice::ReadOnly))
-		licenseText = licenseFile.readAll();
-	else
-		licenseText = "Error: could not load the license. Please contact the Christian Light IT departement for a copy of the license.";
 
 	QDialog dialog{parent};
 
 	auto layout = new QVBoxLayout{&dialog};
 
 	auto licenseView = new QTextBrowser{&dialog};
-	licenseView->setText(licenseText);
+
+	QFile licenseFile{":/LICENSE"};
+	if (licenseFile.open(QIODevice::ReadOnly)) [[likely]]
+		licenseView->setText(licenseFile.readAll());
+	else [[unlikely]] // this really should never happen, but just in case...
+		licenseView->setMarkdown("Error: could not load the license. Please read the license on "
+								 "[GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE).");
+
 	licenseView->setOpenExternalLinks(true);
 	licenseView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 	layout->addWidget(licenseView);
@@ -335,7 +336,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 	layout->addWidget(bb);
 
 	dialog.setLayout(layout);
-	dialog.setWindowTitle("MIT license with Christian Light Internal Software exceptions");
+	dialog.setWindowTitle("MIT license");
 	dialog.setModal(true);
 	dialog.resize(600, 600);
 	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
