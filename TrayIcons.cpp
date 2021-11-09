@@ -387,7 +387,7 @@ void TrayIcons::setUpTrayIcons()
 		bool ok{};
 		auto interval = QInputDialog::getDouble(nullptr,
 												"Change update interval",
-												"Choose the new interval:",
+												"Choose the new interval in seconds:",
 												static_cast<double>(m_eventLoopInterval) / 1000,
 												0,
 												10,
@@ -461,7 +461,7 @@ void TrayIcons::setUpTrayIcons()
 		bool ok{};
 		auto interval = QInputDialog::getDouble(nullptr,
 												"Change update interval",
-												"Choose the new interval:",
+												"Choose the new interval in seconds:",
 												static_cast<double>(m_eventLoopInterval) / 1000,
 												0,
 												10,
