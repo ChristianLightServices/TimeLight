@@ -512,7 +512,7 @@ void ClockifyManager::get(const QUrl &url,
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
-		if (done != nullptr)
+		if (done)
 			*done = true;
 
 		m_pendingReplies.remove(rep);
@@ -526,10 +526,7 @@ void ClockifyManager::get(const QUrl &url,
 		}
 
 	if (done)
-	{
 		delete done;
-		done = nullptr; // in case we are doing async, this is required to make the lamba's done setting logic work
-	}
 }
 
 void ClockifyManager::post(const QUrl &url,
@@ -580,7 +577,7 @@ void ClockifyManager::post(const QUrl &url,
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
-		if (done != nullptr)
+		if (done)
 			*done = true;
 
 		m_pendingReplies.remove(rep);
@@ -594,10 +591,7 @@ void ClockifyManager::post(const QUrl &url,
 		}
 
 	if (done)
-	{
 		delete done;
-		done = nullptr;
-	}
 }
 
 void ClockifyManager::patch(const QUrl &url,
@@ -648,7 +642,7 @@ void ClockifyManager::patch(const QUrl &url,
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
-		if (done != nullptr)
+		if (done)
 			*done = true;
 
 		m_pendingReplies.remove(rep);
@@ -662,10 +656,7 @@ void ClockifyManager::patch(const QUrl &url,
 		}
 
 	if (done)
-	{
 		delete done;
-		done = nullptr;
-	}
 }
 
 void ClockifyManager::head(const QUrl &url,
@@ -712,7 +703,7 @@ void ClockifyManager::head(const QUrl &url,
 		else [[unlikely]]
 			m_pendingReplies[rep].second(rep);
 
-		if (done != nullptr)
+		if (done)
 			*done = true;
 
 		m_pendingReplies.remove(rep);
@@ -726,8 +717,5 @@ void ClockifyManager::head(const QUrl &url,
 		}
 
 	if (done)
-	{
 		delete done;
-		done = nullptr;
-	}
 }
