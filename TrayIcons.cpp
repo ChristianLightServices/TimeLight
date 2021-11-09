@@ -293,6 +293,7 @@ void TrayIcons::showAboutDialog()
 	auto infoLabel = new QLabel{licenseInfo, &dialog};
 	infoLabel->setTextFormat(Qt::MarkdownText);
 	infoLabel->setWordWrap(true);
+	infoLabel->setOpenExternalLinks(true);
 	layout->addWidget(infoLabel);
 
 	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
