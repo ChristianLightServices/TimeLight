@@ -241,7 +241,7 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId, std::o
 	if (pageNumber.has_value())
 		query.addQueryItem("page", QString::number(pageNumber.value()));
 	if (pageSize.has_value())
-		query.addQueryItem("page-size", QString::number(pageSize.value()));
+		query.addQueryItem("page-size", QString::number(std::min(pageSize.value(), 5000)));
 	url.setQuery(query);
 
 	json j;
