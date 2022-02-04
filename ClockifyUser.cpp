@@ -54,9 +54,9 @@ void ClockifyUser::startTimeEntry(const QString &projectId, const QString &descr
 	ClockifyManager::instance()->startTimeEntry(m_userId, projectId, description, start, async);
 }
 
-QVector<TimeEntry> ClockifyUser::getTimeEntries()
+QVector<TimeEntry> ClockifyUser::getTimeEntries(std::optional<int> pageNumber, std::optional<int> pageSize)
 {
-	return ClockifyManager::instance()->getTimeEntries(m_userId);
+	return ClockifyManager::instance()->getTimeEntries(m_userId, pageNumber, pageSize);
 }
 
 ClockifyUser &ClockifyUser::operator=(const ClockifyUser &other)

@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <iostream>
+#include <optional>
 
 #include <nlohmann/json.hpp>
 
@@ -45,7 +46,7 @@ public:
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
 	void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
-	QVector<TimeEntry> getTimeEntries(const QString &userId);
+	QVector<TimeEntry> getTimeEntries(const QString &userId, std::optional<int> pageNumber = std::nullopt, std::optional<int> pageSize = std::nullopt);
 
 	bool isConnectedToInternet() const { return m_isConnectedToInternet; }
 	ClockifyUser *getApiKeyOwner();

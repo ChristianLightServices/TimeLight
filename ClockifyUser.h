@@ -3,11 +3,9 @@
 
 #include <QObject>
 
+#include <optional>
+
 #include "TimeEntry.h"
-
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
 
 class ClockifyUser : public QObject
 {
@@ -24,7 +22,7 @@ public:
 	void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
 	void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
 	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
-	QVector<TimeEntry> getTimeEntries();
+	QVector<TimeEntry> getTimeEntries(std::optional<int> pageNumber = std::nullopt, std::optional<int> pageSize = std::nullopt);
 
 	ClockifyUser &operator=(const ClockifyUser &other);
 

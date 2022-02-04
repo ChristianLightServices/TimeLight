@@ -234,12 +234,19 @@ void ClockifyManager::startTimeEntry(const QString &userId, const QString &proje
 	post(url, QByteArray::fromStdString(j.dump()), async, 201);
 }
 
-// TODO: refactor this to only load small amounts at a time
-QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId)
+QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId, std::optional<int> pageNumber, std::optional<int> pageSize)
 {
+	QUrl url{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"};
+	QUrlQuery query;
+	if (pageNumber.has_value())
+		query.addQueryItem("page", QString::number(pageNumber.value()));
+	if (pageSize.has_value())
+		query.addQueryItem("page-size", QString::number(pageSize.value()));
+	url.setQuery(query);
+
 	json j;
 
-	get(QUrl{s_baseUrl + "/workspaces/" + m_workspaceId + "/user/" + userId + "/time-entries"}, false, [&j](QNetworkReply *rep) {
+	get(url, false, [&j](QNetworkReply *rep) {
 		try
 		{
 			j = json::parse(rep->readAll().toStdString());

@@ -94,7 +94,9 @@ ClockifyProject TrayIcons::defaultProject() const
 {
 	QString projectId;
 	QString description;
-	auto entries = m_user->getTimeEntries();
+	int pageNum{1};
+	bool itemsLeftToLoad{true};
+	auto entries = m_user->getTimeEntries(pageNum);
 
 	if (!m_useLastProject)
 		projectId = m_defaultProjectId;
@@ -102,20 +104,29 @@ ClockifyProject TrayIcons::defaultProject() const
 	{
 		bool projectIdLoaded{false};
 
-		for (const auto &entry : entries)
+		do
 		{
-			if (entry.project().id().isEmpty()) [[unlikely]]
+			for (const auto &entry : entries)
 			{
-				std::cerr << "getting project id failed\n";
-				continue; // no project id to see here, move along
+				if (entry.project().id().isEmpty()) [[unlikely]]
+				{
+					std::cerr << "getting project id failed\n";
+					continue; // no project id to see here, move along
+				}
+				else if (entry.project().id() != m_breakTimeId)
+				{
+					projectId = entry.project().id();
+					projectIdLoaded = true;
+					break;
+				}
 			}
-			else if (entry.project().id() != m_breakTimeId)
-			{
-				projectId = entry.project().id();
-				projectIdLoaded = true;
-				break;
-			}
-		}
+
+			auto newEntries = m_user->getTimeEntries(++pageNum);
+			if (newEntries.empty())
+				itemsLeftToLoad = false;
+			else
+				entries.append(newEntries);
+		} while (itemsLeftToLoad || !projectIdLoaded);
 
 		// when all else fails, use the first extant project
 		if (!projectIdLoaded) [[unlikely]]
@@ -130,15 +141,24 @@ ClockifyProject TrayIcons::defaultProject() const
 	{
 		bool descriptionLoaded{false};
 
-		for (const auto &entry : entries)
+		do
 		{
-			if (entry.project().id() != m_breakTimeId)
+			for (const auto &entry : entries)
 			{
-				description = entry.project().description();
-				descriptionLoaded = true;
-				break;
+				if (entry.project().id() != m_breakTimeId)
+				{
+					description = entry.project().description();
+					descriptionLoaded = true;
+					break;
+				}
 			}
-		}
+
+			auto newEntries = m_user->getTimeEntries(++pageNum);
+			if (newEntries.empty())
+				itemsLeftToLoad = false;
+			else
+				entries.append(newEntries);
+		} while (itemsLeftToLoad || !descriptionLoaded);
 
 		if (!descriptionLoaded) [[unlikely]]
 			description = ClockifyManager::instance()->projects().first().description();
