@@ -304,7 +304,7 @@ QVector<ClockifyWorkspace> ClockifyManager::getOwnerWorkspaces()
 {
 	QVector<ClockifyWorkspace> workspaces;
 
-	get(QUrl{s_baseUrl + "/workspaces"}, false, [&workspaces](QNetworkReply *rep) {
+	get(QUrl{s_baseUrl + "/workspaces"}, false, [this, &workspaces](QNetworkReply *rep) {
 		try
 		{
 			json j{json::parse(rep->readAll().toStdString())};
@@ -318,6 +318,16 @@ QVector<ClockifyWorkspace> ClockifyManager::getOwnerWorkspaces()
 				{
 					std::cerr << "Error while parsing workspace: " << ex.what() << std::endl;
 					std::cerr << workspace.dump(4) << std::endl;
+				}
+
+				try
+				{
+					m_numUsers[workspace["id"]] = workspace["memberships"].size();
+				}
+				catch (const std::exception &ex)
+				{
+					std::cerr << "Error while extracting number of members for workspace "
+							  << workspace["id"].get<std::string>() << ": " << ex.what() << std::endl;
 				}
 			}
 		}
@@ -392,47 +402,52 @@ void ClockifyManager::updateCurrentUser()
 
 void ClockifyManager::updateUsers()
 {
-	m_loadingUsers = true;
+	m_usersLoaded = false;
+	m_users.clear();
+
+	const auto numUsers = m_numUsers[m_workspaceId];
+	const auto pageSize = std::min(5000, numUsers);
+	auto pageNum{1};
 
 	QUrl url = s_baseUrl + "/workspaces/" + m_workspaceId + "/users";
-	QUrlQuery query;
-	// this would be INT_MAX but Clockify doesn't allow page sizes greater than 5000
-	query.addQueryItem("page-size", QString::number(5000));
-	url.setQuery(query);
 
-	get(url, [this](QNetworkReply *rep) {
-		try
-		{
-			m_usersLoaded = false;
-			json j{json::parse(rep->readAll().toStdString())};
+	while (m_users.length() < numUsers)
+	{
+		QUrlQuery query;
+		query.addQueryItem("page-size", QString::number(pageSize));
+		query.addQueryItem("page", QString::number(pageNum++));
+		url.setQuery(query);
 
-			m_users.clear();
-			for (const auto &item : j)
+		get(url, false, [this, numUsers](QNetworkReply *rep) {
+			try
 			{
-				try
+				json j{json::parse(rep->readAll().toStdString())};
+
+				for (const auto &item : j)
 				{
-					m_users.push_back({item["id"].get<QByteArray>(),
-									   item["name"].get<QByteArray>()});
-				}
-				catch (const std::exception &)
-				{
-					if (!item.contains("id"))
-						throw;
-					else // they are guaranteed to have an email address AFAIK
-						m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
+					try
+					{
+						m_users.push_back({item["id"].get<QByteArray>(),
+										   item["name"].get<QByteArray>()});
+					}
+					catch (const std::exception &)
+					{
+						if (!item.contains("id"))
+							throw;
+						else // they are guaranteed to have an email address AFAIK
+							m_users.push_back({item["id"].get<QByteArray>(), item["email"].get<QByteArray>()});
+					}
 				}
 			}
+			catch (const std::exception &)
+			{
+				std::cerr << "Could not parse list of users!" << std::endl;
+			}
+		});
+	}
 
-			m_usersLoaded = true;
-			m_expireUsersTimer.start();
-		}
-		catch (const std::exception &)
-		{
-			m_usersLoaded = false;
-		}
-
-		m_loadingUsers = false;
-	});
+	m_usersLoaded = true;
+	m_expireUsersTimer.start();
 }
 
 void ClockifyManager::updateProjects()
