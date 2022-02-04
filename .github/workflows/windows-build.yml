@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qt-version: ['5.15.2', '6.1.2']
+        qt-version: ['5.15.2', '6.2.3']
 
     steps:
       - name: Install Qt
