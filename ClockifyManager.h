@@ -169,13 +169,6 @@ private:
 
 	const static QString s_baseUrl;
 
-	bool m_isValid{false};
-	bool m_projectsLoaded{false};
-	bool m_usersLoaded{false};
-	bool m_loadingProjects{false};
-	bool m_loadingUsers{false};
-	bool m_isConnectedToInternet{true}; // assume connected at start
-
 	QTimer m_expireUsersTimer;
 	QTimer m_expireProjectsTimer;
 	QTimer m_checkConnectionTimer;
@@ -183,6 +176,13 @@ private:
 	static const std::function<void (QNetworkReply *)> s_defaultSuccessCb;
 	static const std::function<void (QNetworkReply *)> s_defaultFailureCb;
 	static QSharedPointer<ClockifyManager> s_instance;
+
+	bool m_isValid{false};
+	bool m_projectsLoaded{false};
+	bool m_usersLoaded{false};
+	bool m_loadingProjects{false};
+	bool m_loadingUsers{false};
+	bool m_isConnectedToInternet{true}; // assume connected at start
 };
 
 #endif // CLOCKIFYMANAGER_H

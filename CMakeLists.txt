@@ -19,8 +19,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
 # (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
-# this is quiet because it just might not be found the first time around
-find_package(nlohmann_json 3.2.0 QUIET)
+find_package(nlohmann_json 3.2.0)
 
 if(NOT nlohmann_json_FOUND)
     include(FetchContent)

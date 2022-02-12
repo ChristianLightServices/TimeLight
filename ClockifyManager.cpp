@@ -490,7 +490,7 @@ void ClockifyManager::get(const QUrl &url,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return get(url, true, 200, successCb, failureCb);
+    get(url, true, 200, successCb, failureCb);
 }
 
 void ClockifyManager::get(const QUrl &url,
@@ -498,7 +498,7 @@ void ClockifyManager::get(const QUrl &url,
 									const std::function<void (QNetworkReply *)> &successCb,
 									const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return get(url, true, expectedReturnCode, successCb, failureCb);
+    get(url, true, expectedReturnCode, successCb, failureCb);
 }
 
 void ClockifyManager::get(const QUrl &url,
@@ -506,7 +506,7 @@ void ClockifyManager::get(const QUrl &url,
 									const std::function<void (QNetworkReply *)> &successCb,
 									const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return get(url, async, 200, successCb, failureCb);
+    get(url, async, 200, successCb, failureCb);
 }
 
 void ClockifyManager::get(const QUrl &url,
@@ -552,7 +552,7 @@ void ClockifyManager::post(const QUrl &url,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return post(url, body, true, 200, successCb, failureCb);
+    post(url, body, true, 200, successCb, failureCb);
 }
 
 void ClockifyManager::post(const QUrl &url,
@@ -561,7 +561,7 @@ void ClockifyManager::post(const QUrl &url,
 									 const std::function<void (QNetworkReply *)> &successCb,
 									 const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return post(url, body, true, expectedReturnCode, successCb, failureCb);
+    post(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void ClockifyManager::post(const QUrl &url,
@@ -570,7 +570,7 @@ void ClockifyManager::post(const QUrl &url,
 						   const std::function<void (QNetworkReply *)> &successCb,
 						   const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return post(url, body, async, 200, successCb, failureCb);
+    post(url, body, async, 200, successCb, failureCb);
 }
 
 void ClockifyManager::post(const QUrl &url,
@@ -617,7 +617,7 @@ void ClockifyManager::patch(const QUrl &url,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return patch(url, body, true, 200, successCb, failureCb);
+    patch(url, body, true, 200, successCb, failureCb);
 }
 
 void ClockifyManager::patch(const QUrl &url,
@@ -626,7 +626,7 @@ void ClockifyManager::patch(const QUrl &url,
 									  const std::function<void (QNetworkReply *)> &successCb,
 									  const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return patch(url, body, true, expectedReturnCode, successCb, failureCb);
+    patch(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void ClockifyManager::patch(const QUrl &url,
@@ -635,7 +635,7 @@ void ClockifyManager::patch(const QUrl &url,
 							const std::function<void (QNetworkReply *)> &successCb,
 							const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return patch(url, body, async, 200, successCb, failureCb);
+    patch(url, body, async, 200, successCb, failureCb);
 }
 
 void ClockifyManager::patch(const QUrl &url,
@@ -681,7 +681,7 @@ void ClockifyManager::head(const QUrl &url,
 									 const std::function<void (QNetworkReply *)> &successCb,
 									 const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return head(url, true, 200, successCb, failureCb);
+    head(url, true, 200, successCb, failureCb);
 }
 
 void ClockifyManager::head(const QUrl &url,
@@ -689,7 +689,7 @@ void ClockifyManager::head(const QUrl &url,
 						   const std::function<void (QNetworkReply *)> &successCb,
 						   const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return head(url, true, expectedReturnCode, successCb, failureCb);
+    head(url, true, expectedReturnCode, successCb, failureCb);
 }
 
 void ClockifyManager::head(const QUrl &url,
@@ -697,7 +697,7 @@ void ClockifyManager::head(const QUrl &url,
 						   const std::function<void (QNetworkReply *)> &successCb,
 						   const std::function<void (QNetworkReply *)> &failureCb)
 {
-	return head(url, async, 200, successCb, failureCb);
+    head(url, async, 200, successCb, failureCb);
 }
 
 void ClockifyManager::head(const QUrl &url,
