@@ -381,7 +381,7 @@ void ClockifyManager::updateCurrentUser()
 		}
 		catch (...)
 		{
-			std::cout << "Unknown error!\n";
+			std::cerr << "Unknown error!" << std::endl;
 		}
 	}, [this](QNetworkReply *rep) {
 		if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 0) [[likely]]
