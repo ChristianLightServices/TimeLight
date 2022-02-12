@@ -6,7 +6,7 @@
 
 using json = nlohmann::json;
 
-ClockifyUser::ClockifyUser(QString userId, QObject *parent)
+ClockifyUser::ClockifyUser(const QString &userId, QObject *parent)
 	: QObject{parent},
 	  m_userId{userId},
 	  m_name{ClockifyManager::instance()->userName(userId)}

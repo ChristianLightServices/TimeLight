@@ -36,7 +36,7 @@ private:
 	QString m_id;
 	ClockifyProject m_project;
 	QString m_userId;
-	bool m_running;
+	bool m_running{false};
 	QDateTime m_start;
 	QDateTime m_end;
 

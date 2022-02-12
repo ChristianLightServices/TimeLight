@@ -10,7 +10,6 @@
 #include <QNetworkCookie>
 
 #include <iostream>
-#include <nlohmann/json.hpp>
 
 #include "JsonHelper.h"
 #include "ClockifyUser.h"
@@ -50,7 +49,7 @@ class NoCookies : public QNetworkCookieJar
 	}
 };
 
-ClockifyManager::ClockifyManager(QByteArray apiKey, QObject *parent)
+ClockifyManager::ClockifyManager(const QByteArray &apiKey, QObject *parent)
 	: QObject{parent},
 	  m_apiKey{apiKey}
 {
@@ -251,7 +250,7 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId, std::o
 		{
 			j = json::parse(rep->readAll().toStdString());
 		}
-		catch (std::exception ex)
+		catch (const std::exception &ex)
 		{
 			std::cout << ex.what() << std::endl;
 			j = {};
@@ -264,8 +263,7 @@ QVector<TimeEntry> ClockifyManager::getTimeEntries(const QString &userId, std::o
 	});
 
 	QVector<TimeEntry> entries;
-	for (const auto &entry : j)
-		entries.push_back(TimeEntry{entry});
+	std::transform(j.begin(), j.end(), entries.begin(), [](json &j) { return TimeEntry{j}; });
 
 	return entries;
 }
@@ -284,7 +282,7 @@ ClockifyUser *ClockifyManager::getApiKeyOwner()
 				json j{json::parse(rep->readAll().toStdString())};
 				retVal = new ClockifyUser{j["id"].get<QString>(), this};
 			}
-			catch (std::exception ex)
+		    catch (const std::exception &ex)
 			{
 				std::cout << ex.what() << std::endl;
 				retVal = nullptr;
@@ -418,7 +416,7 @@ void ClockifyManager::updateUsers()
 		query.addQueryItem("page", QString::number(pageNum++));
 		url.setQuery(query);
 
-		get(url, false, [this, numUsers](QNetworkReply *rep) {
+		get(url, false, [this](QNetworkReply *rep) {
 			try
 			{
 				json j{json::parse(rep->readAll().toStdString())};
@@ -470,9 +468,7 @@ void ClockifyManager::updateProjects()
 			json j{json::parse(rep->readAll().toStdString())};
 
 			m_projects.clear();
-			for (const auto &item : j)
-				m_projects.push_back({item["id"].get<QString>(),
-									  item["name"].get<QString>()});
+			std::transform(j.begin(), j.end(), m_projects.begin(), [](const json &j) { return ClockifyProject{j["id"].get<QString>(), j["name"].get<QString>()}; });
 
 			m_projectsLoaded = true;
 			m_expireProjectsTimer.start();

@@ -7,31 +7,31 @@
 #include <QDialogButtonBox>
 
 SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
-													   bool useLastDescription,
-													   bool disableDescription,
-													   QString oldDefaultProject,
-													   QString oldDefaultDescription,
-													   QPair<QStringList, QStringList> availableProjects,
-													   QWidget *parent)
-	: QDialog{parent},
-	  m_projectButtons{new QButtonGroup{this}},
-	  m_useLastProjectBtn{new QRadioButton{"Use the project from the last task", this}},
-	  m_useSpecificProjectBtn{new QRadioButton{"Use a specific project every time", this}},
-	  m_descriptionButtons{new QButtonGroup{this}},
-	  m_useLastDescriptionBtn{new QRadioButton{"Use the description from the last task", this}},
-	  m_useSpecificDescriptionBtn{new QRadioButton{"Use a specific description every time", this}},
-	  m_useNoDescriptionBtn{new QRadioButton{"Don't use a description", this}},
-	  m_defaultProjectCombo{new QComboBox{this}},
-	  m_defaultDescriptionEdit{new QLineEdit{oldDefaultDescription, this}},
-	  m_useLastProject{useLastProject},
-	  m_useLastDescription{useLastDescription},
-	  m_disableDescription{disableDescription},
-	  m_defaultProject{(oldDefaultProject.isEmpty() ? availableProjects.first.first() : oldDefaultProject)},
-	  m_availableProjects{availableProjects}
+                                                       bool useLastDescription,
+                                                       bool disableDescription,
+                                                       const QString &oldDefaultProject,
+                                                       const QString &oldDefaultDescription,
+                                                       const QPair<QStringList, QStringList> &availableProjects,
+                                                       QWidget *parent)
+    : QDialog{parent},
+      m_projectButtons{new QButtonGroup{this}},
+      m_useLastProjectBtn{new QRadioButton{"Use the project from the last task", this}},
+      m_useSpecificProjectBtn{new QRadioButton{"Use a specific project every time", this}},
+      m_descriptionButtons{new QButtonGroup{this}},
+      m_useLastDescriptionBtn{new QRadioButton{"Use the description from the last task", this}},
+      m_useSpecificDescriptionBtn{new QRadioButton{"Use a specific description every time", this}},
+      m_useNoDescriptionBtn{new QRadioButton{"Don't use a description", this}},
+      m_defaultProjectCombo{new QComboBox{this}},
+      m_defaultDescriptionEdit{new QLineEdit{oldDefaultDescription, this}},
+      m_useLastProject{useLastProject},
+      m_useLastDescription{useLastDescription},
+      m_disableDescription{disableDescription},
+      m_defaultProject{(oldDefaultProject.isEmpty() ? availableProjects.first.first() : oldDefaultProject)},
+      m_availableProjects{availableProjects}
 {
-	auto buttons = new QDialogButtonBox{QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this};
+    auto buttons = new QDialogButtonBox{QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this};
 
-	auto layout	= new QVBoxLayout{this};
+    auto layout	= new QVBoxLayout{this};
 
 	auto projectGroup = new QGroupBox{"Default project settings", this};
 	auto descriptionGroup = new QGroupBox{"Default description settings", this};

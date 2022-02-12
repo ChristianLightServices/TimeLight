@@ -13,12 +13,12 @@ class SelectDefaultProjectDialog : public QDialog
 
 public:
 	explicit SelectDefaultProjectDialog(bool useLastProject,
-										bool useLastDescription,
-										bool disableDescription,
-										QString oldDefaultProject,
-										QString oldDefaultDescription,
-										QPair<QStringList, QStringList> availableProjects,
-										QWidget *parent = nullptr);
+	                                    bool useLastDescription,
+	                                    bool disableDescription,
+	                                    const QString &oldDefaultProject,
+	                                    const QString &oldDefaultDescription,
+	                                    const QPair<QStringList, QStringList> &availableProjects,
+	                                    QWidget *parent = nullptr);
 
 	bool useLastProject() const { return m_useLastProject; }
 	bool useLastDescription() const { return m_useLastDescription; }

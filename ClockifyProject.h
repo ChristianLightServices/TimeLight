@@ -12,7 +12,7 @@ class ClockifyProject : public QObject
 	Q_OBJECT
 	
 public:
-	ClockifyProject(QString id, QString name, QString description = QString{}, QObject *parent = nullptr);
+	ClockifyProject(const QString &id, const QString &name, const QString &description = QString{}, QObject *parent = nullptr);
 	ClockifyProject(const ClockifyProject &that);
 	ClockifyProject();
 

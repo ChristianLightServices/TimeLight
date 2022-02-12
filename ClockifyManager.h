@@ -29,7 +29,7 @@ class ClockifyManager : public QObject
 	Q_PROPERTY(bool isValid READ isValid CONSTANT)
 
 public:
-	explicit ClockifyManager(QByteArray apiKey, QObject *parent = nullptr);
+	explicit ClockifyManager(const QByteArray &apiKey, QObject *parent = nullptr);
 
 	bool isValid() const { return m_isValid; }
 

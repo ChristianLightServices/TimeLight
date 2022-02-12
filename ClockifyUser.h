@@ -12,7 +12,7 @@ class ClockifyUser : public QObject
 	Q_OBJECT
 
 public:
-	explicit ClockifyUser(QString userId, QObject *parent = nullptr);
+	explicit ClockifyUser(const QString &userId, QObject *parent = nullptr);
 	explicit ClockifyUser(const ClockifyUser &that);
 
 	bool hasRunningTimeEntry();

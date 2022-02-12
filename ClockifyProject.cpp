@@ -2,7 +2,7 @@
 
 #include "JsonHelper.h"
 
-ClockifyProject::ClockifyProject(QString id, QString name, QString description, QObject *parent)
+ClockifyProject::ClockifyProject(const QString &id, const QString &name, const QString &description, QObject *parent)
 	: QObject{parent},
 	  m_id{id},
 	  m_name{name},
