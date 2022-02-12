@@ -41,35 +41,31 @@ int main(int argc, char *argv[])
 	}
 
 	ClockifyManager::init(apiKey.toUtf8());
-	while (!ClockifyManager::instance()->isValid())
-	{
-		bool ok{false};
-		apiKey = QInputDialog::getText(nullptr,
-									   "API key",
-									   "The API key is incorrect or invalid. Please enter a valid API key:",
-									   QLineEdit::Normal,
-									   QString{},
-									   &ok);
-		if (!ok)
-			return 1;
-		settings.setValue("apiKey", apiKey);
-		ClockifyManager::instance()->setApiKey(apiKey);
-	}
-	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
+
+	auto fixApiKey = [&] {
 		while (!ClockifyManager::instance()->isValid())
 		{
 			bool ok{false};
 			apiKey = QInputDialog::getText(nullptr,
-										   "API key",
-										   "The API key is incorrect or invalid. Please enter a valid API key:",
-										   QLineEdit::Normal,
-										   QString{},
-										   &ok);
+			                               "API key",
+			                               "The API key is incorrect or invalid. Please enter a valid API key:",
+			                               QLineEdit::Normal,
+			                               QString{},
+			                               &ok);
 			if (!ok)
-				QApplication::exit(1);
+				return false;
 			settings.setValue("apiKey", apiKey);
 			ClockifyManager::instance()->setApiKey(apiKey);
 		}
+
+		return true;
+	};
+	if (!fixApiKey())
+		return 1;
+
+	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
+		if (!fixApiKey())
+			QApplication::exit(1);
 	});
 
 	auto user{ClockifyManager::instance()->getApiKeyOwner()};
