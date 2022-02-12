@@ -20,7 +20,6 @@ TimeEntry::TimeEntry(nlohmann::json entry, QObject *parent)
 	catch (const std::exception &e)
 	{
 		std::cerr << "Error while creating time entry: " << e.what() << std::endl;
-		std::cerr << entry.dump(4);
 	}
 }
 
