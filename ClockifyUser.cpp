@@ -1,10 +1,7 @@
 #include "ClockifyUser.h"
 
-#include <nlohmann/json.hpp>
-
+#include "JsonHelper.h"
 #include "ClockifyManager.h"
-
-using json = nlohmann::json;
 
 ClockifyUser::ClockifyUser(const QString &userId, QObject *parent)
 	: QObject{parent},
