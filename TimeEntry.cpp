@@ -3,29 +3,19 @@
 #include "ClockifyManager.h"
 #include "JsonHelper.h"
 
-TimeEntry::TimeEntry(nlohmann::json entry, QObject *parent)
-	: QObject{parent}
-{
-	try
-	{
-		m_id = entry["id"].get<QString>();
-		auto projectId = entry["projectId"].get<QString>();
-		m_project = {projectId, ClockifyManager::instance()->projectName(projectId), entry["description"].get<QString>()};
-		m_userId = entry["userId"].get<QString>();
-		m_start = entry["timeInterval"]["start"].get<QDateTime>();
-		m_end = entry["timeInterval"]["end"].get<QDateTime>();
+TimeEntry::TimeEntry(const QString &id, const Project &project, const QString &description, const QString &userId, const QDateTime &start, const QDateTime &end, QObject *parent)
+    : QObject{parent},
+      m_id{id},
+      m_project{project},
+      m_description{description},
+      m_userId{userId},
+      m_start{start},
+      m_end{end},
+      m_isValid{true}
+{}
 
-		m_isValid = true;
-	}
-	catch (const std::exception &e)
-	{
-		std::cerr << "Error while creating time entry: " << e.what() << std::endl;
-	}
-}
-
-TimeEntry::TimeEntry()
-	: QObject{nullptr},
-	  m_isValid{false}
+TimeEntry::TimeEntry(QObject *parent)
+    : QObject{parent}
 {
 }
 

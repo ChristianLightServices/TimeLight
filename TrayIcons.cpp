@@ -17,8 +17,9 @@
 
 #include <SingleApplication>
 
-#include "ClockifyProject.h"
-#include "ClockifyUser.h"
+#include "ClockifyManager.h"
+#include "Project.h"
+#include "User.h"
 #include "JsonHelper.h"
 #include "SelectDefaultProjectDialog.h"
 #include "SelectDefaultWorkspaceDialog.h"
@@ -32,31 +33,95 @@ QPair<QString, QIcon> TrayIcons::s_notWorking;
 QPair<QString, QIcon> TrayIcons::s_powerNotConnected;
 QPair<QString, QIcon> TrayIcons::s_runningNotConnected;
 
-TrayIcons::TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent)
+TrayIcons::TrayIcons(QObject *parent)
 	: QObject{parent},
 	  m_clockifyRunning{new QSystemTrayIcon},
-	  m_runningJob{new QSystemTrayIcon},
-	  m_user{user},
-	  m_apiKey{ClockifyManager::instance()->apiKey()}
+      m_runningJob{new QSystemTrayIcon}
 {
 	QSettings settings;
-	m_defaultProjectId = settings.value("projectId").toString();
+	QString apiKey = settings.value("apiKey").toString();
 
-	m_defaultDescription = settings.value("description").toString();
-	m_disableDescription = settings.value("disableDescription", false).toBool();
-	m_useLastProject = settings.value("useLastProject", true).toBool();
-	m_useLastDescription = settings.value("useLastDescription", true).toBool();
-	m_breakTimeId = settings.value("breakTimeId").toString();
-	m_eventLoopInterval = settings.value("eventLoopInterval", 500).toInt();
-	QString workspaceId = settings.value("workspaceId").toString();
+	while (apiKey == QString{})
+	{
+		bool ok{false};
+		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, QString{}, &ok);
+		if (!ok)
+		{
+			m_valid = false;
+			return;
+		}
+		else
+			settings.setValue("apiKey", apiKey);
+	}
+	m_apiKey = apiKey;
+	m_manager = new ClockifyManager{apiKey.toUtf8()};
 
-	while (m_defaultProjectId == "" && !m_useLastProject)
+	auto fixApiKey = [&] {
+		while (!m_manager->isValid())
+		{
+			bool ok{false};
+			apiKey = QInputDialog::getText(nullptr,
+			                               "API key",
+			                               "The API key is incorrect or invalid. Please enter a valid API key:",
+			                               QLineEdit::Normal,
+			                               QString{},
+			                               &ok);
+			if (!ok)
+				return false;
+			settings.setValue("apiKey", apiKey);
+			m_manager->setApiKey(apiKey);
+		}
+
+		return true;
+	};
+	if (!fixApiKey())
+	{
+		m_valid = false;
+		return;
+	}
+
+	connect(m_manager, &ClockifyManager::invalidated, this, [this, fixApiKey]() {
+		if (!fixApiKey())
+		{
+			m_valid = false;
+			return;
+		}
+	});
+
+	m_user = m_manager->getApiKeyOwner();
+	m_manager->setWorkspaceId(settings.value(QStringLiteral("workspaceId"), m_user.workspaceId()).toString());
+	if (!m_user.isValid()) [[unlikely]]
+	{
+		QMessageBox::warning(nullptr, QStringLiteral("Fatal error"), QStringLiteral("Could not load user!"));
+		m_valid = false;
+		return;
+	}
+
+	connect(m_manager, &ClockifyManager::apiKeyChanged, this, [this]() {
+		auto temp = m_manager->getApiKeyOwner();
+		if (temp.isValid()) [[likely]]
+		        m_user = temp;
+		else [[unlikely]]
+		        QMessageBox::warning(nullptr, QStringLiteral("Operation failed"), QStringLiteral("Could not change API key!"));
+	});
+
+	m_defaultProjectId = settings.value(QStringLiteral("projectId")).toString();
+
+	m_defaultDescription = settings.value(QStringLiteral("description")).toString();
+	m_disableDescription = settings.value(QStringLiteral("disableDescription"), false).toBool();
+	m_useLastProject = settings.value(QStringLiteral("useLastProject"), true).toBool();
+	m_useLastDescription = settings.value(QStringLiteral("useLastDescription"), true).toBool();
+	m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
+	m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 500).toInt();
+	QString workspaceId = settings.value(QStringLiteral("workspaceId")).toString();
+
+	while (m_defaultProjectId == QString{} && !m_useLastProject)
 		getNewProjectId();
 
 	while (workspaceId.isEmpty())
 	{
 		getNewWorkspaceId();
-		workspaceId = ClockifyManager::instance()->workspaceId();
+		workspaceId = m_manager->workspaceId();
 	}
 
 	while (m_breakTimeId.isEmpty())
@@ -90,13 +155,13 @@ void TrayIcons::show()
 	m_runningJob->show();
 }
 
-ClockifyProject TrayIcons::defaultProject() const
+Project TrayIcons::defaultProject()
 {
 	QString projectId;
 	QString description;
-	int pageNum{1};
+	int pageNum{m_manager->paginationStartsAt()};
 	bool itemsLeftToLoad{true};
-	auto entries = m_user->getTimeEntries(pageNum);
+	auto entries = m_user.getTimeEntries(pageNum);
 
 	if (!m_useLastProject)
 		projectId = m_defaultProjectId;
@@ -121,7 +186,7 @@ ClockifyProject TrayIcons::defaultProject() const
 				}
 			}
 
-			auto newEntries = m_user->getTimeEntries(++pageNum);
+			auto newEntries = m_user.getTimeEntries(++pageNum);
 			if (newEntries.empty())
 				itemsLeftToLoad = false;
 			else
@@ -130,7 +195,7 @@ ClockifyProject TrayIcons::defaultProject() const
 
 		// when all else fails, use the first extant project
 		if (!projectIdLoaded) [[unlikely]]
-			projectId = ClockifyManager::instance()->projects().first().id();
+		    projectId = m_manager->projects().first().id();
 	}
 
 	if (m_disableDescription)
@@ -153,7 +218,7 @@ ClockifyProject TrayIcons::defaultProject() const
 				}
 			}
 
-			auto newEntries = m_user->getTimeEntries(++pageNum);
+			auto newEntries = m_user.getTimeEntries(++pageNum);
 			if (newEntries.empty())
 				itemsLeftToLoad = false;
 			else
@@ -161,31 +226,30 @@ ClockifyProject TrayIcons::defaultProject() const
 		} while (itemsLeftToLoad || !descriptionLoaded);
 
 		if (!descriptionLoaded) [[unlikely]]
-			description = ClockifyManager::instance()->projects().first().description();
+		    description = m_manager->projects().first().description();
 	}
 
-	return ClockifyProject{projectId, ClockifyManager::instance()->projectName(projectId), description};
+	return Project{projectId, m_manager->projectName(projectId), description};
 }
 
-void TrayIcons::setUser(QSharedPointer<ClockifyUser> user)
+void TrayIcons::setUser(User user)
 {
-	m_user.clear();
 	m_user = user;
 }
 
 void TrayIcons::updateTrayIcons()
 {
-	if (!ClockifyManager::instance()->isConnectedToInternet()) [[unlikely]]
+	if (!m_manager->isConnectedToInternet()) [[unlikely]]
 	{
 		setClockifyRunningIconTooltip(s_powerNotConnected);
 		setRunningJobIconTooltip(s_runningNotConnected);
 	}
-	else if (m_user->hasRunningTimeEntry())
+	else if (m_user.hasRunningTimeEntry())
 	{
 		setClockifyRunningIconTooltip(s_clockifyOn);
 
 		try {
-			if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
+			if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
 				setRunningJobIconTooltip(s_onBreak);
 			else
 				setRunningJobIconTooltip(s_working);
@@ -206,7 +270,7 @@ void TrayIcons::getNewProjectId()
 {
 	QStringList projectIds;
 	QStringList projectNames;
-	for (auto &project : ClockifyManager::instance()->projects())
+	for (auto &project : m_manager->projects())
 	{
 		projectIds.push_back(project.id());
 		projectNames.push_back(project.name());
@@ -247,7 +311,7 @@ void TrayIcons::getNewApiKey()
 	}
 	while (m_apiKey == "");
 
-	ClockifyManager::instance()->setApiKey(m_apiKey);
+	m_manager->setApiKey(m_apiKey);
 
 	QSettings settings;
 	settings.setValue("apiKey", m_apiKey);
@@ -255,10 +319,10 @@ void TrayIcons::getNewApiKey()
 
 void TrayIcons::getNewWorkspaceId()
 {
-	SelectDefaultWorkspaceDialog dialog{ClockifyManager::instance()->getOwnerWorkspaces(), this};
+	SelectDefaultWorkspaceDialog dialog{m_manager->getOwnerWorkspaces(), this};
 	if (dialog.getNewWorkspace())
 	{
-		ClockifyManager::instance()->setWorkspaceId(dialog.selectedWorkspaceId());
+		m_manager->setWorkspaceId(dialog.selectedWorkspaceId());
 
 		QSettings settings;
 		settings.setValue("workspaceId", dialog.selectedWorkspaceId());
@@ -268,7 +332,7 @@ void TrayIcons::getNewWorkspaceId()
 void TrayIcons::getNewBreakTimeId()
 {
 	auto ok{false};
-	auto projects = ClockifyManager::instance()->projects();
+	auto projects = m_manager->projects();
 
 	QStringList projectIds;
 	QStringList projectNames;
@@ -380,23 +444,23 @@ void TrayIcons::setUpTrayIcons()
 
 	// set up the menu actions
 	connect(m_clockifyRunningMenu->addAction("Start"), &QAction::triggered, this, [this]() {
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 
-		if (!m_user->hasRunningTimeEntry()) [[likely]]
+		if (!m_user.hasRunningTimeEntry()) [[likely]]
 		{
 			auto project = defaultProject();
-			m_user->startTimeEntry(project.id(), project.description());
+			m_user.startTimeEntry(project.id(), project.description());
 			updateTrayIcons();
 		}
 	});
 	connect(m_clockifyRunningMenu->addAction("Stop"), &QAction::triggered, this, [this]() {
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 
-		if (m_user->hasRunningTimeEntry()) [[likely]]
+		if (m_user.hasRunningTimeEntry()) [[likely]]
 		{
-			m_user->stopCurrentTimeEntry();
+			m_user.stopCurrentTimeEntry();
 			updateTrayIcons();
 		}
 	});
@@ -428,7 +492,7 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_clockifyRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
 
 	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [this]() {
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 			return;
@@ -436,22 +500,22 @@ void TrayIcons::setUpTrayIcons()
 
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
-		if (m_user->hasRunningTimeEntry())
+		if (m_user.hasRunningTimeEntry())
 		{
 			try
 			{
-				if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
+				if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
 					return;
 			}
 			catch (const std::exception &) {}
 
-			start = m_user->stopCurrentTimeEntry();
+			start = m_user.stopCurrentTimeEntry();
 		}
-		m_user->startTimeEntry(m_breakTimeId, start);
+		m_user.startTimeEntry(m_breakTimeId, start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [this]() {
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 			return;
@@ -459,19 +523,19 @@ void TrayIcons::setUpTrayIcons()
 
 		QDateTime start = QDateTime::currentDateTimeUtc();
 
-		if (m_user->hasRunningTimeEntry())
+		if (m_user.hasRunningTimeEntry())
 		{
 			try
 			{
-				if (m_user->getRunningTimeEntry().project().id() != m_breakTimeId)
+				if (m_user.getRunningTimeEntry().project().id() != m_breakTimeId)
 					return;
 			}
 			catch (const std::exception &) {}
 
-			start = m_user->stopCurrentTimeEntry();
+			start = m_user.stopCurrentTimeEntry();
 		}
 		auto project = defaultProject();
-		m_user->startTimeEntry(project.id(), project.description(), start);
+		m_user.startTimeEntry(project.id(), project.description(), start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
@@ -511,19 +575,19 @@ void TrayIcons::setUpTrayIcons()
 			return;
 		}
 
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 			m_eventLoop.start();
 			return;
 		}
 
-		if (m_user->hasRunningTimeEntry())
-			m_user->stopCurrentTimeEntry();
+		if (m_user.hasRunningTimeEntry())
+			m_user.stopCurrentTimeEntry();
 		else
 		{
 			auto project = defaultProject();
-			m_user->startTimeEntry(project.id(), project.description());
+			m_user.startTimeEntry(project.id(), project.description());
 		}
 
 		m_eventLoop.start();
@@ -537,37 +601,37 @@ void TrayIcons::setUpTrayIcons()
 			return;
 		}
 
-		if (ClockifyManager::instance()->isConnectedToInternet() == false) [[unlikely]]
+		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
 			m_clockifyRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
 			m_eventLoop.start();
 			return;
 		}
 
-		if (m_user->hasRunningTimeEntry())
+		if (m_user.hasRunningTimeEntry())
 		{
-			if (m_user->getRunningTimeEntry().project().id() == m_breakTimeId)
+			if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
 			{
-				auto time = m_user->stopCurrentTimeEntry();
+				auto time = m_user.stopCurrentTimeEntry();
 				auto project = defaultProject();
-				m_user->startTimeEntry(project.id(), project.description(), time);
+				m_user.startTimeEntry(project.id(), project.description(), time);
 			}
 			else
 			{
-				auto time = m_user->stopCurrentTimeEntry();
-				m_user->startTimeEntry(m_breakTimeId, time);
+				auto time = m_user.stopCurrentTimeEntry();
+				m_user.startTimeEntry(m_breakTimeId, time);
 			}
 		}
 		else
 		{
 			auto project = defaultProject();
-			m_user->startTimeEntry(project.id(), project.description());
+			m_user.startTimeEntry(project.id(), project.description());
 		}
 
 		m_eventLoop.start();
 	});
 
-	connect(ClockifyManager::instance().data(), &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
+	connect(m_manager, &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
 		updateTrayIcons();
 	});
 

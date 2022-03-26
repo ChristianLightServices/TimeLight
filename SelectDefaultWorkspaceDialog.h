@@ -3,18 +3,18 @@
 
 #include <QObject>
 
-#include "ClockifyWorkspace.h"
+#include "Workspace.h"
 
 class SelectDefaultWorkspaceDialog : public QObject
 {
 	Q_OBJECT
 
 public:
-	SelectDefaultWorkspaceDialog(const QVector<ClockifyWorkspace> &workspaces, QObject *parent = nullptr);
+	SelectDefaultWorkspaceDialog(const QVector<Workspace> &workspaces, QObject *parent = nullptr);
 
-	ClockifyWorkspace selectedWorkspace() const
+	Workspace selectedWorkspace() const
 	{
-		return ClockifyWorkspace{m_defaultWorkspaceId, m_workspaceNames[m_workspaceIds.indexOf(m_defaultWorkspaceId)]};
+		return Workspace{m_defaultWorkspaceId, m_workspaceNames[m_workspaceIds.indexOf(m_defaultWorkspaceId)]};
 	}
 	QString selectedWorkspaceId() const { return m_defaultWorkspaceId; }
 	QString selectedWorkspaceName() const { return m_workspaceNames[m_workspaceIds.indexOf(m_defaultWorkspaceId)]; }

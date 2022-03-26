@@ -1,19 +1,21 @@
-#ifndef CLOCKIFYUSER_H
-#define CLOCKIFYUSER_H
+#ifndef USER_H
+#define USER_H
 
 #include <QObject>
 
 #include <optional>
 
 #include "TimeEntry.h"
+#include "AbstractTimeServiceManager.h"
 
-class ClockifyUser : public QObject
+class User : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit ClockifyUser(const QString &userId, QObject *parent = nullptr);
-	explicit ClockifyUser(const ClockifyUser &that);
+	explicit User(const QString &userId, const QString &name, const QString &workspaceId, AbstractTimeServiceManager *parent = nullptr);
+	explicit User(const User &that);
+	User(QObject *parent = nullptr);
 
 	bool hasRunningTimeEntry();
 	TimeEntry getRunningTimeEntry();
@@ -24,13 +26,23 @@ public:
 	void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
 	QVector<TimeEntry> getTimeEntries(std::optional<int> pageNumber = std::nullopt, std::optional<int> pageSize = std::nullopt);
 
-	ClockifyUser &operator=(const ClockifyUser &other);
+	User &operator=(const User &other);
+
+	QString userId() const { return m_userId; }
+	QString name() const { return m_name; }
+	QString workspaceId() const { return m_workspaceId; }
+	bool isValid() const { return m_isValid; }
 
 signals:
 
 private:
 	QString m_userId;
+	QString m_workspaceId;
 	QString m_name;
+
+	bool m_isValid{true};
+
+	AbstractTimeServiceManager *m_manager{nullptr};
 };
 
-#endif // CLOCKIFYUSER_H
+#endif // USER_H

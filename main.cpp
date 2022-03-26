@@ -13,7 +13,7 @@
 
 #include "JsonHelper.h"
 #include "ClockifyManager.h"
-#include "ClockifyUser.h"
+#include "User.h"
 #include "TrayIcons.h"
 #include "SelectDefaultWorkspaceDialog.h"
 
@@ -27,64 +27,9 @@ int main(int argc, char *argv[])
 	SingleApplication a{argc, argv};
 	a.setWindowIcon(QIcon{":/icons/greenlight.png"});
 
-	QSettings settings;
-
-	QString apiKey = settings.value("apiKey").toString();
-
-	while (apiKey == "")
-	{
-		bool ok{false};
-		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, QString{}, &ok);
-		if (!ok)
-			QApplication::exit(1);
-		settings.setValue("apiKey", apiKey);
-	}
-
-	ClockifyManager::init(apiKey.toUtf8());
-
-	auto fixApiKey = [&] {
-		while (!ClockifyManager::instance()->isValid())
-		{
-			bool ok{false};
-			apiKey = QInputDialog::getText(nullptr,
-			                               "API key",
-			                               "The API key is incorrect or invalid. Please enter a valid API key:",
-			                               QLineEdit::Normal,
-			                               QString{},
-			                               &ok);
-			if (!ok)
-				return false;
-			settings.setValue("apiKey", apiKey);
-			ClockifyManager::instance()->setApiKey(apiKey);
-		}
-
-		return true;
-	};
-	if (!fixApiKey())
-		return 1;
-
-	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::invalidated, &a, [&]() {
-		if (!fixApiKey())
-			QApplication::exit(1);
-	});
-
-	auto user{ClockifyManager::instance()->getApiKeyOwner()};
-	if (user == nullptr) [[unlikely]]
-	{
-		QMessageBox::warning(nullptr, "Fatal error", "Could not load user!");
-		return 0;
-	}
-
-	TrayIcons icons{QSharedPointer<ClockifyUser>{user}};
-
-	QObject::connect(ClockifyManager::instance().data(), &ClockifyManager::apiKeyChanged, &a, [&]() {
-		auto temp = ClockifyManager::instance()->getApiKeyOwner();
-		if (temp != nullptr) [[likely]]
-			icons.setUser(QSharedPointer<ClockifyUser>{temp});
-		else [[unlikely]]
-			QMessageBox::warning(nullptr, "Operation failed", "Could not change API key!");
-	});
-
+	TrayIcons icons;
+	if (!icons.valid())
+		return 2;
 	icons.show();
 
 	return a.exec();
