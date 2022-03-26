@@ -14,7 +14,7 @@ class User : public QObject
 
 public:
 	explicit User(const QString &userId, const QString &name, const QString &workspaceId, AbstractTimeServiceManager *parent = nullptr);
-	explicit User(const User &that);
+	User(const User &that);
 	User(QObject *parent = nullptr);
 
 	bool hasRunningTimeEntry();
