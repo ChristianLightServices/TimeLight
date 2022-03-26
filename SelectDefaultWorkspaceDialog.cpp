@@ -2,7 +2,7 @@
 
 #include <QInputDialog>
 
-SelectDefaultWorkspaceDialog::SelectDefaultWorkspaceDialog(const QVector<ClockifyWorkspace> &workspaces, QObject *parent)
+SelectDefaultWorkspaceDialog::SelectDefaultWorkspaceDialog(const QVector<Workspace> &workspaces, QObject *parent)
 	: QObject{parent}
 {
 	for (const auto &item : workspaces)

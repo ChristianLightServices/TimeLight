@@ -6,21 +6,23 @@
 #include <QTimer>
 
 #include "ClockifyManager.h"
-#include "ClockifyProject.h"
-#include "ClockifyUser.h"
+#include "Project.h"
+#include "User.h"
 
 class TrayIcons : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TrayIcons(const QSharedPointer<ClockifyUser> &user, QObject *parent = nullptr);
+	explicit TrayIcons(QObject *parent = nullptr);
 	~TrayIcons();
 
 	void show();
 
-	ClockifyProject defaultProject() const;
-	void setUser(QSharedPointer<ClockifyUser> user);
+	Project defaultProject();
+	void setUser(User user);
+
+	bool valid() const { return m_valid; }
 
 signals:
 
@@ -43,6 +45,8 @@ private:
 	void setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data);
 	void setRunningJobIconTooltip(const QPair<QString, QIcon> &data);
 
+	AbstractTimeServiceManager *m_manager;
+
 	QSystemTrayIcon *m_clockifyRunning{nullptr};
 	QSystemTrayIcon *m_runningJob{nullptr};
 
@@ -52,7 +56,7 @@ private:
 	QString m_clockifyRunningCurrentTooltip;
 	QString m_runningJobCurrentTooltip;
 
-	QSharedPointer<ClockifyUser> m_user;
+	User m_user;
 
 	QString m_apiKey;
 
@@ -65,6 +69,8 @@ private:
 
 	QTimer m_eventLoop;
 	int m_eventLoopInterval{};
+
+	bool m_valid{true};
 
 	static QPair<QString, QIcon> s_clockifyOn;
 	static QPair<QString, QIcon> s_clockifyOff;

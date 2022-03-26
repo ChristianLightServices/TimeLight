@@ -42,11 +42,8 @@ add_subdirectory(singleapplication)
 configure_file(version.h.in version.h)
 
 set(SRC_CLOCKIFY
-    ClockifyProject.cpp
     ClockifyManager.cpp
-    ClockifyUser.cpp
-	ClockifyWorkspace.cpp
-    TimeEntry.cpp
+    ClockifyManager.h
 )
 
 # put in some platform-specific configuration stuff
@@ -64,10 +61,24 @@ endif()
 set(SRC
 	${SRC_CLOCKIFY}
 
-	main.cpp
-	SelectDefaultProjectDialog.cpp
-	SelectDefaultWorkspaceDialog.cpp
-	TrayIcons.cpp
+    AbstractTimeServiceManager.cpp
+    AbstractTimeServiceManager.h
+    JsonHelper.h
+    main.cpp
+    Project.cpp
+    Project.h
+    SelectDefaultProjectDialog.cpp
+    SelectDefaultProjectDialog.h
+    SelectDefaultWorkspaceDialog.cpp
+    SelectDefaultWorkspaceDialog.h
+    TimeEntry.cpp
+    TimeEntry.h
+    TrayIcons.cpp
+    TrayIcons.h
+    User.cpp
+    User.h
+    Workspace.cpp
+    Workspace.h
 
 	res.qrc
 	${APP_ICON_RESOURCE}
