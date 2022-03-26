@@ -248,7 +248,8 @@ void TrayIcons::updateTrayIcons()
 	{
 		setClockifyRunningIconTooltip(s_clockifyOn);
 
-		try {
+		try
+		{
 			if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
 				setRunningJobIconTooltip(s_onBreak);
 			else
