@@ -36,7 +36,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	auto projectGroup = new QGroupBox{"Default project settings", this};
 	auto descriptionGroup = new QGroupBox{"Default description settings", this};
 
-	auto projectGroupLayout = new QGridLayout{this};
+	auto projectGroupLayout = new QGridLayout{projectGroup};
 
 	m_projectButtons->addButton(m_useLastProjectBtn);
 	m_projectButtons->addButton(m_useSpecificProjectBtn);
@@ -58,7 +58,7 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 
 	projectGroup->setLayout(projectGroupLayout);
 
-	auto descriptionGroupLayout = new QGridLayout{this};
+	auto descriptionGroupLayout = new QGridLayout{descriptionGroup};
 
 	m_descriptionButtons->addButton(m_useLastDescriptionBtn);
 	m_descriptionButtons->addButton(m_useSpecificDescriptionBtn);
@@ -87,8 +87,6 @@ SelectDefaultProjectDialog::SelectDefaultProjectDialog(bool useLastProject,
 	layout->addWidget(projectGroup);
 	layout->addWidget(descriptionGroup);
 	layout->addWidget(buttons);
-
-	setLayout(layout);
 
 	connect(m_projectButtons, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, [this](QAbstractButton *) {
 		if (m_projectButtons->checkedButton() == static_cast<QAbstractButton *>(m_useSpecificProjectBtn))
