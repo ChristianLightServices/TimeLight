@@ -25,6 +25,7 @@ public:
 	bool valid() const { return m_valid; }
 
 signals:
+	void timerStateChanged();
 
 public slots:
 	void setEventLoopInterval(int interval);
@@ -40,23 +41,25 @@ private slots:
 	void showLicenseDialog(QWidget *parent = nullptr);
 
 private:
-	void setUpTrayIcons();
+	enum class TimerState
+	{
+		Running,
+		OnBreak,
+		NotRunning,
+		Offline,
+		StateUnset,
+	};
 
-	void setClockifyRunningIconTooltip(const QPair<QString, QIcon> &data);
-	void setRunningJobIconTooltip(const QPair<QString, QIcon> &data);
+	void setUpTrayIcons();
+	void setTimerState(const TimerState state);
 
 	AbstractTimeServiceManager *m_manager;
 
-	QSystemTrayIcon *m_clockifyRunning{nullptr};
+	QSystemTrayIcon *m_timerRunning{nullptr};
 	QSystemTrayIcon *m_runningJob{nullptr};
 
-	// we'll cache icons and tooltips in these to avoid having to reset stuff a lot
-	const QIcon *m_clockifyRunningCurrentIcon{nullptr};
-	const QIcon *m_runningJobCurrentIcon{nullptr};
-	QString m_clockifyRunningCurrentTooltip;
-	QString m_runningJobCurrentTooltip;
-
 	User m_user;
+	TimerState m_timerState{TimerState::StateUnset};
 
 	QString m_apiKey;
 
@@ -72,8 +75,8 @@ private:
 
 	bool m_valid{true};
 
-	static QPair<QString, QIcon> s_clockifyOn;
-	static QPair<QString, QIcon> s_clockifyOff;
+	static QPair<QString, QIcon> s_timerOn;
+	static QPair<QString, QIcon> s_timerOff;
 	static QPair<QString, QIcon> s_onBreak;
 	static QPair<QString, QIcon> s_working;
 	static QPair<QString, QIcon> s_notWorking;
