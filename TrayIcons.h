@@ -20,7 +20,7 @@ public:
 	void show();
 
 	Project defaultProject();
-	void setUser(User user);
+	void setUser(const User &user);
 
 	bool valid() const { return m_valid; }
 

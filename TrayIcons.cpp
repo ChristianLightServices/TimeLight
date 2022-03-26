@@ -232,7 +232,7 @@ Project TrayIcons::defaultProject()
 	return Project{projectId, m_manager->projectName(projectId), description};
 }
 
-void TrayIcons::setUser(User user)
+void TrayIcons::setUser(const User &user)
 {
 	m_user = user;
 }
