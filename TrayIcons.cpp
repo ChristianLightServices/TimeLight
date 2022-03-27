@@ -666,7 +666,6 @@ void TrayIcons::setUpTrayIcons()
 		auto job{jobs.first()};
 
 		QTime duration{QTime::fromMSecsSinceStartOfDay(job.start().msecsTo(job.end()))};
-		std::cout << duration.isValid() << " " << job.start().msecsTo(job.end()) << " " << job.start().isValid() << " " << job.end().isValid() << std::endl;
 		QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
 		if (duration.hour() > 0)
 			timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
