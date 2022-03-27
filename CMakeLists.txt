@@ -6,7 +6,6 @@ set(ClockifyTrayIcons_VERSION_STR "${ClockifyTrayIcons_VERSION_MAJOR}.${Clockify
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
