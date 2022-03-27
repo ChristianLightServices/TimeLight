@@ -91,6 +91,7 @@ qt_add_executable(ClockifyTrayIcons ${OS_HACKS}
     res.qrc
     ${APP_ICON_RESOURCE}
 )
+qt_add_translations(ClockifyTrayIcons TS_FILES ClockifyTrayIcons_en_US.ts)
 
 if(APPLE)
 	set_target_properties(ClockifyTrayIcons PROPERTIES
