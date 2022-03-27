@@ -16,8 +16,8 @@ bool SelectDefaultWorkspaceDialog::getNewWorkspace()
 {
 	auto ok{false};
 	auto workspaceId = QInputDialog::getItem(nullptr,
-											 "Select default workspace",
-											 "Select the workspace you want to track time on:",
+	                                         tr("Select default workspace"),
+	                                         tr("Select the workspace you want to track time on:"),
 											 m_workspaceNames,
 											 m_workspaceIds.indexOf(m_defaultWorkspaceId),
 											 false,

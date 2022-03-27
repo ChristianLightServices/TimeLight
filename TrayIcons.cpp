@@ -44,7 +44,7 @@ TrayIcons::TrayIcons(QObject *parent)
 	while (apiKey == QString{})
 	{
 		bool ok{false};
-		apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, QString{}, &ok);
+		apiKey = QInputDialog::getText(nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, QString{}, &ok);
 		if (!ok)
 		{
 			m_valid = false;
@@ -61,8 +61,8 @@ TrayIcons::TrayIcons(QObject *parent)
 		{
 			bool ok{false};
 			apiKey = QInputDialog::getText(nullptr,
-			                               "API key",
-			                               "The API key is incorrect or invalid. Please enter a valid API key:",
+			                               tr("API key"),
+			                               tr("The API key is incorrect or invalid. Please enter a valid API key:"),
 			                               QLineEdit::Normal,
 			                               QString{},
 			                               &ok);
@@ -92,7 +92,7 @@ TrayIcons::TrayIcons(QObject *parent)
 	m_manager->setWorkspaceId(settings.value(QStringLiteral("workspaceId"), m_user.workspaceId()).toString());
 	if (!m_user.isValid()) [[unlikely]]
 	{
-		QMessageBox::warning(nullptr, QStringLiteral("Fatal error"), QStringLiteral("Could not load user!"));
+		QMessageBox::warning(nullptr, tr("Fatal error"), tr("Could not load user!"));
 		m_valid = false;
 		return;
 	}
@@ -102,7 +102,7 @@ TrayIcons::TrayIcons(QObject *parent)
 		if (temp.isValid()) [[likely]]
 		        m_user = temp;
 		else [[unlikely]]
-		        QMessageBox::warning(nullptr, QStringLiteral("Operation failed"), QStringLiteral("Could not change API key!"));
+		        QMessageBox::warning(nullptr, tr("Operation failed"), tr("Could not change API key!"));
 	});
 
 	m_defaultProjectId = settings.value(QStringLiteral("projectId")).toString();
@@ -128,13 +128,13 @@ TrayIcons::TrayIcons(QObject *parent)
 	while (m_breakTimeId.isEmpty())
 		getNewBreakTimeId();
 
-	s_timerOn = {"Clockify is running", QIcon{":/icons/greenpower.png"}};
-	s_timerOff = {"Clockify is not running", QIcon{":/icons/redpower.png"}};
-	s_onBreak = {"You are on break", QIcon{":/icons/yellowlight.png"}};
-	s_working = {"You are working", QIcon{":/icons/greenlight.png"}};
-	s_notWorking = {"You are not working", QIcon{":/icons/redlight.png"}};
-	s_powerNotConnected = {"You are offline", QIcon{":/icons/graypower.png"}};
-	s_runningNotConnected = {"You are offline", QIcon{":/icons/graylight.png"}};
+	s_timerOn = {tr("Clockify is running"), QIcon{":/icons/greenpower.png"}};
+	s_timerOff = {tr("Clockify is not running"), QIcon{":/icons/redpower.png"}};
+	s_onBreak = {tr("You are on break"), QIcon{":/icons/yellowlight.png"}};
+	s_working = {tr("You are working"), QIcon{":/icons/greenlight.png"}};
+	s_notWorking = {tr("You are not working"), QIcon{":/icons/redlight.png"}};
+	s_powerNotConnected = {tr("You are offline"), QIcon{":/icons/graypower.png"}};
+	s_runningNotConnected = {tr("You are offline"), QIcon{":/icons/graylight.png"}};
 
 	setUpTrayIcons();
 
@@ -303,7 +303,7 @@ void TrayIcons::getNewApiKey()
 	bool ok{true};
 	do
 	{
-		m_apiKey = QInputDialog::getText(nullptr, "API key", "Enter your Clockify API key:", QLineEdit::Normal, m_apiKey, &ok);
+		m_apiKey = QInputDialog::getText(nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, m_apiKey, &ok);
 		if (!ok)
 			return;
 	}
@@ -342,8 +342,8 @@ void TrayIcons::getNewBreakTimeId()
 	}
 
 	auto workspaceId = QInputDialog::getItem(nullptr,
-											 "Select break time project",
-											 "Select the project used for break time:",
+	                                         tr("Select break time project"),
+	                                         tr("Select the project used for break time:"),
 											 projectNames,
 											 projectIds.indexOf(m_breakTimeId),
 											 false,
@@ -361,12 +361,12 @@ void TrayIcons::getNewBreakTimeId()
 void TrayIcons::showAboutDialog()
 {
 	// put this into a variable to handle this gonzo string more nicely
-	constexpr auto licenseInfo = "ClockifyTrayIcons " VERSION_STR " copyright © 2020. Licensed " \
+	auto licenseInfo = tr("ClockifyTrayIcons %1 copyright © 2020. Licensed " \
 								 "under the MIT license.\n\nIcons from " \
 								 "[1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) " \
 								 "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))" \
 								 " and [Microsoft](https://github.com/microsoft/fluentui-system-icons) " \
-								 "(power icon, licensed [MIT](https://mit-license.org)).";
+	                             "(power icon, licensed [MIT](https://mit-license.org)).").arg(VERSION_STR);
 
 	QDialog dialog;
 
@@ -379,7 +379,7 @@ void TrayIcons::showAboutDialog()
 	layout->addWidget(infoLabel);
 
 	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
-	connect(bb->addButton("Show license", QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, &dialog] {
+	connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, &dialog] {
 		showLicenseDialog(&dialog);
 	});
 	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
@@ -387,7 +387,7 @@ void TrayIcons::showAboutDialog()
 	layout->addWidget(bb);
 
 	dialog.setLayout(layout);
-	dialog.setWindowTitle("About " + qApp->applicationName());
+	dialog.setWindowTitle(tr("About ") + qApp->applicationName());
 	dialog.resize(500, dialog.heightForWidth(500));
 	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
 	dialog.exec();
@@ -406,8 +406,8 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 	if (licenseFile.open(QIODevice::ReadOnly)) [[likely]]
 		licenseView->setText(licenseFile.readAll());
 	else [[unlikely]] // this really should never happen, but just in case...
-		licenseView->setMarkdown("Error: could not load the license. Please read the license on "
-								 "[GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE).");
+	    licenseView->setMarkdown(tr("Error: could not load the license. Please read the license on "
+	                             "[GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE)."));
 
 	licenseView->setOpenExternalLinks(true);
 	licenseView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
@@ -419,7 +419,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 	layout->addWidget(bb);
 
 	dialog.setLayout(layout);
-	dialog.setWindowTitle("MIT license");
+	dialog.setWindowTitle(tr("MIT license"));
 	dialog.setModal(true);
 	dialog.resize(600, 600);
 	dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2, dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
@@ -441,9 +441,9 @@ void TrayIcons::setUpTrayIcons()
 	auto m_runningJobMenu = new QMenu;
 
 	// set up the menu actions
-	connect(m_timerRunningMenu->addAction("Start"), &QAction::triggered, this, [this]() {
+	connect(m_timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
-		    m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+		        m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 
 		if (!m_user.hasRunningTimeEntry()) [[likely]]
 		{
@@ -452,9 +452,9 @@ void TrayIcons::setUpTrayIcons()
 			updateTrayIcons();
 		}
 	});
-	connect(m_timerRunningMenu->addAction("Stop"), &QAction::triggered, this, [this]() {
+	connect(m_timerRunningMenu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
-		    m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+		    m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 
 		if (m_user.hasRunningTimeEntry()) [[likely]]
 		{
@@ -462,15 +462,15 @@ void TrayIcons::setUpTrayIcons()
 			updateTrayIcons();
 		}
 	});
-	connect(m_timerRunningMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
-	connect(m_timerRunningMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
-	connect(m_timerRunningMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
-	connect(m_timerRunningMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
-	connect(m_timerRunningMenu->addAction("Change update interval"), &QAction::triggered, this, [this] {
+	connect(m_timerRunningMenu->addAction(tr("Change default project")), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_timerRunningMenu->addAction(tr("Change default workspace")), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
+	connect(m_timerRunningMenu->addAction(tr("Change break time project")), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
+	connect(m_timerRunningMenu->addAction(tr("Change API key")), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_timerRunningMenu->addAction(tr("Change update interval")), &QAction::triggered, this, [this] {
 		bool ok{};
 		auto interval = QInputDialog::getDouble(nullptr,
-												"Change update interval",
-												"Choose the new interval in seconds:",
+		                                        tr("Change update interval"),
+		                                        tr("Choose the new interval in seconds:"),
 												static_cast<double>(m_eventLoopInterval) / 1000,
 												0,
 												10,
@@ -483,7 +483,7 @@ void TrayIcons::setUpTrayIcons()
 			setEventLoopInterval(interval * 1000);
 	});
 	{
-		auto notifs = m_timerRunningMenu->addAction(QStringLiteral("Show job duration at completion"));
+		auto notifs = m_timerRunningMenu->addAction(tr("Show job duration at completion"));
 		notifs->setCheckable(true);
 		notifs->setChecked(m_showDurationNotifications);
 		connect(notifs, &QAction::triggered, this, [this, notifs] {
@@ -492,17 +492,17 @@ void TrayIcons::setUpTrayIcons()
 			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
 		});
 	}
-	connect(m_timerRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
+	connect(m_timerRunningMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
-	connect(m_timerRunningMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-	connect(m_timerRunningMenu->addAction("About"), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-	connect(m_timerRunningMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
+	connect(m_timerRunningMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+	connect(m_timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+	connect(m_timerRunningMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 
-	connect(m_runningJobMenu->addAction("Break"), &QAction::triggered, this, [this]() {
+	connect(m_runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
-			m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 			return;
 		}
 
@@ -522,10 +522,10 @@ void TrayIcons::setUpTrayIcons()
 		m_user.startTimeEntry(m_breakTimeId, start);
 		updateTrayIcons();
 	});
-	connect(m_runningJobMenu->addAction("Resume work"), &QAction::triggered, this, [this]() {
+	connect(m_runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
-			m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 			return;
 		}
 
@@ -546,15 +546,15 @@ void TrayIcons::setUpTrayIcons()
 		m_user.startTimeEntry(project.id(), project.description(), start);
 		updateTrayIcons();
 	});
-	connect(m_runningJobMenu->addAction("Change default project"), &QAction::triggered, this, &TrayIcons::getNewProjectId);
-	connect(m_runningJobMenu->addAction("Change default workspace"), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
-	connect(m_runningJobMenu->addAction("Change break time project"), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
-	connect(m_runningJobMenu->addAction("Change API key"), &QAction::triggered, this, &TrayIcons::getNewApiKey);
-	connect(m_runningJobMenu->addAction("Change update interval"), &QAction::triggered, this, [this] {
+	connect(m_runningJobMenu->addAction(tr("Change default project")), &QAction::triggered, this, &TrayIcons::getNewProjectId);
+	connect(m_runningJobMenu->addAction(tr("Change default workspace")), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
+	connect(m_runningJobMenu->addAction(tr("Change break time project")), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
+	connect(m_runningJobMenu->addAction(tr("Change API key")), &QAction::triggered, this, &TrayIcons::getNewApiKey);
+	connect(m_runningJobMenu->addAction(tr("Change update interval")), &QAction::triggered, this, [this] {
 		bool ok{};
 		auto interval = QInputDialog::getDouble(nullptr,
-												"Change update interval",
-												"Choose the new interval in seconds:",
+		                                        tr("Change update interval"),
+		                                        tr("Choose the new interval in seconds:"),
 												static_cast<double>(m_eventLoopInterval) / 1000,
 												0,
 												10,
@@ -567,7 +567,7 @@ void TrayIcons::setUpTrayIcons()
 			setEventLoopInterval(interval * 1000);
 	});
 	{
-		auto notifs = m_runningJobMenu->addAction(QStringLiteral("Show job duration at completion"));
+		auto notifs = m_runningJobMenu->addAction(tr("Show job duration at completion"));
 		notifs->setCheckable(true);
 		notifs->setChecked(m_showDurationNotifications);
 		connect(notifs, &QAction::triggered, this, [this, notifs] {
@@ -576,12 +576,12 @@ void TrayIcons::setUpTrayIcons()
 			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
 		});
 	}
-	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
+	connect(m_runningJobMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
-	connect(m_runningJobMenu->addAction("About Qt"), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-	connect(m_runningJobMenu->addAction("About"), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-	connect(m_runningJobMenu->addAction("Quit"), &QAction::triggered, qApp, &QApplication::quit);
+	connect(m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+	connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+	connect(m_runningJobMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 
 	// set up the actions on icon click
 	connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
@@ -595,7 +595,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
-			m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 			m_eventLoop.start();
 			return;
 		}
@@ -621,7 +621,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		{
-			m_timerRunning->showMessage("Internet connection lost", "The request could not be completed because the internet connection is down.");
+			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
 			m_eventLoop.start();
 			return;
 		}
@@ -672,10 +672,9 @@ void TrayIcons::setUpTrayIcons()
 			timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
 		else
 			timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
-		m_timerRunning->showMessage(QStringLiteral("Job ended"),
-		                            QStringLiteral("You worked %1 on %2")
-		                                .arg(timeString)
-		                                .arg(job.project().name()),
+		m_timerRunning->showMessage(tr("Job ended"),
+		                            tr("You worked %1 on %2")
+		                                .arg(timeString, job.project().name()),
 		                            QSystemTrayIcon::Information,
 		                            5000);
 	});
