@@ -13,9 +13,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# using 5.15 here doesn't mean that we can't use Qt 6, y'know
-find_package(QT 5.15 NAMES Qt6 Qt5 COMPONENTS Core Network Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
 # (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
@@ -79,9 +77,6 @@ set(SRC
     User.h
     Workspace.cpp
     Workspace.h
-
-	res.qrc
-	${APP_ICON_RESOURCE}
 )
 
 set(LIBRARIES
@@ -91,15 +86,11 @@ set(LIBRARIES
 	nlohmann_json::nlohmann_json
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-	qt_add_executable(ClockifyTrayIcons ${OS_HACKS} MANUAL_FINALIZATION ${SRC})
-else()
-	set(LIBRARIES
-		Qt${QT_VERSION_MAJOR}::Core
-		${LIBRARIES}
-	)
-    add_executable(ClockifyTrayIcons ${OS_HACKS} ${SRC})
-endif()
+qt_add_executable(ClockifyTrayIcons ${OS_HACKS}
+    ${SRC}
+    res.qrc
+    ${APP_ICON_RESOURCE}
+)
 
 if(APPLE)
 	set_target_properties(ClockifyTrayIcons PROPERTIES
@@ -115,7 +106,3 @@ if(APPLE)
 endif()
 
 target_link_libraries(ClockifyTrayIcons PRIVATE ${LIBRARIES})
-
-if(QT_VERSION_MAJOR EQUAL 6)
-	qt_finalize_executable(ClockifyTrayIcons)
-endif()
