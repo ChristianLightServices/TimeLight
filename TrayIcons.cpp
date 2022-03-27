@@ -114,6 +114,7 @@ TrayIcons::TrayIcons(QObject *parent)
 	m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
 	m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 500).toInt();
 	QString workspaceId = settings.value(QStringLiteral("workspaceId")).toString();
+	m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
 
 	while (m_defaultProjectId == QString{} && !m_useLastProject)
 		getNewProjectId();
@@ -481,6 +482,16 @@ void TrayIcons::setUpTrayIcons()
 		if (ok)
 			setEventLoopInterval(interval * 1000);
 	});
+	{
+		auto notifs = m_timerRunningMenu->addAction(QStringLiteral("Show job duration at completion"));
+		notifs->setCheckable(true);
+		notifs->setChecked(m_showDurationNotifications);
+		connect(notifs, &QAction::triggered, this, [this, notifs] {
+			m_showDurationNotifications = notifs->isChecked();
+			QSettings settings;
+			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
+		});
+	}
 	connect(m_timerRunningMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
@@ -555,6 +566,16 @@ void TrayIcons::setUpTrayIcons()
 		if (ok)
 			setEventLoopInterval(interval * 1000);
 	});
+	{
+		auto notifs = m_runningJobMenu->addAction(QStringLiteral("Show job duration at completion"));
+		notifs->setCheckable(true);
+		notifs->setChecked(m_showDurationNotifications);
+		connect(notifs, &QAction::triggered, this, [this, notifs] {
+			m_showDurationNotifications = notifs->isChecked();
+			QSettings settings;
+			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
+		});
+	}
 	connect(m_runningJobMenu->addAction("Open the Clockify website"), &QAction::triggered, this, []() {
 		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
 	});
@@ -635,6 +656,30 @@ void TrayIcons::setUpTrayIcons()
 	m_timerRunning->setContextMenu(m_timerRunningMenu);
 	m_runningJob->setContextMenu(m_runningJobMenu);
 
+	connect(this, &TrayIcons::jobEnded, this, [this] {
+		if (!m_showDurationNotifications)
+			return;
+
+		auto jobs = m_user.getTimeEntries(1, 1);
+		if (jobs.isEmpty())
+			return;
+		auto job{jobs.first()};
+
+		QTime duration{QTime::fromMSecsSinceStartOfDay(job.start().msecsTo(job.end()))};
+		std::cout << duration.isValid() << " " << job.start().msecsTo(job.end()) << " " << job.start().isValid() << " " << job.end().isValid() << std::endl;
+		QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
+		if (duration.hour() > 0)
+			timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
+		else
+			timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
+		m_timerRunning->showMessage(QStringLiteral("Job ended"),
+		                            QStringLiteral("You worked %1 on %2")
+		                                .arg(timeString)
+		                                .arg(job.project().name()),
+		                            QSystemTrayIcon::Information,
+		                            5000);
+	});
+
 	updateTrayIcons();
 }
 
@@ -656,12 +701,18 @@ void TrayIcons::setTimerState(const TimerState state)
 		m_timerRunning->setIcon(s_timerOn.second);
 		m_runningJob->setToolTip(s_onBreak.first);
 		m_runningJob->setIcon(s_onBreak.second);
+
+		if (m_timerState == TimerState::Running)
+			emit jobEnded();
 		break;
 	case TimerState::NotRunning:
 		m_timerRunning->setToolTip(s_timerOff.first);
 		m_timerRunning->setIcon(s_timerOff.second);
 		m_runningJob->setToolTip(s_notWorking.first);
 		m_runningJob->setIcon(s_notWorking.second);
+
+		if (m_timerState == TimerState::Running)
+			emit jobEnded();
 		break;
 	case TimerState::Offline:
 		m_timerRunning->setToolTip(s_powerNotConnected.first);
