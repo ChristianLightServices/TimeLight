@@ -26,6 +26,7 @@ public:
 
 signals:
 	void timerStateChanged();
+	void jobEnded();
 
 public slots:
 	void setEventLoopInterval(int interval);
@@ -66,6 +67,7 @@ private:
 	bool m_useLastProject;
 	bool m_useLastDescription;
 	bool m_disableDescription;
+	bool m_showDurationNotifications;
 	QString m_defaultProjectId;
 	QString m_defaultDescription;
 	QString m_breakTimeId;
