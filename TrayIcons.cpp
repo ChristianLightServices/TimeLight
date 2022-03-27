@@ -39,7 +39,7 @@ TrayIcons::TrayIcons(QObject *parent)
       m_runningJob{new QSystemTrayIcon}
 {
 	QSettings settings;
-	QString apiKey = settings.value("apiKey").toString();
+	QString apiKey = settings.value(QStringLiteral("apiKey")).toString();
 
 	while (apiKey == QString{})
 	{
@@ -51,7 +51,7 @@ TrayIcons::TrayIcons(QObject *parent)
 			return;
 		}
 		else
-			settings.setValue("apiKey", apiKey);
+			settings.setValue(QStringLiteral("apiKey"), apiKey);
 	}
 	m_apiKey = apiKey;
 	m_manager = new ClockifyManager{apiKey.toUtf8()};
@@ -68,7 +68,7 @@ TrayIcons::TrayIcons(QObject *parent)
 			                               &ok);
 			if (!ok)
 				return false;
-			settings.setValue("apiKey", apiKey);
+			settings.setValue(QStringLiteral("apiKey"), apiKey);
 			m_manager->setApiKey(apiKey);
 		}
 
@@ -289,11 +289,11 @@ void TrayIcons::getNewProjectId()
 		m_useLastDescription = dialog.useLastDescription();
 
 		QSettings settings;
-		settings.setValue("projectId", m_defaultProjectId);
-		settings.setValue("description", m_defaultDescription);
-		settings.setValue("disableDescription", m_disableDescription);
-		settings.setValue("useLastProject", m_useLastProject);
-		settings.setValue("useLastDescription", m_useLastDescription);
+		settings.setValue(QStringLiteral("projectId"), m_defaultProjectId);
+		settings.setValue(QStringLiteral("description"), m_defaultDescription);
+		settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);
+		settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
+		settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
 		settings.sync();
 	}
 }
@@ -312,7 +312,7 @@ void TrayIcons::getNewApiKey()
 	m_manager->setApiKey(m_apiKey);
 
 	QSettings settings;
-	settings.setValue("apiKey", m_apiKey);
+	settings.setValue(QStringLiteral("apiKey"), m_apiKey);
 }
 
 void TrayIcons::getNewWorkspaceId()
@@ -323,7 +323,7 @@ void TrayIcons::getNewWorkspaceId()
 		m_manager->setWorkspaceId(dialog.selectedWorkspaceId());
 
 		QSettings settings;
-		settings.setValue("workspaceId", dialog.selectedWorkspaceId());
+		settings.setValue(QStringLiteral("workspaceId"), dialog.selectedWorkspaceId());
 	}
 }
 
@@ -354,7 +354,7 @@ void TrayIcons::getNewBreakTimeId()
 		m_breakTimeId = projectIds[projectNames.indexOf(workspaceId)];
 
 		QSettings settings;
-		settings.setValue("breakTimeId", m_breakTimeId);
+		settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
 	}
 }
 
@@ -402,7 +402,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 
 	auto licenseView = new QTextBrowser{&dialog};
 
-	QFile licenseFile{":/LICENSE"};
+	QFile licenseFile{QStringLiteral(":/LICENSE")};
 	if (licenseFile.open(QIODevice::ReadOnly)) [[likely]]
 		licenseView->setText(licenseFile.readAll());
 	else [[unlikely]] // this really should never happen, but just in case...
@@ -432,7 +432,7 @@ void TrayIcons::setEventLoopInterval(int interval)
 	m_eventLoop.setInterval(m_eventLoopInterval);
 
 	QSettings settings;
-	settings.setValue("eventLoopInterval", m_eventLoopInterval);
+	settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
 }
 
 void TrayIcons::setUpTrayIcons()
@@ -493,7 +493,7 @@ void TrayIcons::setUpTrayIcons()
 		});
 	}
 	connect(m_timerRunningMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
-		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
+		QDesktopServices::openUrl(QUrl{QStringLiteral("https://clockify.me/tracker/")});
 	});
 	connect(m_timerRunningMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
@@ -577,7 +577,7 @@ void TrayIcons::setUpTrayIcons()
 		});
 	}
 	connect(m_runningJobMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
-		QDesktopServices::openUrl(QUrl{"https://clockify.me/tracker/"});
+		QDesktopServices::openUrl(QUrl{QStringLiteral("https://clockify.me/tracker/")});
 	});
 	connect(m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
