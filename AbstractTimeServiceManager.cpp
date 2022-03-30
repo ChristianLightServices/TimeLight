@@ -395,17 +395,21 @@ void AbstractTimeServiceManager::updateProjects()
 			try
 			{
 				json j{json::parse(rep->readAll().toStdString())};
+				if (j.empty() || j.is_null())
+				{
+					retVal = false;
+					return;
+				}
 
 //				using namespace std::placeholders;
 //				std::transform(j.begin(), j.end(), m_projects.begin(), std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
 				// I'm not sure why, but nlohmann::json tends to make everything into an array
 				if (j.is_array() && j[0].is_array())
 					j = j[0];
-//				std::cout << j.dump(4) << std::endl;
 				for (const auto &project : j)
 					m_projects.push_back(jsonToProject(project));
 
-				retVal = !j.empty();
+				retVal = !j.empty() && !j.is_null();
 			}
 			catch (const std::exception &e)
 			{
