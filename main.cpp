@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QMenu>
+#include <QTranslator>
 
 #include <SingleApplication>
 
@@ -26,6 +27,9 @@ int main(int argc, char *argv[])
 
 	SingleApplication a{argc, argv};
 	a.setWindowIcon(QIcon{":/icons/greenlight.png"});
+	QTranslator translator;
+	if (translator.load(QLocale{}, QStringLiteral("ClockifyTrayIcons"), QStringLiteral("_"), QStringLiteral(":/i18n")))
+		QApplication::installTranslator(&translator);
 
 	TrayIcons icons;
 	if (!icons.valid())
