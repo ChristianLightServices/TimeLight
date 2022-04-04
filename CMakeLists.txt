@@ -64,18 +64,24 @@ set(SRC
     main.cpp
     Project.cpp
     Project.h
-    SelectDefaultProjectDialog.cpp
-    SelectDefaultProjectDialog.h
-    SelectDefaultWorkspaceDialog.cpp
-    SelectDefaultWorkspaceDialog.h
+    Settings.cpp
+    Settings.h
+    SettingsDialog.cpp
+    SettingsDialog.h
     TimeEntry.cpp
     TimeEntry.h
     TrayIcons.cpp
     TrayIcons.h
     User.cpp
     User.h
+    Utils.h
+    Utils.cpp
     Workspace.cpp
     Workspace.h
+)
+
+set(TRANSLATIONS
+    ClockifyTrayIcons_en_US.ts
 )
 
 set(LIBRARIES
@@ -87,10 +93,11 @@ set(LIBRARIES
 
 qt_add_executable(ClockifyTrayIcons ${OS_HACKS}
     ${SRC}
-    res.qrc
     ${APP_ICON_RESOURCE}
+    ${TRANSLATIONS}
+    res.qrc
 )
-qt_add_translations(ClockifyTrayIcons TS_FILES ClockifyTrayIcons_en_US.ts)
+qt_add_translations(ClockifyTrayIcons TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
 
 if(APPLE)
 	set_target_properties(ClockifyTrayIcons PROPERTIES
