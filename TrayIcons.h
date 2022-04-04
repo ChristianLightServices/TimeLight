@@ -63,14 +63,6 @@ private:
 	QTimer m_eventLoop;
 
 	bool m_valid{true};
-
-	static QPair<QString, QIcon> s_timerOn;
-	static QPair<QString, QIcon> s_timerOff;
-	static QPair<QString, QIcon> s_onBreak;
-	static QPair<QString, QIcon> s_working;
-	static QPair<QString, QIcon> s_notWorking;
-	static QPair<QString, QIcon> s_powerNotConnected;
-	static QPair<QString, QIcon> s_runningNotConnected;
 };
 
 #endif // TRAYICONS_H
