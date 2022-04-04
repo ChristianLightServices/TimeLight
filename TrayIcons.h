@@ -71,6 +71,7 @@ private:
 	QString m_defaultProjectId;
 	QString m_defaultDescription;
 	QString m_breakTimeId;
+	QString m_currentRunningJobId;
 
 	QTimer m_eventLoop;
 	int m_eventLoopInterval{};
