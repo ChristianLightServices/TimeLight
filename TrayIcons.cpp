@@ -246,10 +246,13 @@ void TrayIcons::updateTrayIcons()
 	{
 		try
 		{
-			if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
+			if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry.project().id() == m_breakTimeId)
 				setTimerState(TimerState::OnBreak);
 			else
+			{
 				setTimerState(TimerState::Running);
+				m_currentRunningJobId = runningEntry.id();
+			}
 		}
 		catch (const std::exception &ex)
 		{
@@ -664,6 +667,9 @@ void TrayIcons::setUpTrayIcons()
 		if (jobs.isEmpty())
 			return;
 		auto job{jobs.first()};
+		if (!m_currentRunningJobId.isEmpty() && job.id() != m_currentRunningJobId)
+			return;
+		m_currentRunningJobId.clear();
 
 		QTime duration{QTime::fromMSecsSinceStartOfDay(job.start().msecsTo(job.end()))};
 		QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
