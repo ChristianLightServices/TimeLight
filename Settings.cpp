@@ -17,6 +17,7 @@ Settings::Settings(QObject *parent)
 	m_projectId = settings.value(QStringLiteral("projectId")).toString();
 	m_useLastDescription = settings.value(QStringLiteral("useLastDescription"), true).toBool();
 	m_useLastProject = settings.value(QStringLiteral("useLastProject"), true).toBool();
+	m_useSeparateBreakTime = settings.value(QStringLiteral("useSeparateBreakTime"), false).toBool();
 	m_workspaceId = settings.value(QStringLiteral("workspaceId")).toString();
 	settings.endGroup();
 
@@ -104,6 +105,15 @@ void Settings::setWorkspaceId(const QString &id)
     m_settingsDirty = true;
 }
 
+void Settings::setUseSeparateBreakTime(const bool use)
+{
+    if (use == m_useSeparateBreakTime)
+        return;
+    m_useSeparateBreakTime = use;
+    emit useSeparateBreakTimeChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::setDisableDescription(const bool disable)
 {
     if (disable == m_disableDescription)
@@ -163,6 +173,7 @@ void Settings::save()
 	settings.setValue(QStringLiteral("projectId"), m_projectId);
 	settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
 	settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
+	settings.setValue(QStringLiteral("useSeparateBreakTime"), m_useSeparateBreakTime);
 	settings.setValue(QStringLiteral("workspaceId"), m_workspaceId);
 	settings.endGroup();
 

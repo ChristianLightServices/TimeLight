@@ -56,6 +56,10 @@ int main(int argc, char *argv[])
 			settings.setValue(QStringLiteral("app/eventLoopInterval"), oldSettings.value(QStringLiteral("eventLoopInterval")));
 			settings.setValue(QStringLiteral("app/showDurationNotifications"), oldSettings.value(QStringLiteral("showDurationNotifications")));
 
+			// This setting "migration" is a special case: for new users, this setting will default to false,
+			// but users who are upgrading from old versions should not have their workflows broken
+			settings.setValue(QStringLiteral("com.clockify/useSeparateBreakTime"), true);
+
 			// ...and now we can delete all of the old keys
 			const QStringList oldKeys = {QStringLiteral("apiKey"),
 			                       QStringLiteral("breakTimeId"),

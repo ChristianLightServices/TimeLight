@@ -24,18 +24,9 @@
 #include "SettingsDialog.h"
 #include "version.h"
 
-QPair<QString, QIcon> TrayIcons::s_timerOn;
-QPair<QString, QIcon> TrayIcons::s_timerOff;
-QPair<QString, QIcon> TrayIcons::s_onBreak;
-QPair<QString, QIcon> TrayIcons::s_working;
-QPair<QString, QIcon> TrayIcons::s_notWorking;
-QPair<QString, QIcon> TrayIcons::s_powerNotConnected;
-QPair<QString, QIcon> TrayIcons::s_runningNotConnected;
-
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
-      m_timerRunning{new QSystemTrayIcon},
-      m_runningJob{new QSystemTrayIcon}
+      m_timerRunning{new QSystemTrayIcon}
 {
 	while (Settings::instance()->apiKey().isEmpty())
 	{
@@ -100,13 +91,8 @@ TrayIcons::TrayIcons(QObject *parent)
 		getNewProjectId();
 	}
 
-	s_timerOn = {tr("Clockify is running"), QIcon{":/icons/greenpower.png"}};
-	s_timerOff = {tr("Clockify is not running"), QIcon{":/icons/redpower.png"}};
-	s_onBreak = {tr("You are on break"), QIcon{":/icons/yellowlight.png"}};
-	s_working = {tr("You are working"), QIcon{":/icons/greenlight.png"}};
-	s_notWorking = {tr("You are not working"), QIcon{":/icons/redlight.png"}};
-	s_powerNotConnected = {tr("You are offline"), QIcon{":/icons/graypower.png"}};
-	s_runningNotConnected = {tr("You are offline"), QIcon{":/icons/graylight.png"}};
+	if (Settings::instance()->useSeparateBreakTime())
+		m_runningJob = new QSystemTrayIcon;
 
 	setUpTrayIcons();
 
@@ -119,13 +105,15 @@ TrayIcons::TrayIcons(QObject *parent)
 TrayIcons::~TrayIcons()
 {
 	delete m_timerRunning;
-	delete m_runningJob;
+	if (m_runningJob)
+		delete m_runningJob;
 }
 
 void TrayIcons::show()
 {
 	m_timerRunning->show();
-	m_runningJob->show();
+	if (m_runningJob)
+		m_runningJob->show();
 }
 
 Project TrayIcons::defaultProject()
@@ -318,9 +306,6 @@ void TrayIcons::setEventLoopInterval(int interval)
 void TrayIcons::setUpTrayIcons()
 {
 	auto m_timerRunningMenu = new QMenu;
-	auto m_runningJobMenu = new QMenu;
-
-	// set up the menu actions
 	connect(m_timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
 		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 		        m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
@@ -350,62 +335,7 @@ void TrayIcons::setUpTrayIcons()
 	connect(m_timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
 	connect(m_timerRunningMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 
-	connect(m_runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
-		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
-		{
-			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
-			return;
-		}
-
-		QDateTime start = QDateTime::currentDateTimeUtc();
-
-		if (m_user.hasRunningTimeEntry())
-		{
-			try
-			{
-				if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
-					return;
-			}
-			catch (const std::exception &) {}
-
-			start = m_user.stopCurrentTimeEntry();
-		}
-		m_user.startTimeEntry(Settings::instance()->breakTimeId(), start);
-		updateTrayIcons();
-	});
-	connect(m_runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
-		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
-		{
-			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
-			return;
-		}
-
-		QDateTime start = QDateTime::currentDateTimeUtc();
-
-		if (m_user.hasRunningTimeEntry())
-		{
-			try
-			{
-				if (m_user.getRunningTimeEntry().project().id() != Settings::instance()->breakTimeId())
-					return;
-			}
-			catch (const std::exception &) {}
-
-			start = m_user.stopCurrentTimeEntry();
-		}
-		auto project = defaultProject();
-		m_user.startTimeEntry(project.id(), project.description(), start);
-		updateTrayIcons();
-	});
-	connect(m_runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] { SettingsDialog d{m_manager, {m_manager}}; d.exec(); });
-	connect(m_runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
-		QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
-	});
-	connect(m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-	connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-	connect(m_runningJobMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
-
-	// set up the actions on icon click
+	m_timerRunning->setContextMenu(m_timerRunningMenu);
 	connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
 		m_eventLoop.stop();
 
@@ -432,51 +362,109 @@ void TrayIcons::setUpTrayIcons()
 
 		m_eventLoop.start();
 	});
-	connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
-		m_eventLoop.stop();
 
-		if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick) [[unlikely]]
-		{
-			m_eventLoop.start();
-			return;
-		}
-
-		if (m_manager->isConnectedToInternet() == false) [[unlikely]]
-		{
-			m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
-			m_eventLoop.start();
-			return;
-		}
-
-		if (m_user.hasRunningTimeEntry())
-		{
-			if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
+	if (Settings::instance()->useSeparateBreakTime())
+	{
+		auto m_runningJobMenu = new QMenu;
+		connect(m_runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
+			if (m_manager->isConnectedToInternet() == false) [[unlikely]]
 			{
-				auto time = m_user.stopCurrentTimeEntry();
-				auto project = defaultProject();
-				m_user.startTimeEntry(project.id(), project.description(), time);
+				m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
+				return;
+			}
+
+				QDateTime start = QDateTime::currentDateTimeUtc();
+
+			if (m_user.hasRunningTimeEntry())
+			{
+				try
+				{
+					if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
+						return;
+				}
+				catch (const std::exception &) {}
+
+				start = m_user.stopCurrentTimeEntry();
+			}
+			m_user.startTimeEntry(Settings::instance()->breakTimeId(), start);
+			updateTrayIcons();
+		});
+		connect(m_runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
+			if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+			{
+				m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
+				return;
+			}
+
+				QDateTime start = QDateTime::currentDateTimeUtc();
+
+			if (m_user.hasRunningTimeEntry())
+			{
+				try
+				{
+					if (m_user.getRunningTimeEntry().project().id() != Settings::instance()->breakTimeId())
+						return;
+				}
+				catch (const std::exception &) {}
+
+				start = m_user.stopCurrentTimeEntry();
+			}
+			auto project = defaultProject();
+			m_user.startTimeEntry(project.id(), project.description(), start);
+			updateTrayIcons();
+		});
+		connect(m_runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] { SettingsDialog d{m_manager, {m_manager}}; d.exec(); });
+		connect(m_runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+			QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
+		});
+		connect(m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+		connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+		connect(m_runningJobMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
+
+		m_runningJob->setContextMenu(m_runningJobMenu);
+		connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
+			m_eventLoop.stop();
+
+			if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick) [[unlikely]]
+			{
+				m_eventLoop.start();
+				return;
+			}
+
+			if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+			{
+				m_timerRunning->showMessage(tr("Internet connection lost"), tr("The request could not be completed because the internet connection is down."));
+				m_eventLoop.start();
+				return;
+			}
+
+			if (m_user.hasRunningTimeEntry())
+			{
+				if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
+				{
+					auto time = m_user.stopCurrentTimeEntry();
+					auto project = defaultProject();
+					m_user.startTimeEntry(project.id(), project.description(), time);
+				}
+				else
+				{
+					auto time = m_user.stopCurrentTimeEntry();
+					m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+				}
 			}
 			else
 			{
-				auto time = m_user.stopCurrentTimeEntry();
-				m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+				auto project = defaultProject();
+				m_user.startTimeEntry(project.id(), project.description());
 			}
-		}
-		else
-		{
-			auto project = defaultProject();
-			m_user.startTimeEntry(project.id(), project.description());
-		}
 
-		m_eventLoop.start();
-	});
+			m_eventLoop.start();
+		});
+	}
 
 	connect(m_manager, &ClockifyManager::internetConnectionChanged, this, [this](bool) {
 		updateTrayIcons();
 	});
-
-	m_timerRunning->setContextMenu(m_timerRunningMenu);
-	m_runningJob->setContextMenu(m_runningJobMenu);
 
 	connect(this, &TrayIcons::jobEnded, this, [this] {
 		if (!Settings::instance()->showDurationNotifications())
@@ -514,34 +502,46 @@ void TrayIcons::setTimerState(const TimerState state)
 	switch (state)
 	{
 	case TimerState::Running:
-		m_timerRunning->setToolTip(s_timerOn.first);
-		m_timerRunning->setIcon(s_timerOn.second);
-		m_runningJob->setToolTip(s_working.first);
-		m_runningJob->setIcon(s_working.second);
+		m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
+		m_timerRunning->setIcon(QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
+		if (m_runningJob)
+		{
+			m_runningJob->setToolTip(tr("You are working"));
+			m_runningJob->setIcon(QIcon{":/icons/greenlight.png"});
+		}
 		break;
 	case TimerState::OnBreak:
-		m_timerRunning->setToolTip(s_timerOn.first);
-		m_timerRunning->setIcon(s_timerOn.second);
-		m_runningJob->setToolTip(s_onBreak.first);
-		m_runningJob->setIcon(s_onBreak.second);
+		m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
+		m_timerRunning->setIcon(QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/yellowlight.png")});
+		if (m_runningJob) // this *should* always be true, but just in case...
+		{
+			m_runningJob->setToolTip(tr("You are on break"));
+			m_runningJob->setIcon(QIcon{":/icons/yellowlight.png"});
+		}
 
 		if (m_timerState == TimerState::Running)
 			emit jobEnded();
 		break;
 	case TimerState::NotRunning:
-		m_timerRunning->setToolTip(s_timerOff.first);
-		m_timerRunning->setIcon(s_timerOff.second);
-		m_runningJob->setToolTip(s_notWorking.first);
-		m_runningJob->setIcon(s_notWorking.second);
+		m_timerRunning->setToolTip(tr("%1 is not running").arg(m_manager->serviceName()));
+		m_timerRunning->setIcon(QIcon{m_runningJob ? QStringLiteral(":/icons/redpower.png") : QStringLiteral(":/icons/redlight.png")});
+		if (m_runningJob)
+		{
+			m_runningJob->setToolTip(tr("You are not working"));
+			m_runningJob->setIcon(QIcon{":/icons/redlight.png"});
+		}
 
 		if (m_timerState == TimerState::Running)
 			emit jobEnded();
 		break;
 	case TimerState::Offline:
-		m_timerRunning->setToolTip(s_powerNotConnected.first);
-		m_timerRunning->setIcon(s_powerNotConnected.second);
-		m_runningJob->setToolTip(s_runningNotConnected.first);
-		m_runningJob->setIcon(s_runningNotConnected.second);
+		m_timerRunning->setToolTip(tr("You are offline"));
+		m_timerRunning->setIcon(QIcon{m_runningJob ? QStringLiteral(":/icons/graypower.png") : QStringLiteral(":/icons/graylight.png")});
+		if (m_runningJob)
+		{
+			m_runningJob->setToolTip(tr("You are offline"));
+			m_runningJob->setIcon(QIcon{":/icons/graylight.png"});
+		}
 		break;
 	default:
 		break;

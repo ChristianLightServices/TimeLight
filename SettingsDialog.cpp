@@ -172,8 +172,7 @@ QWidget *SettingsDialog::createProjectPage()
 	auto breakProjectGroupLayout{new QGridLayout{breakProjectGroup}};
 
 	auto useBreakTime{new QCheckBox{tr("Use a separate break time project"), breakProjectGroup}};
-	useBreakTime->setChecked(true);
-	useBreakTime->setDisabled(true);
+	useBreakTime->setChecked(Settings::instance()->useSeparateBreakTime());
 
 	auto breakProject{new QComboBox{breakProjectGroup}};
 	breakProject->setEnabled(useBreakTime->isChecked());
@@ -244,19 +243,27 @@ QWidget *SettingsDialog::createProjectPage()
 		Settings::instance()->setProjectId(m_availableProjects.first[i]);
 	});
 
-	connect(useBreakTime, &QCheckBox::stateChanged, breakProject, [breakProject](int state) {
-		switch (state)
+	connect(useBreakTime, &QCheckBox::stateChanged, breakProject, [this, useBreakTime, breakProject](int state) {
+		if (QMessageBox::information(this, tr("Restart required"), tr("To continue, the program will restart"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
 		{
-		case Qt::Checked:
-		case Qt::PartiallyChecked:
-			breakProject->setEnabled(true);
-			break;
-		case Qt::Unchecked:
-			breakProject->setDisabled(true);
-			break;
-		default:
-			break;
+			switch (state)
+			{
+			case Qt::Checked:
+			case Qt::PartiallyChecked:
+				Settings::instance()->setUseSeparateBreakTime(true);
+				breakProject->setEnabled(true);
+				break;
+			case Qt::Unchecked:
+				Settings::instance()->setUseSeparateBreakTime(false);
+				breakProject->setDisabled(true);
+				break;
+			default:
+				break;
+			}
+			ClockifyTrayIcons::restartApp();
 		}
+		else
+			useBreakTime->setChecked(Settings::instance()->useSeparateBreakTime());
 	});
 
 	connect(breakProject, &QComboBox::currentIndexChanged, breakProject, [this, breakProject](int i) {
