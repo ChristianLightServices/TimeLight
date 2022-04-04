@@ -283,11 +283,8 @@ void TrayIcons::showAboutDialog()
 
 void TrayIcons::showLicenseDialog(QWidget *parent)
 {
-
 	QDialog dialog{parent};
-
 	auto layout = new QVBoxLayout{&dialog};
-
 	auto licenseView = new QTextBrowser{&dialog};
 
 	QFile licenseFile{QStringLiteral(":/LICENSE")};
@@ -303,10 +300,8 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 
 	auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
 	connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-
 	layout->addWidget(bb);
 
-	dialog.setLayout(layout);
 	dialog.setWindowTitle(tr("MIT license"));
 	dialog.setModal(true);
 	dialog.resize(600, 600);
