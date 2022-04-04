@@ -476,6 +476,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	req.setRawHeader(authHeaderName(), m_apiKey);
+	req.setRawHeader("Accept", "application/json");
 
 	auto rep = m_manager.get(req);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
@@ -548,6 +549,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	req.setRawHeader(authHeaderName(), m_apiKey);
+	req.setRawHeader("Accept", "application/json");
 
 	auto rep = m_manager.post(req, body);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
@@ -620,6 +622,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	req.setRawHeader(authHeaderName(), m_apiKey);
+	req.setRawHeader("Accept", "application/json");
 
 	auto rep = m_manager.sendCustomRequest(req, "PATCH", body);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
@@ -687,6 +690,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
 	QNetworkRequest req{url};
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	req.setRawHeader(authHeaderName(), m_apiKey);
+	req.setRawHeader("Accept", "application/json");
 
 	auto rep = m_manager.head(req);
 	m_pendingReplies.insert(rep, {successCb, failureCb});
