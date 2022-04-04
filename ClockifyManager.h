@@ -10,6 +10,10 @@ class ClockifyManager : public AbstractTimeServiceManager
 public:
     explicit ClockifyManager(const QByteArray &apiKey, QObject *parent = nullptr);
 
+    virtual QString serviceIdentifier() const final { return QStringLiteral("com.clockify"); }
+    virtual QString serviceName() const final { return QStringLiteral("Clockify"); }
+    virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://clockify.me/tracker")}; }
+
 protected:
 	virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("X-Api-Key"); }
 

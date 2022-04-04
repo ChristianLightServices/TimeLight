@@ -65,8 +65,21 @@ public:
 	void setApiKey(const QString &apiKey);
 	void setWorkspaceId(const QString &workspaceId);
 
+	// ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
+
 	//! This function should be overridden if your service starts pagination at a value other than 1.
 	virtual int paginationStartsAt() const { return 1; }
+
+	//! Override this to provide a unique identifier for your time service. Generally, taking the form `com.clockify` should be fine.
+	//! Once set, this identifier should not be changed as it may be used for storing settings specific to your time service.
+	virtual QString serviceIdentifier() const = 0;
+	//! This function provides the application with a service name appropriate for display to the user (e.g. "Clockify").
+	virtual QString serviceName() const = 0;
+	//! This returns a URL to the tracker webpage of the time service. If your time service has no such feature, return a URL to the
+	//! webpage of the official, most fully-featured, or best-known app	or other software for managing your time service.
+	virtual QUrl timeTrackerWebpageUrl() const = 0;
+
+	// ***** END FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
 signals:
 	void invalidated();

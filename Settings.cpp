@@ -1,0 +1,173 @@
+#include "Settings.h"
+
+#include <QSettings>
+
+Settings::Settings(QObject *parent)
+    : QObject{parent}
+{
+    QSettings settings;
+
+    m_timeService = settings.value(QStringLiteral("timeService"), QStringLiteral("com.clockify")).toString();
+
+	settings.beginGroup(m_timeService);
+	m_apiKey = settings.value(QStringLiteral("apiKey")).toString();
+	m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
+	m_description = settings.value(QStringLiteral("description")).toString();
+	m_disableDescription = settings.value(QStringLiteral("disableDescription")).toBool();
+	m_projectId = settings.value(QStringLiteral("projectId")).toString();
+	m_useLastDescription = settings.value(QStringLiteral("useLastDescription"), true).toBool();
+	m_useLastProject = settings.value(QStringLiteral("useLastProject"), true).toBool();
+	m_workspaceId = settings.value(QStringLiteral("workspaceId")).toString();
+	settings.endGroup();
+
+	settings.beginGroup(QStringLiteral("app"));
+	m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 1000).toInt();
+	m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
+	settings.endGroup();
+
+	m_saveTimer.setInterval(10000);
+	m_saveTimer.setSingleShot(false);
+	m_saveTimer.callOnTimeout(this, [this] {
+		if (m_settingsDirty)
+		{
+			save();
+			m_settingsDirty = false;
+		}
+	});
+	m_saveTimer.start();
+}
+
+Settings::~Settings()
+{
+	save();
+}
+
+void Settings::init()
+{
+    if (!s_instance)
+        s_instance = new Settings;
+    else
+        s_instance->save();
+}
+
+void Settings::setTimeService(const QString &service)
+{
+    if (service == m_timeService)
+        return;
+    m_timeService = service;
+    emit timeServiceChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setApiKey(const QString &key)
+{
+    if (key == m_apiKey)
+        return;
+    m_apiKey = key;
+    emit apiKeyChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setBreakTimeId(const QString &id)
+{
+    if (id == m_breakTimeId)
+        return;
+    m_breakTimeId = id;
+    emit breakTimeIdChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setDescription(const QString &description)
+{
+    if (description == m_description)
+        return;
+    m_description = description;
+    emit descriptionChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setProjectId(const QString &id)
+{
+    if (id == m_projectId)
+        return;
+    m_projectId = id;
+    emit projectIdChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setWorkspaceId(const QString &id)
+{
+    if (id == m_workspaceId)
+        return;
+    m_workspaceId = id;
+    emit workspaceIdChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setDisableDescription(const bool disable)
+{
+    if (disable == m_disableDescription)
+        return;
+    m_disableDescription = disable;
+    emit disableDescriptionChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setUseLastDescription(const bool use)
+{
+    if (use == m_useLastDescription)
+        return;
+    m_useLastDescription = use;
+    emit useLastDescriptionChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setUseLastProject(const bool use)
+{
+    if (use == m_useLastProject)
+        return;
+    m_useLastProject = use;
+    emit useLastProjectChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setShowDurationNotifications(const bool show)
+{
+    if (show == m_showDurationNotifications)
+        return;
+    m_showDurationNotifications = show;
+    emit showDurationNotificationsChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setEventLoopInterval(const int interval)
+{
+    if (interval == m_eventLoopInterval)
+        return;
+    m_eventLoopInterval = interval;
+    emit eventLoopIntervalChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::save()
+{
+	QSettings settings;
+
+	settings.setValue(QStringLiteral("timeService"), m_timeService);
+
+	settings.beginGroup(m_timeService);
+	settings.setValue(QStringLiteral("apiKey"), m_apiKey);
+	settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
+	settings.setValue(QStringLiteral("description"), m_description);
+	settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);
+	settings.setValue(QStringLiteral("projectId"), m_projectId);
+	settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
+	settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
+	settings.setValue(QStringLiteral("workspaceId"), m_workspaceId);
+	settings.endGroup();
+
+	settings.beginGroup(QStringLiteral("app"));
+	settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
+	settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
+	settings.endGroup();
+}

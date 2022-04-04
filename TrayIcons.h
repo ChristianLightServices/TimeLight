@@ -15,7 +15,7 @@ class TrayIcons : public QObject
 
 public:
 	explicit TrayIcons(QObject *parent = nullptr);
-	~TrayIcons();
+	~TrayIcons() override;
 
 	void show();
 
@@ -34,9 +34,6 @@ public slots:
 private slots:
 	void updateTrayIcons();
 	void getNewProjectId();
-	void getNewApiKey();
-	void getNewWorkspaceId();
-	void getNewBreakTimeId();
 
 	void showAboutDialog();
 	void showLicenseDialog(QWidget *parent = nullptr);
@@ -61,20 +58,9 @@ private:
 
 	User m_user;
 	TimerState m_timerState{TimerState::StateUnset};
-
-	QString m_apiKey;
-
-	bool m_useLastProject;
-	bool m_useLastDescription;
-	bool m_disableDescription;
-	bool m_showDurationNotifications;
-	QString m_defaultProjectId;
-	QString m_defaultDescription;
-	QString m_breakTimeId;
 	QString m_currentRunningJobId;
 
 	QTimer m_eventLoop;
-	int m_eventLoopInterval{};
 
 	bool m_valid{true};
 

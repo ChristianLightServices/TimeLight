@@ -492,7 +492,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
 				m_isConnectedToInternet = false;
 				emit internetConnectionChanged(false);
 			}
-				m_pendingReplies[rep].second(rep);
+			m_pendingReplies[rep].second(rep);
 		}
 
 		if (done)

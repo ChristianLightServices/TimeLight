@@ -1,7 +1,6 @@
 #include "TrayIcons.h"
 
 #include <QTimer>
-#include <QSettings>
 #include <QMenu>
 #include <QInputDialog>
 #include <QDesktopServices>
@@ -21,8 +20,8 @@
 #include "Project.h"
 #include "User.h"
 #include "JsonHelper.h"
-#include "SelectDefaultProjectDialog.h"
-#include "SelectDefaultWorkspaceDialog.h"
+#include "Settings.h"
+#include "SettingsDialog.h"
 #include "version.h"
 
 QPair<QString, QIcon> TrayIcons::s_timerOn;
@@ -34,33 +33,29 @@ QPair<QString, QIcon> TrayIcons::s_powerNotConnected;
 QPair<QString, QIcon> TrayIcons::s_runningNotConnected;
 
 TrayIcons::TrayIcons(QObject *parent)
-	: QObject{parent},
+    : QObject{parent},
       m_timerRunning{new QSystemTrayIcon},
       m_runningJob{new QSystemTrayIcon}
 {
-	QSettings settings;
-	QString apiKey = settings.value(QStringLiteral("apiKey")).toString();
-
-	while (apiKey == QString{})
+	while (Settings::instance()->apiKey().isEmpty())
 	{
 		bool ok{false};
-		apiKey = QInputDialog::getText(nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, QString{}, &ok);
+		QString newKey = QInputDialog::getText(nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, QString{}, &ok);
 		if (!ok)
 		{
 			m_valid = false;
 			return;
 		}
 		else
-			settings.setValue(QStringLiteral("apiKey"), apiKey);
+			Settings::instance()->setApiKey(newKey);
 	}
-	m_apiKey = apiKey;
-	m_manager = new ClockifyManager{apiKey.toUtf8()};
+	m_manager = new ClockifyManager{Settings::instance()->apiKey().toUtf8()};
 
 	auto fixApiKey = [&] {
 		while (!m_manager->isValid())
 		{
 			bool ok{false};
-			apiKey = QInputDialog::getText(nullptr,
+			QString newKey = QInputDialog::getText(nullptr,
 			                               tr("API key"),
 			                               tr("The API key is incorrect or invalid. Please enter a valid API key:"),
 			                               QLineEdit::Normal,
@@ -68,8 +63,8 @@ TrayIcons::TrayIcons(QObject *parent)
 			                               &ok);
 			if (!ok)
 				return false;
-			settings.setValue(QStringLiteral("apiKey"), apiKey);
-			m_manager->setApiKey(apiKey);
+			Settings::instance()->setApiKey(newKey);
+			m_manager->setApiKey(newKey);
 		}
 
 		return true;
@@ -89,7 +84,9 @@ TrayIcons::TrayIcons(QObject *parent)
 	});
 
 	m_user = m_manager->getApiKeyOwner();
-	m_manager->setWorkspaceId(settings.value(QStringLiteral("workspaceId"), m_user.workspaceId()).toString());
+	if (Settings::instance()->workspaceId().isEmpty())
+		Settings::instance()->setWorkspaceId(m_user.workspaceId());
+	m_manager->setWorkspaceId(Settings::instance()->workspaceId());
 	if (!m_user.isValid()) [[unlikely]]
 	{
 		QMessageBox::warning(nullptr, tr("Fatal error"), tr("Could not load user!"));
@@ -97,36 +94,11 @@ TrayIcons::TrayIcons(QObject *parent)
 		return;
 	}
 
-	connect(m_manager, &ClockifyManager::apiKeyChanged, this, [this]() {
-		auto temp = m_manager->getApiKeyOwner();
-		if (temp.isValid()) [[likely]]
-		        m_user = temp;
-		else [[unlikely]]
-		        QMessageBox::warning(nullptr, tr("Operation failed"), tr("Could not change API key!"));
-	});
-
-	m_defaultProjectId = settings.value(QStringLiteral("projectId")).toString();
-
-	m_defaultDescription = settings.value(QStringLiteral("description")).toString();
-	m_disableDescription = settings.value(QStringLiteral("disableDescription"), false).toBool();
-	m_useLastProject = settings.value(QStringLiteral("useLastProject"), true).toBool();
-	m_useLastDescription = settings.value(QStringLiteral("useLastDescription"), true).toBool();
-	m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
-	m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 500).toInt();
-	QString workspaceId = settings.value(QStringLiteral("workspaceId")).toString();
-	m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
-
-	while (m_defaultProjectId == QString{} && !m_useLastProject)
-		getNewProjectId();
-
-	while (workspaceId.isEmpty())
+	while ((Settings::instance()->projectId().isEmpty() && !Settings::instance()->useLastProject()) || Settings::instance()->breakTimeId().isEmpty())
 	{
-		getNewWorkspaceId();
-		workspaceId = m_manager->workspaceId();
+		QMessageBox::information(nullptr, tr("Select a project"), tr("Please select a default project and break project in the following dialog."));
+		getNewProjectId();
 	}
-
-	while (m_breakTimeId.isEmpty())
-		getNewBreakTimeId();
 
 	s_timerOn = {tr("Clockify is running"), QIcon{":/icons/greenpower.png"}};
 	s_timerOff = {tr("Clockify is not running"), QIcon{":/icons/redpower.png"}};
@@ -138,7 +110,7 @@ TrayIcons::TrayIcons(QObject *parent)
 
 	setUpTrayIcons();
 
-	m_eventLoop.setInterval(m_eventLoopInterval);
+	m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
 	m_eventLoop.setSingleShot(false);
 	m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
 	m_eventLoop.start();
@@ -164,8 +136,8 @@ Project TrayIcons::defaultProject()
 	bool itemsLeftToLoad{true};
 	auto entries = m_user.getTimeEntries(pageNum);
 
-	if (!m_useLastProject)
-		projectId = m_defaultProjectId;
+	if (!Settings::instance()->useLastProject())
+		projectId = Settings::instance()->projectId();
 	else
 	{
 		bool projectIdLoaded{false};
@@ -179,7 +151,7 @@ Project TrayIcons::defaultProject()
 					std::cerr << "getting project id failed\n";
 					continue; // no project id to see here, move along
 				}
-				else if (entry.project().id() != m_breakTimeId)
+				else if (entry.project().id() != Settings::instance()->breakTimeId())
 				{
 					projectId = entry.project().id();
 					projectIdLoaded = true;
@@ -199,10 +171,10 @@ Project TrayIcons::defaultProject()
 		    projectId = m_manager->projects().first().id();
 	}
 
-	if (m_disableDescription)
+	if (Settings::instance()->disableDescription())
 		; // description is already empty, so we will fall through
-	else if (!m_useLastDescription)
-		description = m_defaultDescription;
+	else if (!Settings::instance()->useLastDescription())
+		description = Settings::instance()->description();
 	else
 	{
 		bool descriptionLoaded{false};
@@ -211,7 +183,7 @@ Project TrayIcons::defaultProject()
 		{
 			for (const auto &entry : entries)
 			{
-				if (entry.project().id() != m_breakTimeId)
+				if (entry.project().id() != Settings::instance()->breakTimeId())
 				{
 					description = entry.project().description();
 					descriptionLoaded = true;
@@ -246,7 +218,7 @@ void TrayIcons::updateTrayIcons()
 	{
 		try
 		{
-			if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry.project().id() == m_breakTimeId)
+			if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry.project().id() == Settings::instance()->breakTimeId())
 				setTimerState(TimerState::OnBreak);
 			else
 			{
@@ -269,96 +241,9 @@ void TrayIcons::updateTrayIcons()
 
 void TrayIcons::getNewProjectId()
 {
-	QStringList projectIds;
-	QStringList projectNames;
-	for (auto &project : m_manager->projects())
-	{
-		projectIds.push_back(project.id());
-		projectNames.push_back(project.name());
-	}
-
-	SelectDefaultProjectDialog dialog{m_useLastProject,
-									  m_useLastDescription,
-									  m_disableDescription,
-									  m_defaultProjectId,
-									  m_defaultDescription,
-									  {projectIds, projectNames}};
-	if (dialog.exec() == QDialog::Accepted)
-	{
-		m_defaultProjectId = dialog.selectedProject();
-		m_defaultDescription = dialog.selectedDescription();
-		m_disableDescription = dialog.disableDescription();
-		m_useLastProject = dialog.useLastProject();
-		m_useLastDescription = dialog.useLastDescription();
-
-		QSettings settings;
-		settings.setValue(QStringLiteral("projectId"), m_defaultProjectId);
-		settings.setValue(QStringLiteral("description"), m_defaultDescription);
-		settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);
-		settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
-		settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
-		settings.sync();
-	}
-}
-
-void TrayIcons::getNewApiKey()
-{
-	bool ok{true};
-	do
-	{
-		m_apiKey = QInputDialog::getText(nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, m_apiKey, &ok);
-		if (!ok)
-			return;
-	}
-	while (m_apiKey == "");
-
-	m_manager->setApiKey(m_apiKey);
-
-	QSettings settings;
-	settings.setValue(QStringLiteral("apiKey"), m_apiKey);
-}
-
-void TrayIcons::getNewWorkspaceId()
-{
-	SelectDefaultWorkspaceDialog dialog{m_manager->getOwnerWorkspaces(), this};
-	if (dialog.getNewWorkspace())
-	{
-		m_manager->setWorkspaceId(dialog.selectedWorkspaceId());
-
-		QSettings settings;
-		settings.setValue(QStringLiteral("workspaceId"), dialog.selectedWorkspaceId());
-	}
-}
-
-void TrayIcons::getNewBreakTimeId()
-{
-	auto ok{false};
-	auto projects = m_manager->projects();
-
-	QStringList projectIds;
-	QStringList projectNames;
-
-	for (const auto &project : qAsConst(projects))
-	{
-		projectIds.push_back(project.id());
-		projectNames.push_back(project.name());
-	}
-
-	auto workspaceId = QInputDialog::getItem(nullptr,
-	                                         tr("Select break time project"),
-	                                         tr("Select the project used for break time:"),
-											 projectNames,
-											 projectIds.indexOf(m_breakTimeId),
-											 false,
-											 &ok);
-
-	if (ok)
-	{
-		m_breakTimeId = projectIds[projectNames.indexOf(workspaceId)];
-
-		QSettings settings;
-		settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
-	}
+	SettingsDialog d{m_manager, {m_manager}};
+	d.switchToPage(SettingsDialog::Pages::ProjectPage);
+	d.exec();
 }
 
 void TrayIcons::showAboutDialog()
@@ -407,7 +292,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 
 	QFile licenseFile{QStringLiteral(":/LICENSE")};
 	if (licenseFile.open(QIODevice::ReadOnly)) [[likely]]
-		licenseView->setText(licenseFile.readAll());
+	    licenseView->setText(licenseFile.readAll());
 	else [[unlikely]] // this really should never happen, but just in case...
 	    licenseView->setMarkdown(tr("Error: could not load the license. Please read the license on "
 	                             "[GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE)."));
@@ -431,11 +316,8 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 
 void TrayIcons::setEventLoopInterval(int interval)
 {
-	m_eventLoopInterval = interval;
-	m_eventLoop.setInterval(m_eventLoopInterval);
-
-	QSettings settings;
-	settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
+	Settings::instance()->setEventLoopInterval(interval);
+	m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
 }
 
 void TrayIcons::setUpTrayIcons()
@@ -465,38 +347,9 @@ void TrayIcons::setUpTrayIcons()
 			updateTrayIcons();
 		}
 	});
-	connect(m_timerRunningMenu->addAction(tr("Change default project")), &QAction::triggered, this, &TrayIcons::getNewProjectId);
-	connect(m_timerRunningMenu->addAction(tr("Change default workspace")), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
-	connect(m_timerRunningMenu->addAction(tr("Change break time project")), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
-	connect(m_timerRunningMenu->addAction(tr("Change API key")), &QAction::triggered, this, &TrayIcons::getNewApiKey);
-	connect(m_timerRunningMenu->addAction(tr("Change update interval")), &QAction::triggered, this, [this] {
-		bool ok{};
-		auto interval = QInputDialog::getDouble(nullptr,
-		                                        tr("Change update interval"),
-		                                        tr("Choose the new interval in seconds:"),
-												static_cast<double>(m_eventLoopInterval) / 1000,
-												0,
-												10,
-												1,
-												&ok,
-												Qt::WindowFlags{},
-												0.5);
-
-		if (ok)
-			setEventLoopInterval(interval * 1000);
-	});
-	{
-		auto notifs = m_timerRunningMenu->addAction(tr("Show job duration at completion"));
-		notifs->setCheckable(true);
-		notifs->setChecked(m_showDurationNotifications);
-		connect(notifs, &QAction::triggered, this, [this, notifs] {
-			m_showDurationNotifications = notifs->isChecked();
-			QSettings settings;
-			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
-		});
-	}
-	connect(m_timerRunningMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
-		QDesktopServices::openUrl(QUrl{QStringLiteral("https://clockify.me/tracker/")});
+	connect(m_timerRunningMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] { SettingsDialog d{m_manager, {m_manager}}; d.exec(); });
+	connect(m_timerRunningMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+		QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
 	});
 	connect(m_timerRunningMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
@@ -515,14 +368,14 @@ void TrayIcons::setUpTrayIcons()
 		{
 			try
 			{
-				if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
+				if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
 					return;
 			}
 			catch (const std::exception &) {}
 
 			start = m_user.stopCurrentTimeEntry();
 		}
-		m_user.startTimeEntry(m_breakTimeId, start);
+		m_user.startTimeEntry(Settings::instance()->breakTimeId(), start);
 		updateTrayIcons();
 	});
 	connect(m_runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
@@ -538,7 +391,7 @@ void TrayIcons::setUpTrayIcons()
 		{
 			try
 			{
-				if (m_user.getRunningTimeEntry().project().id() != m_breakTimeId)
+				if (m_user.getRunningTimeEntry().project().id() != Settings::instance()->breakTimeId())
 					return;
 			}
 			catch (const std::exception &) {}
@@ -549,38 +402,9 @@ void TrayIcons::setUpTrayIcons()
 		m_user.startTimeEntry(project.id(), project.description(), start);
 		updateTrayIcons();
 	});
-	connect(m_runningJobMenu->addAction(tr("Change default project")), &QAction::triggered, this, &TrayIcons::getNewProjectId);
-	connect(m_runningJobMenu->addAction(tr("Change default workspace")), &QAction::triggered, this, &TrayIcons::getNewWorkspaceId);
-	connect(m_runningJobMenu->addAction(tr("Change break time project")), &QAction::triggered, this, &TrayIcons::getNewBreakTimeId);
-	connect(m_runningJobMenu->addAction(tr("Change API key")), &QAction::triggered, this, &TrayIcons::getNewApiKey);
-	connect(m_runningJobMenu->addAction(tr("Change update interval")), &QAction::triggered, this, [this] {
-		bool ok{};
-		auto interval = QInputDialog::getDouble(nullptr,
-		                                        tr("Change update interval"),
-		                                        tr("Choose the new interval in seconds:"),
-												static_cast<double>(m_eventLoopInterval) / 1000,
-												0,
-												10,
-												1,
-												&ok,
-												Qt::WindowFlags{},
-												0.5);
-
-		if (ok)
-			setEventLoopInterval(interval * 1000);
-	});
-	{
-		auto notifs = m_runningJobMenu->addAction(tr("Show job duration at completion"));
-		notifs->setCheckable(true);
-		notifs->setChecked(m_showDurationNotifications);
-		connect(notifs, &QAction::triggered, this, [this, notifs] {
-			m_showDurationNotifications = notifs->isChecked();
-			QSettings settings;
-			settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
-		});
-	}
-	connect(m_runningJobMenu->addAction(tr("Open the Clockify website")), &QAction::triggered, this, []() {
-		QDesktopServices::openUrl(QUrl{QStringLiteral("https://clockify.me/tracker/")});
+	connect(m_runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] { SettingsDialog d{m_manager, {m_manager}}; d.exec(); });
+	connect(m_runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+		QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
 	});
 	connect(m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
 	connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
@@ -631,7 +455,7 @@ void TrayIcons::setUpTrayIcons()
 
 		if (m_user.hasRunningTimeEntry())
 		{
-			if (m_user.getRunningTimeEntry().project().id() == m_breakTimeId)
+			if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
 			{
 				auto time = m_user.stopCurrentTimeEntry();
 				auto project = defaultProject();
@@ -640,7 +464,7 @@ void TrayIcons::setUpTrayIcons()
 			else
 			{
 				auto time = m_user.stopCurrentTimeEntry();
-				m_user.startTimeEntry(m_breakTimeId, time);
+				m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
 			}
 		}
 		else
@@ -652,7 +476,7 @@ void TrayIcons::setUpTrayIcons()
 		m_eventLoop.start();
 	});
 
-	connect(m_manager, &ClockifyManager::internetConnectionChanged, this, [this](bool connected) {
+	connect(m_manager, &ClockifyManager::internetConnectionChanged, this, [this](bool) {
 		updateTrayIcons();
 	});
 
@@ -660,7 +484,7 @@ void TrayIcons::setUpTrayIcons()
 	m_runningJob->setContextMenu(m_runningJobMenu);
 
 	connect(this, &TrayIcons::jobEnded, this, [this] {
-		if (!m_showDurationNotifications)
+		if (!Settings::instance()->showDurationNotifications())
 			return;
 
 		auto jobs = m_user.getTimeEntries(1, 1);
@@ -671,7 +495,7 @@ void TrayIcons::setUpTrayIcons()
 			return;
 		m_currentRunningJobId.clear();
 
-		QTime duration{QTime::fromMSecsSinceStartOfDay(job.start().msecsTo(job.end()))};
+		QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job.start().msecsTo(job.end())))};
 		QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
 		if (duration.hour() > 0)
 			timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
