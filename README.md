@@ -31,3 +31,7 @@ If you want to get the absolute latest and greatest code, you can try out the CI
 3. While macOS builds are available, I have no idea if they will work. I don't have a Mac to test app distribution on, so while I am leaving binary uploads in place for now, there is no guarantee of correct functionality provided.
 
 However, if you are running Windows or you can figure out a way to patch the .app files into your macOS install, the CI builds should provide a way for you to replace your current executable with one that has updated or fixed code.
+
+## Contributing
+
+Before committing, please run `clang-format -i *.cpp *.h`.
