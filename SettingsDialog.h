@@ -11,7 +11,9 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(AbstractTimeServiceManager *manager, const QList<AbstractTimeServiceManager *> &availableManagers, QWidget *parent = nullptr);
+    explicit SettingsDialog(AbstractTimeServiceManager *manager,
+                            const QList<AbstractTimeServiceManager *> &availableManagers,
+                            QWidget *parent = nullptr);
 
     enum class Pages
     {

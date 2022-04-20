@@ -11,58 +11,61 @@
 
 class TrayIcons : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit TrayIcons(QObject *parent = nullptr);
-	~TrayIcons() override;
+    explicit TrayIcons(QObject *parent = nullptr);
+    ~TrayIcons() override;
 
-	void show();
+    void show();
 
-	Project defaultProject();
-	void setUser(const User &user);
+    Project defaultProject();
+    void setUser(const User &user);
 
-	bool valid() const { return m_valid; }
+    bool valid() const
+    {
+        return m_valid;
+    }
 
 signals:
-	void timerStateChanged();
-	void jobEnded();
+    void timerStateChanged();
+    void jobEnded();
 
 public slots:
-	void setEventLoopInterval(int interval);
+    void setEventLoopInterval(int interval);
 
 private slots:
-	void updateTrayIcons();
-	void getNewProjectId();
+    void updateTrayIcons();
+    void getNewProjectId();
 
-	void showAboutDialog();
-	void showLicenseDialog(QWidget *parent = nullptr);
+    void showAboutDialog();
+    void showLicenseDialog(QWidget *parent = nullptr);
 
 private:
-	enum class TimerState
-	{
-		Running,
-		OnBreak,
-		NotRunning,
-		Offline,
-		StateUnset,
-	};
+    enum class TimerState
+    {
+        Running,
+        OnBreak,
+        NotRunning,
+        Offline,
+        StateUnset,
+    };
 
-	void setUpTrayIcons();
-	void setTimerState(const TimerState state);
+    void setUpTrayIcons();
+    void setTimerState(const TimerState state);
 
-	AbstractTimeServiceManager *m_manager;
+    AbstractTimeServiceManager *m_manager;
 
-	QSystemTrayIcon *m_timerRunning{nullptr};
-	QSystemTrayIcon *m_runningJob{nullptr};
+    QSystemTrayIcon *m_timerRunning{nullptr};
+    QSystemTrayIcon *m_runningJob{nullptr};
 
-	User m_user;
-	TimerState m_timerState{TimerState::StateUnset};
-	QString m_currentRunningJobId;
+    User m_user;
+    TimerState m_timerState{TimerState::StateUnset};
+    QString m_currentRunningJobId;
 
-	QTimer m_eventLoop;
+    QTimer m_eventLoop;
 
-	bool m_valid{true};
+    bool m_valid{true};
 };
 
 #endif // TRAYICONS_H

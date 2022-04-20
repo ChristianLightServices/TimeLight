@@ -2,7 +2,10 @@
 
 #include <QWidget>
 
-void ClockifyTrayIcons::restartApp() { qApp->exit(appRestartCode); }
+void ClockifyTrayIcons::restartApp()
+{
+    qApp->exit(appRestartCode);
+}
 
 void ClockifyTrayIcons::addVerticalStretchToQGridLayout(QGridLayout *layout)
 {

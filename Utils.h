@@ -10,6 +10,6 @@ namespace ClockifyTrayIcons
     void restartApp();
 
     void addVerticalStretchToQGridLayout(QGridLayout *layout);
-}
+} // namespace ClockifyTrayIcons
 
 #endif // CONSTANTS_H

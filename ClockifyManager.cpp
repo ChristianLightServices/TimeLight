@@ -5,8 +5,7 @@
 #include "TimeEntry.h"
 #include "User.h"
 
-ClockifyManager::ClockifyManager(const QByteArray &apiKey, QObject *parent)
-    : AbstractTimeServiceManager{apiKey, parent}
+ClockifyManager::ClockifyManager(const QByteArray &apiKey, QObject *parent) : AbstractTimeServiceManager{apiKey, parent}
 {
     callInitVirtualMethods();
 }
@@ -20,7 +19,9 @@ QUrl ClockifyManager::runningTimeEntryUrl(const QString &userId, const QString &
     return url;
 }
 
-QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId,
+                                   const QString &workspaceId,
+                                   const QString &timeEntryId)
 {
     return {baseUrl() + "/workspaces/" + workspaceId + "/time-entries/" + timeEntryId};
 }
@@ -84,7 +85,9 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         if (entry.contains("projectId") && !entry["projectId"].is_null())
         {
             projectId = entry["projectId"].get<QString>();
-            project = {projectId, projectName(projectId), entry.contains("description") ? entry["description"].get<QString>() : QString{}};
+            project = {projectId,
+                       projectName(projectId),
+                       entry.contains("description") ? entry["description"].get<QString>() : QString{}};
         }
         auto userId = entry["userId"].get<QString>();
         auto start = entry["timeInterval"]["start"].get<QDateTime>();
