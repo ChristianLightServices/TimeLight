@@ -39,7 +39,7 @@ private:
 
     QPair<QStringList, QStringList> m_availableProjects;
 
-    // Unfortunately, these are necessary to make sure that certain dialog boxex are only shown once.
+    // Unfortunately, these are necessary to make sure that certain dialog boxes are only shown once.
     bool m_resetOfTimeServiceComboBoxInProgress{false};
     bool m_resetOfApiKeyInProgress{false};
 };
