@@ -19,6 +19,16 @@ QUrl ClockifyManager::runningTimeEntryUrl(const QString &userId, const QString &
     return url;
 }
 
+QUrl ClockifyManager::startTimeEntryUrl(const QString &userId, const QString &workspaceId)
+{
+    return timeEntriesUrl(userId, workspaceId);
+}
+
+QUrl ClockifyManager::stopTimeEntryUrl(const QString &userId, const QString &workspaceId)
+{
+    return timeEntriesUrl(userId, workspaceId);
+}
+
 QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId,
                                    const QString &workspaceId,
                                    const QString &timeEntryId)
@@ -90,10 +100,10 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
                        entry.contains("description") ? entry["description"].get<QString>() : QString{}};
         }
         auto userId = entry["userId"].get<QString>();
-        auto start = entry["timeInterval"]["start"].get<QDateTime>();
+        auto start = jsonToDateTime(entry["timeInterval"]["start"]);
         QDateTime end;
         if (entry["timeInterval"].contains("end") && !entry["timeInterval"]["end"].is_null())
-            end = entry["timeInterval"]["end"].get<QDateTime>();
+            end = jsonToDateTime(entry["timeInterval"]["end"]);
 
         return TimeEntry{id, project, project.description(), userId, start, end, this};
     }
@@ -158,14 +168,46 @@ Project ClockifyManager::jsonToProject(const nlohmann::json &j)
     }
 }
 
-json ClockifyManager::timeEntryToJson(const TimeEntry &t)
+json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction)
 {
     json j;
-    j["start"] = t.start();
+    j["start"] = dateTimeToJson(t.start());
     if (!t.end().isNull())
-        j["end"] = t.end();
+        j["end"] = dateTimeToJson(t.end());
     if (!t.description().isEmpty())
         j["description"] = t.description();
     j["projectId"] = t.project().id();
     return j;
+}
+
+AbstractTimeServiceManager::HttpVerb ClockifyManager::httpVerbForAction(const TimeEntryAction action) const
+{
+    switch (action)
+    {
+    case TimeEntryAction::GetRunningTimeEntry:
+        return HttpVerb::Get;
+    case TimeEntryAction::StartTimeEntry:
+        return HttpVerb::Post;
+    case TimeEntryAction::StopTimeEntry:
+        return HttpVerb::Patch;
+    default:
+        Q_UNREACHABLE();
+        return HttpVerb::Get;
+    }
+}
+
+int ClockifyManager::httpReturnCodeForVerb(const HttpVerb verb) const
+{
+    switch (verb)
+    {
+    case HttpVerb::Get:
+    case HttpVerb::Patch:
+    case HttpVerb::Head:
+        return 200;
+    case HttpVerb::Post:
+        return 201;
+    default:
+        // for unused verbs
+        return -1;
+    }
 }

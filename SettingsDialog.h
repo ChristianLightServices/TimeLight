@@ -12,7 +12,7 @@ class SettingsDialog : public QDialog
 
 public:
     explicit SettingsDialog(AbstractTimeServiceManager *manager,
-                            const QList<AbstractTimeServiceManager *> &availableManagers,
+                            const QList<QPair<QString, QString>> &availableManagers,
                             QWidget *parent = nullptr);
 
     enum class Pages
@@ -30,7 +30,8 @@ private:
     QWidget *createAppPage();
 
     AbstractTimeServiceManager *m_manager;
-    QList<AbstractTimeServiceManager *> m_availableManagers;
+    // ordered as {name, id}
+    QList<QPair<QString, QString>> m_availableManagers;
 
     QTabWidget *m_tabWidget;
     QWidget *m_backendPage;

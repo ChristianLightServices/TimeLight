@@ -97,6 +97,9 @@ public:
     //! service.
     virtual QUrl timeTrackerWebpageUrl() const = 0;
 
+    //! A list of items that may be loaded with pagination.
+    virtual const QFlags<Pagination> supportedPagination() const = 0;
+
     // ***** END FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
 signals:
@@ -106,19 +109,41 @@ signals:
     void internetConnectionChanged(bool status);
 
 protected:
+    enum class HttpVerb
+    {
+        Get,
+        Post,
+        Patch,
+        Put,
+        Head,
+    };
+    enum class TimeEntryAction
+    {
+        StartTimeEntry,
+        GetRunningTimeEntry,
+        StopTimeEntry,
+    };
+
     // ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
     virtual const QByteArray authHeaderName() const = 0;
 
+    //! This function will have the API key substituted into it with arg(). Use if your time service requires more text
+    //! than just the API key for authorization.
+    virtual const QString apiKeyTemplate() const
+    {
+        return QStringLiteral("%1");
+    }
+
     virtual const QString baseUrl() const = 0;
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
+    virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
+    virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntriesUrl(const QString &userId, const QString &workspaceId) const = 0;
     virtual QUrl currentUserUrl() const = 0;
     virtual QUrl workspacesUrl() const = 0;
     virtual QUrl usersUrl(const QString &workspaceId) const = 0;
     virtual QUrl projectsUrl(const QString &workspaceId) const = 0;
-
-    virtual const QFlags<Pagination> supportedPagination() const = 0;
 
     virtual const QString usersPageSizeHeaderName() const
     {
@@ -171,6 +196,7 @@ protected:
         return 50;
     }
 
+    virtual bool jsonToHasRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToTimeEntry(const json &j) = 0;
     virtual User jsonToUser(const json &j) = 0;
@@ -178,7 +204,23 @@ protected:
     virtual Workspace jsonToWorkspace(const json &j) = 0;
     virtual Project jsonToProject(const json &j) = 0;
 
-    virtual json timeEntryToJson(const TimeEntry &t) = 0;
+    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) = 0;
+
+    //! Return a string representing the time format used by your time service. See
+    //! https://doc.qt.io/qt-5/qtime.html#toString and https://doc.qt.io/qt-5/qdate.html#toString-1 for examples of how to
+    //! build format strings.
+    virtual const QString jsonTimeFormatString() const = 0;
+    //! Return a function that will return the current date and time as defined by your time service. Generally, you will
+    //! need to choose either UTC or the local time. For these, QDateTime::currentDateTime() and
+    //! QDateTime::currentDateTimeUtc() should suffice.
+    virtual const QDateTime currentDateTime() const = 0;
+
+    virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const = 0;
+    virtual int httpReturnCodeForVerb(const HttpVerb verb) const = 0;
+    virtual QByteArray getRunningTimeEntryPayload() const
+    {
+        return {};
+    }
 
     // Note: these names are reserved for future development purposes
     // virtual json userToJson(const User &u) = 0;
@@ -189,11 +231,27 @@ protected:
     //! Call this function in the constructor of any derived, non-abstract class.
     void callInitVirtualMethods();
 
+    //! Parse JSON into a QDateTime.
+    QDateTime jsonToDateTime(const json &j) const;
+    json dateTimeToJson(const QDateTime &dt) const;
+
 private:
     void updateCurrentUser();
     void updateUsers();
     void updateProjects();
 
+    QByteArray apiKeyForRequests() const
+    {
+        return apiKeyTemplate().arg(m_apiKey).toUtf8();
+    }
+
+    void timeEntryReq(const QUrl &url,
+                      const TimeEntryAction action,
+                      const QByteArray &body = {},
+                      bool async = true,
+                      const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+                      const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+
     void get(const QUrl &url,
              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
@@ -252,6 +310,27 @@ private:
                int expectedReturnCode,
                const NetworkReplyCallback &successCb = s_defaultSuccessCb,
                const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+
+    void put(const QUrl &url,
+             const QByteArray &body,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void put(const QUrl &url,
+             const QByteArray &body,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void put(const QUrl &url,
+             const QByteArray &body,
+             bool async,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void put(const QUrl &url,
+             const QByteArray &body,
+             bool async,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
 
     void head(const QUrl &url,
               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
@@ -304,5 +383,8 @@ private:
     bool m_isConnectedToInternet{true}; // assume connected at start
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractTimeServiceManager::SupportedPagination)
+
+template<class Manager>
+concept TimeManager = std::is_base_of<AbstractTimeServiceManager, Manager>::value;
 
 #endif // ABSTRACTTIMESERVICEMANAGER_H

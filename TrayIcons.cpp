@@ -21,6 +21,7 @@
 #include "Project.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
+#include "TimeCampManager.h"
 #include "User.h"
 #include "version.h"
 
@@ -39,7 +40,17 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
         else
             Settings::instance()->setApiKey(newKey);
     }
-    m_manager = new ClockifyManager{Settings::instance()->apiKey().toUtf8()};
+
+    if (Settings::instance()->timeService() == QStringLiteral("com.clockify"))
+        initializeManager<ClockifyManager>();
+    else if (Settings::instance()->timeService() == QStringLiteral("com.timecamp"))
+        initializeManager<TimeCampManager>();
+    else
+    {
+        // since the service is invalid, we'll just select Clockify...
+        Settings::instance()->setTimeService("com.clockify");
+        initializeManager<ClockifyManager>();
+    }
 
     auto fixApiKey = [&] {
         while (!m_manager->isValid())
@@ -148,6 +159,8 @@ Project TrayIcons::defaultProject()
                     break;
                 }
             }
+            if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+                break;
 
             auto newEntries = m_user.getTimeEntries(++pageNum);
             if (newEntries.empty())
@@ -232,7 +245,9 @@ void TrayIcons::updateTrayIcons()
 
 void TrayIcons::getNewProjectId()
 {
-    SettingsDialog d{m_manager, {m_manager}};
+    SettingsDialog d{m_manager,
+                     {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
+                      {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
     d.switchToPage(SettingsDialog::Pages::ProjectPage);
     d.exec();
 }
@@ -337,7 +352,9 @@ void TrayIcons::setUpTrayIcons()
         }
     });
     connect(m_timerRunningMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
-        SettingsDialog d{m_manager, {m_manager}};
+        SettingsDialog d{m_manager,
+                         {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
+                          {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
         d.exec();
     });
     connect(m_timerRunningMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
@@ -435,7 +452,9 @@ void TrayIcons::setUpTrayIcons()
             updateTrayIcons();
         });
         connect(m_runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
-            SettingsDialog d{m_manager, {m_manager}};
+            SettingsDialog d{m_manager,
+                             {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
+                              {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
             d.exec();
         });
         connect(m_runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
@@ -578,4 +597,9 @@ void TrayIcons::setTimerState(const TimerState state)
 
     m_timerState = state;
     emit timerStateChanged();
+}
+
+template<TimeManager Manager> void TrayIcons::initializeManager()
+{
+    m_manager = new Manager{Settings::instance()->apiKey().toUtf8()};
 }
