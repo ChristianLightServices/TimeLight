@@ -20,7 +20,7 @@
 #include "Utils.h"
 
 SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
-                               const QList<AbstractTimeServiceManager *> &availableManagers,
+                               const QList<QPair<QString, QString>> &availableManagers,
                                QWidget *parent)
     : QDialog{parent},
       m_manager{manager},
@@ -73,7 +73,15 @@ QWidget *SettingsDialog::createBackendPage()
 
     auto timeServices{new QComboBox{backendPage}};
     for (const auto &manager : m_availableManagers)
-        timeServices->addItem(manager->serviceName(), manager->serviceIdentifier());
+        timeServices->addItem(manager.first, manager.second);
+    for (int i = 0; i < m_availableManagers.size(); ++i)
+    {
+        if (m_availableManagers[i].second == Settings::instance()->timeService())
+        {
+            timeServices->setCurrentIndex(i);
+            break;
+        }
+    }
 
     layout->addWidget(new QLabel{tr("Time service to use"), backendPage}, 0, 0);
     layout->addWidget(timeServices, 0, 1, 1, 2);
@@ -110,13 +118,14 @@ QWidget *SettingsDialog::createBackendPage()
                                          QMessageBox::Ok))
         {
         case QMessageBox::Ok:
-            Settings::instance()->setTimeService(m_availableManagers[i]->serviceIdentifier());
+            Settings::instance()->setTimeService(m_availableManagers[i].second);
             ClockifyTrayIcons::restartApp();
             break;
         case QMessageBox::Cancel:
         default:
             m_resetOfTimeServiceComboBoxInProgress = true;
-            timeServices->setCurrentIndex(m_availableManagers.indexOf(m_manager));
+            timeServices->setCurrentIndex(
+                m_availableManagers.indexOf({m_manager->serviceName(), m_manager->serviceIdentifier()}));
             break;
         }
     });

@@ -14,7 +14,7 @@
 namespace nlohmann
 {
     //	using QJson = basic_json<QMap, QVector, QString, bool, std::int64_t, std::uint64_t, double, std::allocator,
-    //adl_serializer, QVector<std::uint8_t>>;
+    // adl_serializer, QVector<std::uint8_t>>;
 
     template<> struct adl_serializer<QString>
     {
@@ -51,19 +51,6 @@ namespace nlohmann
         //		{
         //			opt = j.get<QString>();
         //		}
-    };
-
-    template<> struct adl_serializer<QDateTime>
-    {
-        static void to_json(json &j, const QDateTime &opt)
-        {
-            j = opt.toString("yyyy-MM-ddThh:mm:ssZ");
-        }
-
-        static void from_json(const json &j, QDateTime &opt)
-        {
-            opt = QDateTime::fromString(j.get<QString>(), "yyyy-MM-ddThh:mm:ssZ");
-        }
     };
 } // namespace nlohmann
 

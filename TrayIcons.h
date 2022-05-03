@@ -5,7 +5,7 @@
 #include <QSystemTrayIcon>
 #include <QTimer>
 
-#include "ClockifyManager.h"
+#include "AbstractTimeServiceManager.h"
 #include "Project.h"
 #include "User.h"
 
@@ -51,6 +51,7 @@ private:
         StateUnset,
     };
 
+    template<TimeManager Manager> void initializeManager();
     void setUpTrayIcons();
     void setTimerState(const TimerState state);
 

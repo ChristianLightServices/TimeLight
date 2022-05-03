@@ -43,6 +43,11 @@ set(SRC_CLOCKIFY
     ClockifyManager.h
 )
 
+set(SRC_TIMECAMP
+    TimeCampManager.cpp
+    TimeCampManager.h
+)
+
 # put in some platform-specific configuration stuff
 if(WIN32)
         set(OS_HACKS "WIN32")
@@ -57,6 +62,7 @@ endif()
 
 set(SRC
 	${SRC_CLOCKIFY}
+    ${SRC_TIMECAMP}
 
     AbstractTimeServiceManager.cpp
     AbstractTimeServiceManager.h

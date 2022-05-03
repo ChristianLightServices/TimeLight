@@ -1,38 +1,38 @@
-#ifndef CLOCKIFYMANAGER_H
-#define CLOCKIFYMANAGER_H
+#ifndef TIMECAMPMANAGER_H
+#define TIMECAMPMANAGER_H
 
 #include "AbstractTimeServiceManager.h"
 
-class ClockifyManager : public AbstractTimeServiceManager
+class TimeCampManager : public AbstractTimeServiceManager
 {
     Q_OBJECT
 
 public:
-    explicit ClockifyManager(const QByteArray &apiKey, QObject *parent = nullptr);
+    explicit TimeCampManager(const QByteArray &apiKey, QObject *parent = nullptr);
 
     virtual QString serviceIdentifier() const final
     {
-        return QStringLiteral("com.clockify");
+        return QStringLiteral("com.timecamp");
     }
     virtual QString serviceName() const final
     {
-        return QStringLiteral("Clockify");
+        return QStringLiteral("TimeCamp");
     }
     virtual QUrl timeTrackerWebpageUrl() const final
     {
-        return QUrl{QStringLiteral("https://clockify.me/tracker")};
+        return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")};
     }
     virtual const QFlags<Pagination> supportedPagination() const final;
 
 protected:
     virtual const QByteArray authHeaderName() const final
     {
-        return QByteArrayLiteral("X-Api-Key");
+        return QByteArrayLiteral("Authorization");
     }
 
     virtual const QString baseUrl() const final
     {
-        return QStringLiteral("https://api.clockify.me/api/v1");
+        return QStringLiteral("https://app.timecamp.com/third_party/api");
     }
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
@@ -44,32 +44,6 @@ protected:
     virtual QUrl usersUrl(const QString &workspaceId) const final;
     virtual QUrl projectsUrl(const QString &workspaceId) const final;
 
-    virtual const QString projectsPageSizeHeaderName() const final
-    {
-        return QStringLiteral("page-size");
-    }
-    virtual const QString usersPageSizeHeaderName() const final
-    {
-        return QStringLiteral("page-size");
-    }
-    virtual const QString timeEntriesPageSizeHeaderName() const final
-    {
-        return QStringLiteral("page-size");
-    }
-
-    virtual const QString projectsPageHeaderName() const final
-    {
-        return QStringLiteral("page");
-    }
-    virtual const QString usersPageHeaderName() const final
-    {
-        return QStringLiteral("page");
-    }
-    virtual const QString timeEntriesPageHeaderName() const final
-    {
-        return QStringLiteral("page");
-    }
-
     virtual bool jsonToHasRunningTimeEntry(const json &j) final;
     virtual TimeEntry jsonToRunningTimeEntry(const json &j) final;
     virtual TimeEntry jsonToTimeEntry(const json &j) final;
@@ -80,17 +54,21 @@ protected:
 
     virtual const QString jsonTimeFormatString() const final
     {
-        return QStringLiteral("yyyy-MM-ddTHH:mm:ssZ");
+        return QStringLiteral("yyyy-MM-dd HH:mm:ss");
     }
     virtual const QDateTime currentDateTime() const final
     {
-        return QDateTime::currentDateTimeUtc();
+        return QDateTime::currentDateTime();
     }
 
-    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction) final;
+    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const final;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const final;
+    virtual QByteArray getRunningTimeEntryPayload() const final
+    {
+        return QByteArrayLiteral(R"({"action":"status"})");
+    }
 };
 
-#endif // CLOCKIFYMANAGER_H
+#endif // TIMECAMPMANAGER_H
