@@ -12,7 +12,7 @@ Settings::Settings(QObject *parent) : QObject{parent}
     m_apiKey = settings.value(QStringLiteral("apiKey")).toString();
     m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
     m_description = settings.value(QStringLiteral("description")).toString();
-	m_disableDescription = settings.value(QStringLiteral("disableDescription"), false).toBool();
+    m_disableDescription = settings.value(QStringLiteral("disableDescription"), false).toBool();
     m_projectId = settings.value(QStringLiteral("projectId")).toString();
     m_useLastDescription = settings.value(QStringLiteral("useLastDescription"), true).toBool();
     m_useLastProject = settings.value(QStringLiteral("useLastProject"), true).toBool();
