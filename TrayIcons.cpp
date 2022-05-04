@@ -153,7 +153,7 @@ Project TrayIcons::defaultProject()
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
                 {
-                    std::cerr << "getting project id failed\n";
+                    std::cerr << "Error: getting project id failed\n";
                     continue; // no project id to see here, move along
                 }
                 else if (entry.project().id() != Settings::instance()->breakTimeId())
