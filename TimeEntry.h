@@ -15,14 +15,14 @@ class TimeEntry : public QObject
     Q_OBJECT
 
 public:
-    explicit TimeEntry(const QString &id,
-                       const Project &project,
-                       const QString &description,
-                       const QString &userId,
-                       const QDateTime &start,
-                       const QDateTime &end,
-                       QObject *parent = nullptr);
-    explicit TimeEntry(const TimeEntry &that);
+    TimeEntry(const QString &id,
+              const Project &project,
+              const QString &description,
+              const QString &userId,
+              const QDateTime &start,
+              const QDateTime &end,
+              QObject *parent = nullptr);
+    TimeEntry(const TimeEntry &that);
     TimeEntry(QObject *parent = nullptr);
 
     QString id() const
