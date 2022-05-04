@@ -100,6 +100,10 @@ public:
     //! A list of items that may be loaded with pagination.
     virtual const QFlags<Pagination> supportedPagination() const = 0;
 
+    //! Different services return time entries in different orders. If your time entries are returned with the most
+    //! recent entry first, return Qt::DescendingOrder; otherwise, return Qt::AscendingOrder.
+    virtual Qt::SortOrder timeEntriesSortOrder() const = 0;
+
     // ***** END FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
 signals:

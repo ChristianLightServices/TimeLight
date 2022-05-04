@@ -23,6 +23,10 @@ public:
         return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")};
     }
     virtual const QFlags<Pagination> supportedPagination() const final;
+    virtual Qt::SortOrder timeEntriesSortOrder() const final
+    {
+        return Qt::AscendingOrder;
+    }
 
 protected:
     virtual const QByteArray authHeaderName() const final

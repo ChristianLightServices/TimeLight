@@ -145,7 +145,11 @@ Project TrayIcons::defaultProject()
 
         do
         {
-            for (const auto &entry : entries)
+            if (m_manager->timeEntriesSortOrder() == Qt::AscendingOrder)
+                std::reverse(entries.begin(), entries.end());
+
+            for (const auto &entry : entries) // (m_manager->timeEntriesSortOrder() == Qt::DescendingOrder ? entries :
+                                              // std::ranges::reverse(entries.begin(), entries.end())))
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
                 {
@@ -166,7 +170,11 @@ Project TrayIcons::defaultProject()
             if (newEntries.empty())
                 itemsLeftToLoad = false;
             else
+            {
+                if (m_manager->timeEntriesSortOrder() == Qt::AscendingOrder)
+                    std::reverse(newEntries.begin(), newEntries.end());
                 entries.append(newEntries);
+            }
         } while (itemsLeftToLoad || !projectIdLoaded);
 
         // when all else fails, use the first extant project
@@ -198,7 +206,11 @@ Project TrayIcons::defaultProject()
             if (newEntries.empty())
                 itemsLeftToLoad = false;
             else
+            {
+                if (m_manager->timeEntriesSortOrder() == Qt::AscendingOrder)
+                    std::reverse(newEntries.begin(), newEntries.end());
                 entries.append(newEntries);
+            }
         } while (itemsLeftToLoad || !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
@@ -518,7 +530,7 @@ void TrayIcons::setUpTrayIcons()
         auto jobs = m_user.getTimeEntries(1, 1);
         if (jobs.isEmpty())
             return;
-        auto job{jobs.first()};
+        auto job{m_manager->timeEntriesSortOrder() == Qt::DescendingOrder ? jobs.first() : jobs.last()};
         if (!m_currentRunningJobId.isEmpty() && job.id() != m_currentRunningJobId)
             return;
         m_currentRunningJobId.clear();

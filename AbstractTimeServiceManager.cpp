@@ -685,20 +685,20 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
-                                      const QByteArray &body,
-                                      bool async,
-                                      const NetworkReplyCallback &successCb,
-                                      const NetworkReplyCallback &failureCb)
+                                       const QByteArray &body,
+                                       bool async,
+                                       const NetworkReplyCallback &successCb,
+                                       const NetworkReplyCallback &failureCb)
 {
     patch(url, body, async, 200, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
-                                      const QByteArray &body,
-                                      bool async,
-                                      int expectedReturnCode,
-                                      const NetworkReplyCallback &successCb,
-                                      const NetworkReplyCallback &failureCb)
+                                       const QByteArray &body,
+                                       bool async,
+                                       int expectedReturnCode,
+                                       const NetworkReplyCallback &successCb,
+                                       const NetworkReplyCallback &failureCb)
 {
     QNetworkRequest req{url};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");

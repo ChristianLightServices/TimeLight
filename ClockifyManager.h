@@ -23,6 +23,10 @@ public:
         return QUrl{QStringLiteral("https://clockify.me/tracker")};
     }
     virtual const QFlags<Pagination> supportedPagination() const final;
+    virtual Qt::SortOrder timeEntriesSortOrder() const final
+    {
+        return Qt::DescendingOrder;
+    }
 
 protected:
     virtual const QByteArray authHeaderName() const final
