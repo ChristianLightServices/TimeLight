@@ -80,12 +80,6 @@ public:
 
     // ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
-    //! This function should be overridden if your service starts pagination at a value other than 1.
-    virtual int paginationStartsAt() const
-    {
-        return 1;
-    }
-
     //! Override this to provide a unique identifier for your time service. Generally, taking the form `com.clockify` should
     //! be fine. Once set, this identifier should not be changed as it may be used for storing settings specific to your time
     //! service.
@@ -99,6 +93,12 @@ public:
 
     //! A list of items that may be loaded with pagination.
     virtual const QFlags<Pagination> supportedPagination() const = 0;
+
+    //! This function should be overridden if your service starts pagination at a value other than 1.
+    virtual int paginationStartsAt() const
+    {
+        return 1;
+    }
 
     //! Different services return time entries in different orders. If your time entries are returned with the most
     //! recent entry first, return Qt::DescendingOrder; otherwise, return Qt::AscendingOrder.
