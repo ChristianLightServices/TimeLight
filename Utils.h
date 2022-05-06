@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <QApplication>
 #include <QGridLayout>
@@ -12,4 +12,4 @@ namespace ClockifyTrayIcons
     void addVerticalStretchToQGridLayout(QGridLayout *layout);
 } // namespace ClockifyTrayIcons
 
-#endif // CONSTANTS_H
+#endif // UTILS_H
