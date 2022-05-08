@@ -44,10 +44,9 @@ Settings::~Settings()
 
 void Settings::init()
 {
-    if (!s_instance)
-        s_instance = new Settings;
-    else
-        s_instance->save();
+    if (s_instance)
+        delete s_instance;
+    s_instance = new Settings;
 }
 
 void Settings::setTimeService(const QString &service)
