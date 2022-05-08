@@ -102,7 +102,7 @@ QWidget *SettingsDialog::createBackendPage()
     layout->addWidget(new QLabel{tr("Workspace to track time on"), backendPage}, 2, 0);
     layout->addWidget(workspaces, 2, 1, 1, 2);
 
-    ClockifyTrayIcons::addVerticalStretchToQGridLayout(layout);
+    TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(timeServices, &QComboBox::currentIndexChanged, timeServices, [this, timeServices](int i) {
         if (m_resetOfTimeServiceComboBoxInProgress)
@@ -119,7 +119,7 @@ QWidget *SettingsDialog::createBackendPage()
         {
         case QMessageBox::Ok:
             Settings::instance()->setTimeService(m_availableManagers[i].second);
-            ClockifyTrayIcons::restartApp();
+            TimeLight::restartApp();
             break;
         case QMessageBox::Cancel:
         default:
@@ -141,7 +141,7 @@ QWidget *SettingsDialog::createBackendPage()
         {
             m_manager->setApiKey(apiKeyInput->text());
             Settings::instance()->setApiKey(apiKeyInput->text());
-            ClockifyTrayIcons::restartApp();
+            TimeLight::restartApp();
         }
     });
 
@@ -284,7 +284,7 @@ QWidget *SettingsDialog::createProjectPage()
             default:
                 break;
             }
-            ClockifyTrayIcons::restartApp();
+            TimeLight::restartApp();
         }
         else
             useBreakTime->setChecked(Settings::instance()->useSeparateBreakTime());
@@ -357,7 +357,7 @@ QWidget *SettingsDialog::createAppPage()
     layout->addWidget(eventLoopInterval, 0, 1);
     layout->addWidget(showNotifications, 1, 0, 1, 2);
 
-    ClockifyTrayIcons::addVerticalStretchToQGridLayout(layout);
+    TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(eventLoopInterval, &QDoubleSpinBox::valueChanged, eventLoopInterval, [](double d) {
         Settings::instance()->setEventLoopInterval(static_cast<int>(d) * 1000);

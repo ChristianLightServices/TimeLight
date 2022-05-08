@@ -19,16 +19,16 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication::setApplicationName(QStringLiteral("ClockifyTrayIcons"));
+    QApplication::setApplicationName(QStringLiteral("TimeLight"));
     QApplication::setOrganizationName(QStringLiteral("Christian Light"));
 
     // Migrate old settings to the new organizational format. This must
     // be the third or fourth migration I've written for this app.
+    QSettings settings;
     QSettings oldSettings{qApp->organizationName(), QStringLiteral("ClockifyTrayIcons")};
     // we'll assume that apiKey signals everything being non-migrated
     if (oldSettings.contains(QStringLiteral("apiKey")))
     {
-        QSettings settings;
         // the following is highly dependent on the config file not being screwed up
         settings.setValue(QStringLiteral("com.clockify/apiKey"), oldSettings.value(QStringLiteral("apiKey")));
         settings.setValue(QStringLiteral("com.clockify/breakTimeId"), oldSettings.value(QStringLiteral("breakTimeId")));
@@ -50,21 +50,16 @@ int main(int argc, char *argv[])
         // This setting "migration" is a special case: for new users, this setting will default to false,
         // but users who are upgrading from old versions should not have their workflows broken
         settings.setValue(QStringLiteral("com.clockify/useSeparateBreakTime"), true);
-
-        // ...and now we can delete all of the old keys
-        const QStringList oldKeys = {QStringLiteral("apiKey"),
-                                     QStringLiteral("breakTimeId"),
-                                     QStringLiteral("description"),
-                                     QStringLiteral("disableDescription"),
-                                     QStringLiteral("eventLoopInterval"),
-                                     QStringLiteral("projectId"),
-                                     QStringLiteral("showDurationNotifications"),
-                                     QStringLiteral("useLastDescription"),
-                                     QStringLiteral("useLastProject"),
-                                     QStringLiteral("workspaceId")};
-        for (const auto &key : oldKeys)
-            oldSettings.remove(key);
     }
+    else
+    {
+        for (const auto &key : oldSettings.allKeys())
+            settings.setValue(key, oldSettings.value(key));
+    }
+
+    // ...and now we can delete all of the old keys
+    for (const auto &key : oldSettings.allKeys())
+        oldSettings.remove(key);
     // end migration
 
     QApplication::setOrganizationDomain(QStringLiteral("org.christianlight"));
@@ -77,7 +72,7 @@ int main(int argc, char *argv[])
         a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
 
         QTranslator translator;
-        if (translator.load(QLocale{}, QStringLiteral("ClockifyTrayIcons"), QStringLiteral("_"), QStringLiteral(":/i18n")))
+        if (translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
             QApplication::installTranslator(&translator);
 
         Settings::init();
@@ -88,7 +83,7 @@ int main(int argc, char *argv[])
         icons.show();
 
         retCode = a.exec();
-    } while (retCode == ClockifyTrayIcons::appRestartCode);
+    } while (retCode == TimeLight::appRestartCode);
 
     return retCode;
 }

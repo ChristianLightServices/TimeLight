@@ -79,7 +79,8 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
             bool ok{false};
             QString newKey = QInputDialog::getText(nullptr,
                                                    tr("API key"),
-                                                   tr("The API key is incorrect or invalid. Please enter a valid API key:"),
+                                                   tr("The API key seems to be incorrect or invalid. Please enter a valid "
+                                                      "API key:"),
                                                    QLineEdit::Normal,
                                                    QString{},
                                                    &ok);
@@ -315,7 +316,7 @@ void TrayIcons::getNewProjectId()
 void TrayIcons::showAboutDialog()
 {
     // put this into a variable to handle this gonzo string more nicely
-    auto licenseInfo = tr("ClockifyTrayIcons %1 copyright © 2022. Licensed "
+    auto licenseInfo = tr("TimeLight %1 copyright © 2022. Licensed "
                           "under the MIT license.\n\nIcons from "
                           "[1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) "
                           "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))"
@@ -360,7 +361,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
         licenseView->setText(licenseFile.readAll());
     else [[unlikely]] // this really should never happen, but just in case...
         licenseView->setMarkdown(tr("Error: could not load the license. Please read the license on "
-                                    "[GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/"
+                                    "[GitHub](https://github.com/ChristianLightServices/TimeLight/blob/master/"
                                     "LICENSE)."));
 
     licenseView->setOpenExternalLinks(true);
