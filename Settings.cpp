@@ -6,7 +6,7 @@ Settings::Settings(QObject *parent) : QObject{parent}
 {
     QSettings settings;
 
-    m_timeService = settings.value(QStringLiteral("timeService"), QStringLiteral("com.clockify")).toString();
+    m_timeService = settings.value(QStringLiteral("timeService")).toString();
 
     settings.beginGroup(m_timeService);
     m_apiKey = settings.value(QStringLiteral("apiKey")).toString();
