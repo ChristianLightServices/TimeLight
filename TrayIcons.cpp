@@ -27,11 +27,32 @@
 
 TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSystemTrayIcon}
 {
+    while (Settings::instance()->timeService().isEmpty())
+    {
+        bool ok{false};
+        QString service = QInputDialog::getItem(nullptr,
+                                                tr("Time service"),
+                                                tr("Choose which time service to use:"),
+                                                QStringList{} << QStringLiteral("Clockify") << QStringList("TimeCamp"),
+                                                0,
+                                                false,
+                                                &ok);
+        if (!ok)
+        {
+            m_valid = false;
+            return;
+        }
+        else if (service == QStringLiteral("Clockify"))
+            Settings::instance()->setTimeService(QStringLiteral("com.clockify"));
+        else if (service == QStringLiteral("TimeCamp"))
+            Settings::instance()->setTimeService(QStringLiteral("com.timecamp"));
+    }
+
     while (Settings::instance()->apiKey().isEmpty())
     {
         bool ok{false};
-        QString newKey = QInputDialog::getText(
-            nullptr, tr("API key"), tr("Enter your Clockify API key:"), QLineEdit::Normal, QString{}, &ok);
+        QString newKey =
+            QInputDialog::getText(nullptr, tr("API key"), tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
         if (!ok)
         {
             m_valid = false;
@@ -86,8 +107,32 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
 
     m_user = m_manager->getApiKeyOwner();
     if (Settings::instance()->workspaceId().isEmpty())
-        Settings::instance()->setWorkspaceId(m_user.workspaceId());
+    {
+        auto workspaces = m_manager->getOwnerWorkspaces();
+        QStringList names;
+        for (const auto &w : workspaces)
+            names << w.name();
+        while (Settings::instance()->workspaceId().isEmpty())
+        {
+            bool ok{false};
+            QString workspace = QInputDialog::getItem(
+                nullptr, tr("Workspace"), tr("Choose which workspace to track time on:"), names, 0, false, &ok);
+            if (!ok)
+            {
+                m_valid = false;
+                return;
+            }
+
+            for (const auto &w : workspaces)
+                if (w.name() == workspace)
+                {
+                    Settings::instance()->setWorkspaceId(w.id());
+                    break;
+                }
+        }
+    }
     m_manager->setWorkspaceId(Settings::instance()->workspaceId());
+
     if (!m_user.isValid()) [[unlikely]]
     {
         QMessageBox::warning(nullptr, tr("Fatal error"), tr("Could not load user!"));
@@ -95,12 +140,11 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
         return;
     }
 
-    while ((Settings::instance()->projectId().isEmpty() && !Settings::instance()->useLastProject()) ||
-           Settings::instance()->breakTimeId().isEmpty())
+    while (!Settings::instance()->useLastProject() && (Settings::instance()->projectId().isEmpty()) ||
+           (Settings::instance()->useSeparateBreakTime() && Settings::instance()->breakTimeId().isEmpty()))
     {
-        QMessageBox::information(nullptr,
-                                 tr("Select a project"),
-                                 tr("Please select a default project and break project in the following dialog."));
+        QMessageBox::information(
+            nullptr, tr("Select a project"), tr("Please select a default project in the following dialog."));
         getNewProjectId();
     }
 
