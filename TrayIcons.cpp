@@ -113,6 +113,10 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
     m_eventLoop.setSingleShot(false);
     m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
     m_eventLoop.start();
+
+    connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
+        m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
+    });
 }
 
 TrayIcons::~TrayIcons()
