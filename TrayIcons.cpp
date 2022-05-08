@@ -570,7 +570,7 @@ void TrayIcons::setTimerState(const TimerState state)
     case TimerState::OnBreak:
         m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
         m_timerRunning->setIcon(
-            QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/yellowlight.png")});
+            QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
         if (m_runningJob) // this *should* always be true, but just in case...
         {
             m_runningJob->setToolTip(tr("You are on break"));
