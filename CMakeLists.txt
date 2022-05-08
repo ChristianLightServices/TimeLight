@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(ClockifyTrayIcons VERSION 1.0.1 LANGUAGES CXX)
+project(TimeLight VERSION 1.0.1 LANGUAGES CXX)
 
-set(ClockifyTrayIcons_VERSION_STR "${ClockifyTrayIcons_VERSION_MAJOR}.${ClockifyTrayIcons_VERSION_MINOR}.${ClockifyTrayIcons_VERSION_PATCH}")
+set(TimeLight_VERSION_STR "${TimeLight_VERSION_MAJOR}.${TimeLight_VERSION_MINOR}.${TimeLight_VERSION_PATCH}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -87,7 +87,7 @@ set(SRC
 )
 
 set(TRANSLATIONS
-    ClockifyTrayIcons_en_US.ts
+    TimeLight_en_US.ts
 )
 
 set(LIBRARIES
@@ -97,25 +97,25 @@ set(LIBRARIES
 	nlohmann_json::nlohmann_json
 )
 
-qt_add_executable(ClockifyTrayIcons ${OS_HACKS}
+qt_add_executable(TimeLight ${OS_HACKS}
     ${SRC}
     ${APP_ICON_RESOURCE}
     ${TRANSLATIONS}
     res.qrc
 )
-qt_add_translations(ClockifyTrayIcons TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
+qt_add_translations(TimeLight TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
 
 if(APPLE)
-	set_target_properties(ClockifyTrayIcons PROPERTIES
-		MACOSX_BUNDLE_BUNDLE_NAME "ClockifyTrayIcons"
-		MACOSX_BUNDLE_BUNDLE_VERSION ${ClockifyTrayIcons_VERSION_STR}
+    set_target_properties(TimeLight PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME "TimeLight"
+        MACOSX_BUNDLE_BUNDLE_VERSION ${TimeLight_VERSION_STR}
 		MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
-		MACOSX_BUNDLE_GUI_IDENTIFIER "org.christianlight.ClockifyTrayIcons"
-		MACOSX_BUNDLE_INFO_STRING "ClockifyTrayIcons"
-		MACOSX_BUNDLE_LONG_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
-		MACOSX_BUNDLE_SHORT_VERSION_STRING ${ClockifyTrayIcons_VERSION_STR}
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.christianlight.TimeLight"
+        MACOSX_BUNDLE_INFO_STRING "TimeLight"
+        MACOSX_BUNDLE_LONG_VERSION_STRING ${TimeLight_VERSION_STR}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${TimeLight_VERSION_STR}
 		MACOSX_BUNDLE_ICON_FILE "icons/macicon.icns"
 	)
 endif()
 
-target_link_libraries(ClockifyTrayIcons PRIVATE ${LIBRARIES})
+target_link_libraries(TimeLight PRIVATE ${LIBRARIES})

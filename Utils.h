@@ -4,12 +4,12 @@
 #include <QApplication>
 #include <QGridLayout>
 
-namespace ClockifyTrayIcons
+namespace TimeLight
 {
     constexpr auto appRestartCode{0x1337beef};
     void restartApp();
 
     void addVerticalStretchToQGridLayout(QGridLayout *layout);
-} // namespace ClockifyTrayIcons
+} // namespace TimeLight
 
 #endif // UTILS_H

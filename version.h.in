@@ -1,14 +1,14 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VERSION_MAJOR @ClockifyTrayIcons_VERSION_MAJOR@
-#define VERSION_MINOR @ClockifyTrayIcons_VERSION_MINOR@
-#define VERSION_PATCH @ClockifyTrayIcons_VERSION_PATCH@
+#define VERSION_MAJOR @TimeLight_VERSION_MAJOR@
+#define VERSION_MINOR @TimeLight_VERSION_MINOR@
+#define VERSION_PATCH @TimeLight_VERSION_PATCH@
 
-#define VERSION_MAJOR_STR "@ClockifyTrayIcons_VERSION_MAJOR@"
-#define VERSION_MINOR_STR "@ClockifyTrayIcons_VERSION_MINOR@"
-#define VERSION_PATCH_STR "@ClockifyTrayIcons_VERSION_PATCH@"
+#define VERSION_MAJOR_STR "@TimeLight_VERSION_MAJOR@"
+#define VERSION_MINOR_STR "@TimeLight_VERSION_MINOR@"
+#define VERSION_PATCH_STR "@TimeLight_VERSION_PATCH@"
 
-#define VERSION_STR "@ClockifyTrayIcons_VERSION_STR@"
+#define VERSION_STR "@TimeLight_VERSION_STR@"
 
 #endif // VERSION_H
