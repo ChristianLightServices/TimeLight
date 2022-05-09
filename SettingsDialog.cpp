@@ -111,6 +111,16 @@ QWidget *SettingsDialog::createBackendPage()
             return;
         }
 
+        if (m_availableManagers[i].second == QStringLiteral("com.timecamp") && Settings::instance()->eventLoopInterval() < 15000)
+            if (QMessageBox::question(this,
+                                      tr("Increase update interval"),
+                                      tr("TimeCamp only allows apps to check for updates 360 times per hour. Do you want to "
+                                         "increase the update interval to 15 seconds to ensure that you do not exceed this "
+                                         "update limit?")/*,
+                                      QMessageBox::Yes | QMessageBox::No,
+                                      QMessageBox::Yes)*/))
+                Settings::instance()->setEventLoopInterval(15000);
+
         switch (QMessageBox::information(this,
                                          tr("Restart app to continue"),
                                          tr("To continue, the app will need to restart."),
@@ -348,7 +358,7 @@ QWidget *SettingsDialog::createAppPage()
     eventLoopInterval->setValue(Settings::instance()->eventLoopInterval() / 1000);
     eventLoopInterval->setDecimals(1);
     eventLoopInterval->setMinimum(0);
-    eventLoopInterval->setMaximum(10);
+    eventLoopInterval->setMaximum(30);
 
     auto showNotifications{new QCheckBox{tr("Show how much time was worked when a job is stopped"), appPage}};
     showNotifications->setChecked(Settings::instance()->showDurationNotifications());
