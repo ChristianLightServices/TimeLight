@@ -45,7 +45,10 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
         else if (service == QStringLiteral("Clockify"))
             Settings::instance()->setTimeService(QStringLiteral("com.clockify"));
         else if (service == QStringLiteral("TimeCamp"))
+        {
             Settings::instance()->setTimeService(QStringLiteral("com.timecamp"));
+            Settings::instance()->setEventLoopInterval(15000);
+        }
     }
 
     while (Settings::instance()->apiKey().isEmpty())
