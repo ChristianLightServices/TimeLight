@@ -96,6 +96,7 @@ private:
     explicit Settings(QObject *parent = nullptr);
     ~Settings() override;
 
+    void load();
     void save();
 
     QTimer m_saveTimer;

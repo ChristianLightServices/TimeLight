@@ -4,6 +4,27 @@
 
 Settings::Settings(QObject *parent) : QObject{parent}
 {
+    load();
+
+    m_saveTimer.setInterval(10000);
+    m_saveTimer.setSingleShot(false);
+    m_saveTimer.callOnTimeout(this, [this] {
+        if (m_settingsDirty)
+        {
+            save();
+            m_settingsDirty = false;
+        }
+    });
+    m_saveTimer.start();
+}
+
+Settings::~Settings()
+{
+    save();
+}
+
+void Settings::load()
+{
     QSettings settings;
 
     m_timeService = settings.value(QStringLiteral("timeService")).toString();
@@ -24,22 +45,6 @@ Settings::Settings(QObject *parent) : QObject{parent}
     m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 1000).toInt();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
     settings.endGroup();
-
-    m_saveTimer.setInterval(10000);
-    m_saveTimer.setSingleShot(false);
-    m_saveTimer.callOnTimeout(this, [this] {
-        if (m_settingsDirty)
-        {
-            save();
-            m_settingsDirty = false;
-        }
-    });
-    m_saveTimer.start();
-}
-
-Settings::~Settings()
-{
-    save();
 }
 
 void Settings::init()
@@ -53,9 +58,14 @@ void Settings::setTimeService(const QString &service)
 {
     if (service == m_timeService)
         return;
-    m_timeService = service;
+
+    // this hack makes sure that time-service-specific settings don't contaminate other services' settings
+    save();
+    QSettings settings;
+    settings.setValue(QStringLiteral("timeService"), service);
+    load();
+
     emit timeServiceChanged();
-    m_settingsDirty = true;
 }
 
 void Settings::setApiKey(const QString &key)
