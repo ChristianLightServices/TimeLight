@@ -31,6 +31,7 @@ TimeEntry &TimeEntry::operator=(const TimeEntry &other)
 {
     m_id = other.m_id;
     m_project = other.m_project;
+    m_description = other.m_description;
     m_userId = other.m_userId;
     m_start = other.m_start;
     m_end = other.m_end;
