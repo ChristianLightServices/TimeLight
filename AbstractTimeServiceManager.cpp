@@ -203,8 +203,9 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
 
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
-                for (const auto &entry : j)
-                    entries.push_back(jsonToTimeEntry(entry));
+                if (!j.is_null() && !j[0].is_null())
+                    for (const auto &entry : j)
+                        entries.push_back(jsonToTimeEntry(entry));
 
                 retVal = !j.empty();
             }
