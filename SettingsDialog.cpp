@@ -116,9 +116,7 @@ QWidget *SettingsDialog::createBackendPage()
                                       tr("Increase update interval"),
                                       tr("TimeCamp only allows apps to check for updates 360 times per hour. Do you want to "
                                          "increase the update interval to 15 seconds to ensure that you do not exceed this "
-                                         "update limit?")/*,
-                                      QMessageBox::Yes | QMessageBox::No,
-                                      QMessageBox::Yes)*/))
+                                         "update limit?")))
                 Settings::instance()->setEventLoopInterval(15000);
 
         switch (QMessageBox::information(this,
