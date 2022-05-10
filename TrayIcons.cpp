@@ -455,6 +455,7 @@ void TrayIcons::setUpTrayIcons()
             m_user.startTimeEntry(project.id(), project.description());
         }
 
+        updateTrayIcons();
         m_eventLoop.start();
     });
 
@@ -568,6 +569,7 @@ void TrayIcons::setUpTrayIcons()
                 m_user.startTimeEntry(project.id(), project.description());
             }
 
+            updateTrayIcons();
             m_eventLoop.start();
         });
     }
