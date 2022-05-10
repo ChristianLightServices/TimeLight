@@ -200,8 +200,7 @@ Project TrayIcons::defaultProject()
             if (m_manager->timeEntriesSortOrder() == Qt::AscendingOrder)
                 std::reverse(entries.begin(), entries.end());
 
-            for (const auto &entry : entries) // (m_manager->timeEntriesSortOrder() == Qt::DescendingOrder ? entries :
-                                              // std::ranges::reverse(entries.begin(), entries.end())))
+            for (const auto &entry : entries)
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
                 {
