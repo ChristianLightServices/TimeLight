@@ -28,6 +28,8 @@ cmake --build .
 
 and you have a binary!
 
+Please note that this project requires C++20 features (most notably concepts) that will not compile with GCC at the moment (unless you set special flags for GCC). Therefore, you will want to use the latest Clang or MSVC to compile this project.
+
 ## Getting nightly builds
 
 ### ⚠ Warning: macOS builds are temporarily disabled. ⚠
