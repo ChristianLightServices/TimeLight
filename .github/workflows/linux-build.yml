@@ -47,12 +47,12 @@ jobs:
       - name: Build release package
         if: ${{ github.event.inputs.packageRelease }}
         run: |
-          linuxdeploy-x86_64.AppImage --plugin qt --output appimage --desktop-file ClockifyTrayIcons.desktop --icon-file icons/ClockifyTrayIcons.svg --executable build/ClockifyTrayIcons --appdir AppDir
+          linuxdeploy-x86_64.AppImage --plugin qt --output appimage --desktop-file TimeLight.desktop --icon-file icons/TimeLight.svg --executable build/TimeLight --appdir AppDir
 
       - name: Upload release package
         if: ${{ github.event.inputs.packageRelease }}
         uses: actions/upload-artifact@v2
         with:
           name: Linux package (64-bit, Qt ${{ matrix.qt-version }})
-          path: ClockifyTrayIcons-*-x86_64.AppImage
+          path: TimeLight-*-x86_64.AppImage
           retention-days: 7 # if it's needed more than a week later, we can just rerun the build manually

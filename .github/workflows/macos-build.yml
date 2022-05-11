@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir upload_dir
           cd upload_dir
-          cp -r ../build/ClockifyTrayIcons.app .
+          cp -r ../build/TimeLight.app .
           cd ..
 
       - name: Upload binary
@@ -56,8 +56,8 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp -r ../build/ClockifyTrayIcons.app .
-          macdeployqt ClockifyTrayIcons.app -dmg
+          cp -r ../build/TimeLight.app .
+          macdeployqt TimeLight.app -dmg
           cd ..
 
       - name: Upload release package
@@ -65,5 +65,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: macOS package (64-bit, Qt ${{ matrix.qt-version }})
-          path: release_dir/ClockifyTrayIcons.dmg
+          path: release_dir/TimeLight.dmg
           retention-days: 7

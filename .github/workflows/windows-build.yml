@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows binary (Qt ${{ matrix.qt-version }})
-          path: build\Release\ClockifyTrayIcons.exe
+          path: build\Release\TimeLight.exe
           retention-days: 7
 
       - name: Build release package
@@ -49,15 +49,15 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp ..\build\Release\ClockifyTrayIcons.exe .
-          windeployqt ClockifyTrayIcons.exe
+          cp ..\build\Release\TimeLight.exe .
+          windeployqt TimeLight.exe
           cd ..
-          7z a -tzip ClockifyTrayIcons.zip release_dir
+          7z a -tzip TimeLight.zip release_dir
 
       - name: Upload release package
         if: ${{ github.event.inputs.packageRelease }}
         uses: actions/upload-artifact@v2
         with:
           name: Windows package (64-bit, Qt ${{ matrix.qt-version }})
-          path: ClockifyTrayIcons.zip
+          path: TimeLight.zip
           retention-days: 7

@@ -135,10 +135,10 @@
     </message>
     <message>
         <location filename="TrayIcons.cpp" line="364"/>
-        <source>ClockifyTrayIcons %1 copyright © 2020. Licensed under the MIT license.
+        <source>TimeLight %1 copyright © 2020. Licensed under the MIT license.
 
 Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and [Microsoft](https://github.com/microsoft/fluentui-system-icons) (power icon, licensed [MIT](https://mit-license.org)).</source>
-        <translation>ClockifyTrayIcons %1 copyright © 2020. Licensed under the MIT license.
+        <translation>TimeLight %1 copyright © 2020. Licensed under the MIT license.
 
 Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and [Microsoft](https://github.com/microsoft/fluentui-system-icons) (power icon, licensed [MIT](https://mit-license.org)).</translation>
     </message>
@@ -154,8 +154,8 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
     </message>
     <message>
         <location filename="TrayIcons.cpp" line="409"/>
-        <source>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE).</source>
-        <translation>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/ClockifyTrayIcons/blob/master/LICENSE).</translation>
+        <source>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/TimeLight/blob/master/LICENSE).</source>
+        <translation>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/TimeLight/blob/master/LICENSE).</translation>
     </message>
     <message>
         <location filename="TrayIcons.cpp" line="422"/>

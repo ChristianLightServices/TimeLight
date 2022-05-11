@@ -1,10 +1,9 @@
 [Desktop Entry]
-Name=ClockifyTrayIcons
-Exec=ClockifyTrayIcons
-Icon=ClockifyTrayIcons
-X-DocPath=kcalc/index.html
-Comment=Two simple tray icons for controlling Clockify.
-GenericName=Clockify tray icons
+Name=TimeLight
+Exec=TimeLight
+Icon=TimeLight
+Comment=A button for controlling time tracker services from your system tray.
+GenericName=TimeLight
 Terminal=false
 Type=Application
 StartupNotify=true

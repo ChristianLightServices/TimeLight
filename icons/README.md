@@ -1,6 +1,6 @@
-# ClockifyTrayIcons icon licensing information
+# TimeLight icon licensing information
 
-ClockifyTrayIcons uses a conglomeration of icons from different sources. These icons are linked to below.
+TimeLight uses a conglomeration of icons from different sources. These icons are linked to below.
 
 - The light icons are licensed [Creative Commons Attribution-Share Alike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/deed.en).
  - [Green light icon](https://commons.wikimedia.org/wiki/File:Green_Light_Icon.svg)
