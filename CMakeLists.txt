@@ -36,54 +36,54 @@ endif()
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
-configure_file(version.h.in version.h)
+configure_file(src/version.h.in version.h)
 
 set(SRC_CLOCKIFY
-    ClockifyManager.cpp
-    ClockifyManager.h
+    src/ClockifyManager.cpp
+    src/ClockifyManager.h
 )
 
 set(SRC_TIMECAMP
-    TimeCampManager.cpp
-    TimeCampManager.h
+    src/TimeCampManager.cpp
+    src/TimeCampManager.h
 )
 
 # put in some platform-specific configuration stuff
 if(WIN32)
-        set(OS_HACKS "WIN32")
-	set(APP_ICON_RESOURCE "winres.rc")
+    set(OS_HACKS "WIN32")
+    set(APP_ICON_RESOURCE "winres.rc")
 elseif(APPLE)
-	set(OS_HACKS "MACOSX_BUNDLE")
-	set(APP_ICON_RESOURCE "icons/macicon.icns")
+    set(OS_HACKS "MACOSX_BUNDLE")
+    set(APP_ICON_RESOURCE "icons/macicon.icns")
 else()
-	set(OS_HACKS "")
-	set(APP_ICON_RESOURCE "")
+    set(OS_HACKS "")
+    set(APP_ICON_RESOURCE "")
 endif()
 
 set(SRC
-	${SRC_CLOCKIFY}
+    ${SRC_CLOCKIFY}
     ${SRC_TIMECAMP}
 
-    AbstractTimeServiceManager.cpp
-    AbstractTimeServiceManager.h
-    JsonHelper.h
-    main.cpp
-    Project.cpp
-    Project.h
-    Settings.cpp
-    Settings.h
-    SettingsDialog.cpp
-    SettingsDialog.h
-    TimeEntry.cpp
-    TimeEntry.h
-    TrayIcons.cpp
-    TrayIcons.h
-    User.cpp
-    User.h
-    Utils.h
-    Utils.cpp
-    Workspace.cpp
-    Workspace.h
+    src/AbstractTimeServiceManager.cpp
+    src/AbstractTimeServiceManager.h
+    src/JsonHelper.h
+    src/main.cpp
+    src/Project.cpp
+    src/Project.h
+    src/Settings.cpp
+    src/Settings.h
+    src/SettingsDialog.cpp
+    src/SettingsDialog.h
+    src/TimeEntry.cpp
+    src/TimeEntry.h
+    src/TrayIcons.cpp
+    src/TrayIcons.h
+    src/User.cpp
+    src/User.h
+    src/Utils.h
+    src/Utils.cpp
+    src/Workspace.cpp
+    src/Workspace.h
 )
 
 set(TRANSLATIONS
@@ -91,10 +91,10 @@ set(TRANSLATIONS
 )
 
 set(LIBRARIES
-	Qt${QT_VERSION_MAJOR}::Network
-	Qt${QT_VERSION_MAJOR}::Widgets
-	SingleApplication::SingleApplication
-	nlohmann_json::nlohmann_json
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Widgets
+    SingleApplication::SingleApplication
+    nlohmann_json::nlohmann_json
 )
 
 qt_add_executable(TimeLight ${OS_HACKS}
@@ -109,13 +109,13 @@ if(APPLE)
     set_target_properties(TimeLight PROPERTIES
         MACOSX_BUNDLE_BUNDLE_NAME "TimeLight"
         MACOSX_BUNDLE_BUNDLE_VERSION ${TimeLight_VERSION_STR}
-		MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
+        MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.christianlight.TimeLight"
         MACOSX_BUNDLE_INFO_STRING "TimeLight"
         MACOSX_BUNDLE_LONG_VERSION_STRING ${TimeLight_VERSION_STR}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${TimeLight_VERSION_STR}
-		MACOSX_BUNDLE_ICON_FILE "icons/macicon.icns"
-	)
+        MACOSX_BUNDLE_ICON_FILE "icons/macicon.icns"
+    )
 endif()
 
 target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
