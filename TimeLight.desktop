@@ -7,5 +7,4 @@ GenericName=TimeLight
 Terminal=false
 Type=Application
 StartupNotify=true
-Categories=Qt;Utility;
-
+Categories=Qt;Network;
