@@ -187,7 +187,7 @@ Project TrayIcons::defaultProject()
     QString description;
     int pageNum{m_manager->paginationStartsAt()};
     bool itemsLeftToLoad{true};
-    auto entries = m_user.getTimeEntries(pageNum);
+    QVector<TimeEntry> entries;
 
     if (!Settings::instance()->useLastProject())
         projectId = Settings::instance()->projectId();
@@ -195,6 +195,7 @@ Project TrayIcons::defaultProject()
     {
         bool projectIdLoaded{false};
 
+        entries = m_user.getTimeEntries(pageNum);
         if (m_manager->timeEntriesSortOrder() == Qt::AscendingOrder)
             std::reverse(entries.begin(), entries.end());
 
