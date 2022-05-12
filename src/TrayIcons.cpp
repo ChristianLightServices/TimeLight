@@ -252,6 +252,8 @@ Project TrayIcons::defaultProject()
                     break;
                 }
             }
+            if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+                break;
 
             auto newEntries = m_user.getTimeEntries(++pageNum);
             if (newEntries.empty())
