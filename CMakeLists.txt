@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
+option(GENERATE_INSTALLER "Generate an installer." OFF)
+
 project(TimeLight VERSION 1.0.1 LANGUAGES CXX)
 
 set(TimeLight_VERSION_STR "${TimeLight_VERSION_MAJOR}.${TimeLight_VERSION_MINOR}.${TimeLight_VERSION_PATCH}")
@@ -11,6 +13,31 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Installer data
+set(CPACK_GENERATOR "IFW")
+set(CPACK_IFW_PACKAGE_NAME "TimeLight")
+set(CPACK_PACKAGE_VERSION ${TimeLight_VERSION_STR})
+set(CPACK_IFW_PACKAGE_TITLE ${CPACK_IFW_PACKAGE_NAME})
+set(CPACK_IFW_PRODUCT_URL "https://github.com/ChristianLightServices/TimeLight")
+set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH 640)
+set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT 480)
+set(CPACK_IFW_PACKAGE_WIZARD_STYLE "Aero")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Christian Light")
+if(UNIX AND NOT APPLE)
+    set(CPACK_IFW_TARGET_DIRECTORY "~/.local/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+endif()
+if(WIN32)
+    set(CPACK_IFW_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons/winicon.ico")
+elseif(APPLE)
+    set(CPACK_IFW_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons/macicon.ico")
+endif()
+set(CPACK_IFW_PACKAGE_WINDOW_ICON "${CMAKE_SOURCE_DIR}/icons/greenlight.png")
+set(CPACK_IFW_PACKAGE_LOGO "${CMAKE_SOURCE_DIR}/icons/greenlight.png")
+set(CPACK_IFW_PACKAGE_START_MENU_DIRECTORY "Christian Light")
+
+include(CPack)
+include(CPackIFW)
 
 find_package(Qt6 6.2 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 
@@ -119,3 +146,20 @@ if(APPLE)
 endif()
 
 target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
+
+install(TARGETS TimeLight RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "TimeLight")
+if(UNIX AND NOT APPLE)
+    install(FILES "TimeLight.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications")
+    install(FILES "icons/TimeLight.svg" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps")
+endif()
+
+cpack_add_component(TimeLight
+    DISPLAY_NAME "TimeLight"
+    DESCRIPTION "A button for controlling time tracker services from your system tray."
+    REQUIRED
+)
+
+cpack_ifw_configure_component(TimeLight
+    FORCED_INSTALLATION
+    LICENSES "License" LICENSE
+)
