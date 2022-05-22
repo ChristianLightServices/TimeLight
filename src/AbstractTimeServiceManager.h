@@ -54,6 +54,8 @@ public:
     void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
     void startTimeEntry(
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+    //! The time entries returned by this function will always be sorted in descending order, i.e. the most recent entry will
+    //! be first.
     QVector<TimeEntry> getTimeEntries(const QString &userId, std::optional<int> pageNumber, std::optional<int> pageSize);
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
@@ -84,10 +86,6 @@ public:
 
     //! This function should be overridden if your service starts pagination at a value other than 1.
     virtual int paginationStartsAt() const { return 1; }
-
-    //! Different services return time entries in different orders. If your time entries are returned with the most
-    //! recent entry first, return Qt::DescendingOrder; otherwise, return Qt::AscendingOrder.
-    virtual Qt::SortOrder timeEntriesSortOrder() const = 0;
 
     // ***** END FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
@@ -168,6 +166,9 @@ protected:
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const = 0;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const = 0;
     virtual QByteArray getRunningTimeEntryPayload() const { return {}; }
+    //! Different services return time entries in different orders. If your time entries are returned with the most
+    //! recent entry first, return Qt::DescendingOrder; otherwise, return Qt::AscendingOrder.
+    virtual Qt::SortOrder timeEntriesSortOrder() const = 0;
 
     // Note: these names are reserved for future development purposes
     // virtual json userToJson(const User &u) = 0;

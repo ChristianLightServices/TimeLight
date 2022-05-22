@@ -201,6 +201,8 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
                     for (const auto &entry : j)
                         entries.push_back(jsonToTimeEntry(entry));
 
+                if (timeEntriesSortOrder() == Qt::AscendingOrder)
+                    std::reverse(entries.begin(), entries.end());
                 retVal = !j.empty();
             }
             catch (const std::exception &e)
