@@ -35,6 +35,12 @@ endif()
 set(CPACK_IFW_PACKAGE_WINDOW_ICON "${CMAKE_SOURCE_DIR}/icons/greenlight.png")
 set(CPACK_IFW_PACKAGE_LOGO "${CMAKE_SOURCE_DIR}/icons/greenlight.png")
 set(CPACK_IFW_PACKAGE_START_MENU_DIRECTORY "Christian Light")
+if(WIN32)
+    # TODO: does this work on Windows or does CPack work differently?
+    set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight.exe")
+else()
+    set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight")
+endif()
 
 include(CPack)
 include(CPackIFW)
