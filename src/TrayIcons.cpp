@@ -208,7 +208,8 @@ Project TrayIcons::defaultProject()
                     std::cerr << "Error: getting project id failed\n";
                     continue; // no project id to see here, move along
                 }
-                else if (!Settings::instance()->useSeparateBreakTime() || entry.project().id() != Settings::instance()->breakTimeId())
+                else if (!Settings::instance()->useSeparateBreakTime() ||
+                         entry.project().id() != Settings::instance()->breakTimeId())
                 {
                     projectId = entry.project().id();
                     projectIdLoaded = true;
@@ -246,7 +247,8 @@ Project TrayIcons::defaultProject()
         {
             for (const auto &entry : entries)
             {
-                if (!Settings::instance()->useSeparateBreakTime() || entry.project().id() != Settings::instance()->breakTimeId())
+                if (!Settings::instance()->useSeparateBreakTime() ||
+                    entry.project().id() != Settings::instance()->breakTimeId())
                 {
                     description = entry.project().description();
                     descriptionLoaded = true;
@@ -288,7 +290,8 @@ void TrayIcons::updateTrayIcons()
         try
         {
             if (auto runningEntry = m_user.getRunningTimeEntry();
-                Settings::instance()->useSeparateBreakTime() && runningEntry.project().id() == Settings::instance()->breakTimeId())
+                Settings::instance()->useSeparateBreakTime() &&
+                runningEntry.project().id() == Settings::instance()->breakTimeId())
                 setTimerState(TimerState::OnBreak);
             else
             {

@@ -111,7 +111,8 @@ QWidget *SettingsDialog::createBackendPage()
             return;
         }
 
-        if (m_availableManagers[i].second == QStringLiteral("com.timecamp") && Settings::instance()->eventLoopInterval() < 15000)
+        if (m_availableManagers[i].second == QStringLiteral("com.timecamp") &&
+            Settings::instance()->eventLoopInterval() < 15000)
             if (QMessageBox::question(this,
                                       tr("Increase update interval"),
                                       tr("TimeCamp only allows apps to check for updates 360 times per hour. Do you want to "
