@@ -45,6 +45,7 @@ private:
         OnBreak,
         NotRunning,
         Offline,
+        Ratelimited,
         StateUnset,
     };
 
@@ -64,6 +65,7 @@ private:
     QTimer m_eventLoop;
 
     bool m_valid{true};
+    bool m_ratelimited{false};
 };
 
 #endif // TRAYICONS_H

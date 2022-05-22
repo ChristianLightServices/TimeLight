@@ -91,6 +91,9 @@ public:
 
 signals:
     void invalidated();
+    //! Generally, services will start returning HTTP 429 if you make too many requests at once. This signal allows you to
+    //! track whether you are being ratelimited in this manner.
+    void ratelimited(bool status);
     void apiKeyChanged();
 
     void internetConnectionChanged(bool status);
@@ -326,6 +329,7 @@ private:
     bool m_loadingProjects{false};
     bool m_loadingUsers{false};
     bool m_isConnectedToInternet{true}; // assume connected at start
+    bool m_isRatelimited{false};
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractTimeServiceManager::SupportedPagination)
 

@@ -165,6 +165,18 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     });
+
+    connect(m_manager, &AbstractTimeServiceManager::ratelimited, this, [this](bool ratelimited) {
+        m_ratelimited = ratelimited;
+        if (m_ratelimited)
+        {
+            // go into "sleep mode" to try to snap out of ratelimiting
+            m_eventLoop.setInterval(30000);
+            setTimerState(TimerState::Ratelimited);
+        }
+        else
+            m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
+    });
 }
 
 TrayIcons::~TrayIcons()
@@ -648,6 +660,16 @@ void TrayIcons::setTimerState(const TimerState state)
         if (m_runningJob)
         {
             m_runningJob->setToolTip(tr("You are offline"));
+            m_runningJob->setIcon(QIcon{":/icons/graylight.png"});
+        }
+        break;
+    case TimerState::Ratelimited:
+        m_timerRunning->setToolTip(tr("You have been ratelimited"));
+        m_timerRunning->setIcon(
+            QIcon{m_runningJob ? QStringLiteral(":/icons/graypower.png") : QStringLiteral(":/icons/graylight.png")});
+        if (m_runningJob)
+        {
+            m_runningJob->setToolTip(tr("You have been ratelimited"));
             m_runningJob->setIcon(QIcon{":/icons/graylight.png"});
         }
         break;

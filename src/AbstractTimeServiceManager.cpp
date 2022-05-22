@@ -556,13 +556,25 @@ void AbstractTimeServiceManager::get(const QUrl &url,
         [this, rep, expectedReturnCode, done]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
                 m_pendingReplies[rep].first(rep);
+            }
             else [[unlikely]]
             {
-                if (status == 0 || status == 429 || status == 404) [[likely]]
+                if (status == 0 || status == 404) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
             }
@@ -635,13 +647,25 @@ void AbstractTimeServiceManager::post(const QUrl &url,
         [this, rep, expectedReturnCode, done]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
                 m_pendingReplies[rep].first(rep);
+            }
             else [[unlikely]]
             {
-                if (status == 0 || status == 429 || status == 404) [[likely]]
+                if (status == 0 || status == 404) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
             }
@@ -714,13 +738,25 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
         [this, rep, expectedReturnCode, done]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
                 m_pendingReplies[rep].first(rep);
+            }
             else [[unlikely]]
             {
-                if (status == 0) [[likely]]
+                if (status == 0 || status == 404) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
             }
@@ -793,13 +829,25 @@ void AbstractTimeServiceManager::put(const QUrl &url,
         [this, rep, expectedReturnCode, done]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
                 m_pendingReplies[rep].first(rep);
+            }
             else [[unlikely]]
             {
-                if (status == 0 || status == 429 || status == 404) [[likely]]
+                if (status == 0 || status == 404) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
             }
@@ -868,13 +916,25 @@ void AbstractTimeServiceManager::head(const QUrl &url,
         [this, rep, expectedReturnCode, done]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
                 m_pendingReplies[rep].first(rep);
+            }
             else [[unlikely]]
             {
-                if (status == 0 || status == 429 || status == 404) [[likely]]
+                if (status == 0 || status == 404) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
             }
