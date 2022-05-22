@@ -38,10 +38,7 @@ public:
     };
     Q_DECLARE_FLAGS(SupportedPagination, Pagination)
 
-    bool isValid() const
-    {
-        return m_isValid;
-    }
+    bool isValid() const { return m_isValid; }
 
     QVector<Project> &projects();
     QVector<QPair<QString, QString>> &users();
@@ -59,21 +56,12 @@ public:
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
     QVector<TimeEntry> getTimeEntries(const QString &userId, std::optional<int> pageNumber, std::optional<int> pageSize);
 
-    bool isConnectedToInternet() const
-    {
-        return m_isConnectedToInternet;
-    }
+    bool isConnectedToInternet() const { return m_isConnectedToInternet; }
     User getApiKeyOwner();
     QVector<Workspace> getOwnerWorkspaces();
 
-    QString apiKey() const
-    {
-        return m_apiKey;
-    }
-    QString workspaceId() const
-    {
-        return m_workspaceId;
-    }
+    QString apiKey() const { return m_apiKey; }
+    QString workspaceId() const { return m_workspaceId; }
 
     void setApiKey(const QString &apiKey);
     void setWorkspaceId(const QString &workspaceId);
@@ -95,10 +83,7 @@ public:
     virtual const QFlags<Pagination> supportedPagination() const = 0;
 
     //! This function should be overridden if your service starts pagination at a value other than 1.
-    virtual int paginationStartsAt() const
-    {
-        return 1;
-    }
+    virtual int paginationStartsAt() const { return 1; }
 
     //! Different services return time entries in different orders. If your time entries are returned with the most
     //! recent entry first, return Qt::DescendingOrder; otherwise, return Qt::AscendingOrder.
@@ -133,10 +118,7 @@ protected:
 
     //! This function will have the API key substituted into it with arg(). Use if your time service requires more text
     //! than just the API key for authorization.
-    virtual const QString apiKeyTemplate() const
-    {
-        return QStringLiteral("%1");
-    }
+    virtual const QString apiKeyTemplate() const { return QStringLiteral("%1"); }
 
     virtual const QString baseUrl() const = 0;
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
@@ -149,56 +131,20 @@ protected:
     virtual QUrl usersUrl(const QString &workspaceId) const = 0;
     virtual QUrl projectsUrl(const QString &workspaceId) const = 0;
 
-    virtual const QString usersPageSizeHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString projectsPageSizeHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString timeEntriesPageSizeHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString workspacesPageSizeHeaderName() const
-    {
-        return {};
-    }
+    virtual const QString usersPageSizeHeaderName() const { return {}; }
+    virtual const QString projectsPageSizeHeaderName() const { return {}; }
+    virtual const QString timeEntriesPageSizeHeaderName() const { return {}; }
+    virtual const QString workspacesPageSizeHeaderName() const { return {}; }
 
-    virtual const QString usersPageHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString projectsPageHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString timeEntriesPageHeaderName() const
-    {
-        return {};
-    }
-    virtual const QString workspacesPageHeaderName() const
-    {
-        return {};
-    }
+    virtual const QString usersPageHeaderName() const { return {}; }
+    virtual const QString projectsPageHeaderName() const { return {}; }
+    virtual const QString timeEntriesPageHeaderName() const { return {}; }
+    virtual const QString workspacesPageHeaderName() const { return {}; }
 
-    virtual int usersPaginationPageSize() const
-    {
-        return 50;
-    }
-    virtual int projectsPaginationPageSize() const
-    {
-        return 50;
-    }
-    virtual int timeEntriesPaginationPageSize() const
-    {
-        return 50;
-    }
-    virtual int workspacesPaginationPageSize() const
-    {
-        return 50;
-    }
+    virtual int usersPaginationPageSize() const { return 50; }
+    virtual int projectsPaginationPageSize() const { return 50; }
+    virtual int timeEntriesPaginationPageSize() const { return 50; }
+    virtual int workspacesPaginationPageSize() const { return 50; }
 
     virtual bool jsonToHasRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToRunningTimeEntry(const json &j) = 0;
@@ -221,10 +167,7 @@ protected:
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const = 0;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const = 0;
-    virtual QByteArray getRunningTimeEntryPayload() const
-    {
-        return {};
-    }
+    virtual QByteArray getRunningTimeEntryPayload() const { return {}; }
 
     // Note: these names are reserved for future development purposes
     // virtual json userToJson(const User &u) = 0;
@@ -244,10 +187,7 @@ private:
     void updateUsers();
     void updateProjects();
 
-    QByteArray apiKeyForRequests() const
-    {
-        return apiKeyTemplate().arg(m_apiKey).toUtf8();
-    }
+    QByteArray apiKeyForRequests() const { return apiKeyTemplate().arg(m_apiKey).toUtf8(); }
 
     void timeEntryReq(const QUrl &url,
                       const TimeEntryAction action,

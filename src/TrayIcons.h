@@ -22,10 +22,7 @@ public:
     Project defaultProject();
     void setUser(const User &user);
 
-    bool valid() const
-    {
-        return m_valid;
-    }
+    bool valid() const { return m_valid; }
 
 signals:
     void timerStateChanged();

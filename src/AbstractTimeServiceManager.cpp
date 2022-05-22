@@ -27,14 +27,8 @@ const NetworkReplyCallback AbstractTimeServiceManager::s_defaultFailureCb = [](Q
 
 class NoCookies : public QNetworkCookieJar
 {
-    virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &) const override
-    {
-        return {};
-    }
-    virtual bool setCookiesFromUrl(const QList<QNetworkCookie> &, const QUrl &) override
-    {
-        return false;
-    }
+    virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &) const override { return {}; }
+    virtual bool setCookiesFromUrl(const QList<QNetworkCookie> &, const QUrl &) override { return false; }
 };
 
 AbstractTimeServiceManager::AbstractTimeServiceManager(const QByteArray &apiKey, QObject *parent)

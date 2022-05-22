@@ -9,60 +9,21 @@ class Settings : public QObject
     Q_OBJECT
 
 public:
-    const QString &timeService() const
-    {
-        return m_timeService;
-    }
-    const QString &apiKey() const
-    {
-        return m_apiKey;
-    }
-    const QString &breakTimeId() const
-    {
-        return m_breakTimeId;
-    }
-    const QString &description() const
-    {
-        return m_description;
-    }
-    const QString &projectId() const
-    {
-        return m_projectId;
-    }
-    const QString &workspaceId() const
-    {
-        return m_workspaceId;
-    }
-    bool useSeparateBreakTime() const
-    {
-        return m_useSeparateBreakTime;
-    }
-    bool disableDescription() const
-    {
-        return m_disableDescription;
-    }
-    bool useLastDescription() const
-    {
-        return m_useLastDescription;
-    }
-    bool useLastProject() const
-    {
-        return m_useLastProject;
-    }
-    bool showDurationNotifications() const
-    {
-        return m_showDurationNotifications;
-    }
-    int eventLoopInterval() const
-    {
-        return m_eventLoopInterval;
-    }
+    const QString &timeService() const { return m_timeService; }
+    const QString &apiKey() const { return m_apiKey; }
+    const QString &breakTimeId() const { return m_breakTimeId; }
+    const QString &description() const { return m_description; }
+    const QString &projectId() const { return m_projectId; }
+    const QString &workspaceId() const { return m_workspaceId; }
+    bool useSeparateBreakTime() const { return m_useSeparateBreakTime; }
+    bool disableDescription() const { return m_disableDescription; }
+    bool useLastDescription() const { return m_useLastDescription; }
+    bool useLastProject() const { return m_useLastProject; }
+    bool showDurationNotifications() const { return m_showDurationNotifications; }
+    int eventLoopInterval() const { return m_eventLoopInterval; }
 
     static void init();
-    static Settings *instance()
-    {
-        return s_instance;
-    }
+    static Settings *instance() { return s_instance; }
 
 public slots:
     void setTimeService(const QString &service);

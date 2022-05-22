@@ -17,18 +17,9 @@ public:
     Project(const Project &that);
     Project(QObject *parent = nullptr);
 
-    QString id() const
-    {
-        return m_id;
-    }
-    QString name() const
-    {
-        return m_name;
-    }
-    QString description() const
-    {
-        return m_description;
-    }
+    QString id() const { return m_id; }
+    QString name() const { return m_name; }
+    QString description() const { return m_description; }
 
     Project &operator=(const Project &other);
 

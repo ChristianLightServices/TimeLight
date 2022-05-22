@@ -18,28 +18,16 @@ namespace nlohmann
 
     template<> struct adl_serializer<QString>
     {
-        static void to_json(json &j, const QString &opt)
-        {
-            j = opt.toStdString();
-        }
+        static void to_json(json &j, const QString &opt) { j = opt.toStdString(); }
 
-        static void from_json(const json &j, QString &opt)
-        {
-            opt = QString::fromStdString(j.get<std::string>());
-        }
+        static void from_json(const json &j, QString &opt) { opt = QString::fromStdString(j.get<std::string>()); }
     };
 
     template<> struct adl_serializer<QByteArray>
     {
-        static void to_json(json &j, const QByteArray &opt)
-        {
-            j = opt.toStdString();
-        }
+        static void to_json(json &j, const QByteArray &opt) { j = opt.toStdString(); }
 
-        static void from_json(const json &j, QByteArray &opt)
-        {
-            opt = QByteArray::fromStdString(j.get<std::string>());
-        }
+        static void from_json(const json &j, QByteArray &opt) { opt = QByteArray::fromStdString(j.get<std::string>()); }
 
         //		// these are required for QJson (QString stuff isn't because it is QJson's StringType)
         //		static void to_json(QJson &j, const QByteArray &opt)

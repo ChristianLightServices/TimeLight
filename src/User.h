@@ -32,22 +32,10 @@ public:
 
     User &operator=(const User &other);
 
-    QString userId() const
-    {
-        return m_userId;
-    }
-    QString name() const
-    {
-        return m_name;
-    }
-    QString workspaceId() const
-    {
-        return m_workspaceId;
-    }
-    bool isValid() const
-    {
-        return m_isValid;
-    }
+    QString userId() const { return m_userId; }
+    QString name() const { return m_name; }
+    QString workspaceId() const { return m_workspaceId; }
+    bool isValid() const { return m_isValid; }
 
 signals:
 

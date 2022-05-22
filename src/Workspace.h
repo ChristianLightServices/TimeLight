@@ -14,14 +14,8 @@ public:
 
     Workspace &operator=(const Workspace &other);
 
-    QString id() const
-    {
-        return m_id;
-    }
-    QString name() const
-    {
-        return m_name;
-    }
+    QString id() const { return m_id; }
+    QString name() const { return m_name; }
 
 private:
     QString m_id;

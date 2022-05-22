@@ -10,34 +10,16 @@ class TimeCampManager : public AbstractTimeServiceManager
 public:
     explicit TimeCampManager(const QByteArray &apiKey, QObject *parent = nullptr);
 
-    virtual QString serviceIdentifier() const final
-    {
-        return QStringLiteral("com.timecamp");
-    }
-    virtual QString serviceName() const final
-    {
-        return QStringLiteral("TimeCamp");
-    }
-    virtual QUrl timeTrackerWebpageUrl() const final
-    {
-        return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")};
-    }
+    virtual QString serviceIdentifier() const final { return QStringLiteral("com.timecamp"); }
+    virtual QString serviceName() const final { return QStringLiteral("TimeCamp"); }
+    virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")}; }
     virtual const QFlags<Pagination> supportedPagination() const final;
-    virtual Qt::SortOrder timeEntriesSortOrder() const final
-    {
-        return Qt::AscendingOrder;
-    }
+    virtual Qt::SortOrder timeEntriesSortOrder() const final { return Qt::AscendingOrder; }
 
 protected:
-    virtual const QByteArray authHeaderName() const final
-    {
-        return QByteArrayLiteral("Authorization");
-    }
+    virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("Authorization"); }
 
-    virtual const QString baseUrl() const final
-    {
-        return QStringLiteral("https://app.timecamp.com/third_party/api");
-    }
+    virtual const QString baseUrl() const final { return QStringLiteral("https://app.timecamp.com/third_party/api"); }
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
@@ -56,23 +38,14 @@ protected:
     virtual Workspace jsonToWorkspace(const json &j) final;
     virtual Project jsonToProject(const json &j) final;
 
-    virtual const QString jsonTimeFormatString() const final
-    {
-        return QStringLiteral("yyyy-MM-dd HH:mm:ss");
-    }
-    virtual const QDateTime currentDateTime() const final
-    {
-        return QDateTime::currentDateTime();
-    }
+    virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-dd HH:mm:ss"); }
+    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTime(); }
 
     virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const final;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const final;
-    virtual QByteArray getRunningTimeEntryPayload() const final
-    {
-        return QByteArrayLiteral(R"({"action":"status"})");
-    }
+    virtual QByteArray getRunningTimeEntryPayload() const final { return QByteArrayLiteral(R"({"action":"status"})"); }
 };
 
 #endif // TIMECAMPMANAGER_H
