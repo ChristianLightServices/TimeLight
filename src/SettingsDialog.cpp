@@ -354,7 +354,7 @@ QWidget *SettingsDialog::createAppPage()
     auto eventLoopInterval{new QDoubleSpinBox{appPage}};
     eventLoopInterval->setSuffix(tr(" seconds"));
     eventLoopInterval->setSingleStep(0.5);
-    eventLoopInterval->setValue(Settings::instance()->eventLoopInterval() / 1000);
+    eventLoopInterval->setValue(static_cast<double>(Settings::instance()->eventLoopInterval()) / 1000);
     eventLoopInterval->setDecimals(1);
     eventLoopInterval->setMinimum(0);
     eventLoopInterval->setMaximum(30);
@@ -369,7 +369,7 @@ QWidget *SettingsDialog::createAppPage()
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(eventLoopInterval, &QDoubleSpinBox::valueChanged, eventLoopInterval, [](double d) {
-        Settings::instance()->setEventLoopInterval(static_cast<int>(d) * 1000);
+        Settings::instance()->setEventLoopInterval(static_cast<int>(d * 1000));
     });
     connect(showNotifications, &QCheckBox::stateChanged, showNotifications, [](int state) {
         switch (state)
