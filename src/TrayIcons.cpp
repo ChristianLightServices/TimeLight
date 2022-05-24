@@ -397,8 +397,8 @@ void TrayIcons::setEventLoopInterval(int interval)
 
 void TrayIcons::setUpTrayIcons()
 {
-    auto m_timerRunningMenu = new QMenu;
-    connect(m_timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
+    auto timerRunningMenu = new QMenu;
+    connect(timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
         if (m_manager->isConnectedToInternet() == false) [[unlikely]]
             m_timerRunning->showMessage(tr("Internet connection lost"),
                                         tr("The request could not be completed because the internet connection is down."));
@@ -410,7 +410,7 @@ void TrayIcons::setUpTrayIcons()
             updateTrayIcons();
         }
     });
-    connect(m_timerRunningMenu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
+    connect(timerRunningMenu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
         if (m_manager->isConnectedToInternet() == false) [[unlikely]]
             m_timerRunning->showMessage(tr("Internet connection lost"),
                                         tr("The request could not be completed because the internet connection is down."));
@@ -421,22 +421,22 @@ void TrayIcons::setUpTrayIcons()
             updateTrayIcons();
         }
     });
-    connect(m_timerRunningMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
+    connect(timerRunningMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
         SettingsDialog d{m_manager,
                          {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
                           {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
         d.exec();
     });
-    connect(m_timerRunningMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
+    connect(timerRunningMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
             &QAction::triggered,
             this,
             [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
     connect(
-        m_timerRunningMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-    connect(m_timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-    connect(m_timerRunningMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
+        timerRunningMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+    connect(timerRunningMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+    connect(timerRunningMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 
-    m_timerRunning->setContextMenu(m_timerRunningMenu);
+    m_timerRunning->setContextMenu(timerRunningMenu);
     connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
         m_eventLoop.stop();
 
@@ -468,8 +468,8 @@ void TrayIcons::setUpTrayIcons()
 
     if (Settings::instance()->useSeparateBreakTime())
     {
-        auto m_runningJobMenu = new QMenu;
-        connect(m_runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
+        auto runningJobMenu = new QMenu;
+        connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
             if (m_manager->isConnectedToInternet() == false) [[unlikely]]
             {
                 m_timerRunning->showMessage(tr("Internet connection lost"),
@@ -495,7 +495,7 @@ void TrayIcons::setUpTrayIcons()
             m_user.startTimeEntry(Settings::instance()->breakTimeId(), start);
             updateTrayIcons();
         });
-        connect(m_runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
+        connect(runningJobMenu->addAction(tr("Resume work")), &QAction::triggered, this, [this]() {
             if (m_manager->isConnectedToInternet() == false) [[unlikely]]
             {
                 m_timerRunning->showMessage(tr("Internet connection lost"),
@@ -522,22 +522,22 @@ void TrayIcons::setUpTrayIcons()
             m_user.startTimeEntry(project.id(), project.description(), start);
             updateTrayIcons();
         });
-        connect(m_runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
+        connect(runningJobMenu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
                               {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
             d.exec();
         });
-        connect(m_runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
+        connect(runningJobMenu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
                 &QAction::triggered,
                 this,
                 [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
         connect(
-            m_runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-        connect(m_runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-        connect(m_runningJobMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
+            runningJobMenu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+        connect(runningJobMenu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+        connect(runningJobMenu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 
-        m_runningJob->setContextMenu(m_runningJobMenu);
+        m_runningJob->setContextMenu(runningJobMenu);
         connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
             m_eventLoop.stop();
 
