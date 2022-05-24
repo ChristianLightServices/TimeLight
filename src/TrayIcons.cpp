@@ -650,9 +650,11 @@ void TrayIcons::updateQuickStartList()
                 return;
             }
 
+            bool hadRunningJob{false};
             QDateTime now{m_manager->currentDateTime()};
             if (m_user.hasRunningTimeEntry())
             {
+                hadRunningJob = true;
                 if (m_user.getRunningTimeEntry().project().id() == entry.project().id())
                 {
                     m_eventLoop.start();
@@ -661,7 +663,8 @@ void TrayIcons::updateQuickStartList()
                 now = m_user.stopCurrentTimeEntry();
             }
             m_user.startTimeEntry(entry.project().id(), defaultProject().description(), now, true);
-            emit jobEnded();
+            if (hadRunningJob)
+                emit jobEnded();
         });
     }
 }
