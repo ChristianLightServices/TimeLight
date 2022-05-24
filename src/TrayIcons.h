@@ -52,11 +52,13 @@ private:
     template<TimeManager Manager> void initializeManager();
     void setUpTrayIcons();
     void setTimerState(const TimerState state);
+    void updateQuickStartList();
 
     AbstractTimeServiceManager *m_manager;
 
     QSystemTrayIcon *m_timerRunning{nullptr};
     QSystemTrayIcon *m_runningJob{nullptr};
+    QMenu *m_quickStartMenu{nullptr};
 
     User m_user;
     TimerState m_timerState{TimerState::StateUnset};
