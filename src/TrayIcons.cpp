@@ -401,7 +401,7 @@ void TrayIcons::setUpTrayIcons()
 
     auto addMenuActions = [this](QMenu *menu) {
         connect(menu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
-            if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
                 m_timerRunning->showMessage(tr("Internet connection lost"),
                                             tr("The request could not be completed because the internet connection is down."));
 
@@ -413,7 +413,7 @@ void TrayIcons::setUpTrayIcons()
             }
         });
         connect(menu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
-            if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
                 m_timerRunning->showMessage(tr("Internet connection lost"),
                                             tr("The request could not be completed because the internet connection is down."));
 
@@ -452,7 +452,7 @@ void TrayIcons::setUpTrayIcons()
             return;
         }
 
-        if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
         {
             m_timerRunning->showMessage(tr("Internet connection lost"),
                                         tr("The request could not be completed because the internet connection is down."));
@@ -486,7 +486,7 @@ void TrayIcons::setUpTrayIcons()
                 return;
             }
 
-            if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
                 m_timerRunning->showMessage(tr("Internet connection lost"),
                                             tr("The request could not be completed because the internet connection is "
@@ -642,7 +642,7 @@ void TrayIcons::updateQuickStartList()
 
         connect(m_quickStartMenu->addAction(entry.project().name()), &QAction::triggered, this, [projectId = entry.project().id(), this] {
             m_eventLoop.stop();
-            if (m_manager->isConnectedToInternet() == false) [[unlikely]]
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
                 m_timerRunning->showMessage(tr("Internet connection lost"),
                                             tr("The request could not be completed because the internet connection is down."));
