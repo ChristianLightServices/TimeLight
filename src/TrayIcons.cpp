@@ -400,7 +400,6 @@ void TrayIcons::setUpTrayIcons()
     updateQuickStartList();
 
     auto addMenuActions = [this](QMenu *menu) {
-        menu->addMenu(m_quickStartMenu);
         connect(menu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
             if (m_manager->isConnectedToInternet() == false) [[unlikely]]
                 m_timerRunning->showMessage(tr("Internet connection lost"),
@@ -424,6 +423,7 @@ void TrayIcons::setUpTrayIcons()
                 updateTrayIcons();
             }
         });
+        menu->addMenu(m_quickStartMenu);
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
