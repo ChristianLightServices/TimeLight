@@ -628,10 +628,12 @@ void TrayIcons::updateQuickStartList()
         m_quickStartMenu = new QMenu{tr("Switch to")};
     m_quickStartMenu->clear();
 
-    auto entries = m_user.getTimeEntries(std::nullopt, 10);
+    auto entries = m_user.getTimeEntries(m_manager->paginationStartsAt(), 25);
     QStringList addedIds;
     for (const auto &entry : entries)
     {
+        if (addedIds.size() >= 10)
+            break;
         if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId()) [[unlikely]]
             continue;
         if (addedIds.contains(entry.project().id()))
