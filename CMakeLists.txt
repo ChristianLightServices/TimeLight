@@ -159,6 +159,7 @@ if(WIN32)
 else()
     set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight")
 endif()
+set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT "${CMAKE_SOURCE_DIR}/installer/installscript.qs")
 
 if(WIN32)
     # set up windeployqt
