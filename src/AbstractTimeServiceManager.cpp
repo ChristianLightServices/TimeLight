@@ -566,7 +566,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
             }
             else [[unlikely]]
             {
-                if (status == 0 || status == 404) [[likely]]
+                if (status == 0) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
@@ -657,7 +657,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
             }
             else [[unlikely]]
             {
-                if (status == 0 || status == 404) [[likely]]
+                if (status == 0) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
@@ -748,7 +748,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
             }
             else [[unlikely]]
             {
-                if (status == 0 || status == 404) [[likely]]
+                if (status == 0) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
@@ -839,7 +839,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
             }
             else [[unlikely]]
             {
-                if (status == 0 || status == 404) [[likely]]
+                if (status == 0) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
@@ -926,7 +926,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
             }
             else [[unlikely]]
             {
-                if (status == 0 || status == 404) [[likely]]
+                if (status == 0) [[likely]]
                 {
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
