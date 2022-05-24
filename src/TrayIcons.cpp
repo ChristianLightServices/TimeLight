@@ -640,7 +640,7 @@ void TrayIcons::updateQuickStartList()
             continue;
         addedIds.push_back(entry.project().id());
 
-        connect(m_quickStartMenu->addAction(entry.project().name()), &QAction::triggered, this, [this, entry] {
+        connect(m_quickStartMenu->addAction(entry.project().name()), &QAction::triggered, this, [projectId = entry.project().id(), this] {
             m_eventLoop.stop();
             if (m_manager->isConnectedToInternet() == false) [[unlikely]]
             {
@@ -655,14 +655,14 @@ void TrayIcons::updateQuickStartList()
             if (m_user.hasRunningTimeEntry())
             {
                 hadRunningJob = true;
-                if (m_user.getRunningTimeEntry().project().id() == entry.project().id())
+                if (m_user.getRunningTimeEntry().project().id() == projectId)
                 {
                     m_eventLoop.start();
                     return;
                 }
                 now = m_user.stopCurrentTimeEntry();
             }
-            m_user.startTimeEntry(entry.project().id(), defaultProject().description(), now, true);
+            m_user.startTimeEntry(projectId, defaultProject().description(), now, true);
             if (hadRunningJob)
                 emit jobEnded();
             m_eventLoop.start();
