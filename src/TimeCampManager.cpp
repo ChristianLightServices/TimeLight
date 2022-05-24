@@ -33,7 +33,6 @@ QUrl TimeCampManager::stopTimeEntryUrl(const QString &userId, const QString &wor
 QUrl TimeCampManager::timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     throw std::logic_error{"TimeCamp doesn't yet support fetching time entries!"};
-    return {};
 }
 
 QUrl TimeCampManager::timeEntriesUrl(const QString &userId, const QString &workspaceId) const
