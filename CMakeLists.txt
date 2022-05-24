@@ -181,4 +181,5 @@ cpack_add_component(TimeLight
 cpack_ifw_configure_component(TimeLight
     FORCED_INSTALLATION
     LICENSES "License" LICENSE
+    SCRIPT "${CMAKE_SOURCE_DIR}/installer/shortcuts.qs"
 )
