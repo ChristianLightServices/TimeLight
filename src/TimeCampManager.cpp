@@ -92,7 +92,7 @@ TimeEntry TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
     try
     {
         return TimeEntry{j["entry_id"].get<QString>(),
-                         Project{{}, {}, this},
+                         Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
                          {},
                          getApiKeyOwner().userId(),
                          jsonToDateTime(j["start_time"]),
