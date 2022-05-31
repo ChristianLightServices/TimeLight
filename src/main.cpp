@@ -68,21 +68,31 @@ int main(int argc, char *argv[])
     int retCode{0};
     do
     {
-        SingleApplication a{argc, argv};
-        a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
+        try
+        {
+            SingleApplication a{argc, argv};
+            a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
 
-        QTranslator translator;
-        if (translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
-            QApplication::installTranslator(&translator);
+            QTranslator translator;
+            if (translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
+                QApplication::installTranslator(&translator);
 
-        Settings::init();
+            Settings::init();
 
-        TrayIcons icons;
-        if (!icons.valid())
-            return 2;
-        icons.show();
+            TrayIcons icons;
+            if (!icons.valid())
+                return 2;
+            icons.show();
 
-        retCode = a.exec();
+            retCode = a.exec();
+        }
+        catch (const nlohmann::json::exception &e)
+        {
+            // hmm... Unhandled error. Let's just reboot the app and let the chips fall where they may.
+            std::cerr << "Unhandled exception: " << e.what() << "\n";
+            std::cerr << "Restarting the app..." << std::endl;
+            retCode = TimeLight::appRestartCode;
+        }
     } while (retCode == TimeLight::appRestartCode);
 
     return retCode;
