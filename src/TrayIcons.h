@@ -51,7 +51,7 @@ private:
 
     template<TimeManager Manager> void initializeManager();
     void setUpTrayIcons();
-    void setTimerState(const TimerState state);
+    void setTimerState(TimerState state);
     void updateQuickStartList();
 
     AbstractTimeServiceManager *m_manager;

@@ -551,8 +551,12 @@ void TrayIcons::setUpTrayIcons()
     updateTrayIcons();
 }
 
-void TrayIcons::setTimerState(const TimerState state)
+void TrayIcons::setTimerState(TimerState state)
 {
+    // This is a hacky way of forcing the ratelimited icon, since otherwise it will generally get overridden
+    if (m_ratelimited)
+        state = TimerState::Ratelimited;
+
     if (state == m_timerState || state == TimerState::StateUnset)
         return;
 
