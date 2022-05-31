@@ -26,6 +26,7 @@ public:
 
 signals:
     void timerStateChanged();
+    void jobStarted();
     void jobEnded();
 
 public slots:

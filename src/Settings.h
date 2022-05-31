@@ -9,6 +9,15 @@ class Settings : public QObject
     Q_OBJECT
 
 public:
+    enum class QuickStartProjectOptions
+    {
+        AllProjects,
+        RecentProjects,
+
+        Undefined,
+    };
+    Q_ENUM(QuickStartProjectOptions)
+
     const QString &timeService() const { return m_timeService; }
     const QString &apiKey() const { return m_apiKey; }
     const QString &breakTimeId() const { return m_breakTimeId; }
@@ -21,6 +30,7 @@ public:
     bool useLastProject() const { return m_useLastProject; }
     bool showDurationNotifications() const { return m_showDurationNotifications; }
     int eventLoopInterval() const { return m_eventLoopInterval; }
+    QuickStartProjectOptions quickStartProjectsLoading() const { return m_quickStartProjectsLoading; }
 
     static void init();
     static Settings *instance() { return s_instance; }
@@ -38,6 +48,7 @@ public slots:
     void setUseLastProject(const bool use);
     void setShowDurationNotifications(const bool show);
     void setEventLoopInterval(const int interval);
+    void setQuickStartProjectsLoading(const Settings::QuickStartProjectOptions &option);
 
 signals:
     void timeServiceChanged();
@@ -52,6 +63,7 @@ signals:
     void useLastProjectChanged();
     void showDurationNotificationsChanged();
     void eventLoopIntervalChanged();
+    void quickStartProjectsLoadingChanged();
 
 private:
     explicit Settings(QObject *parent = nullptr);
@@ -77,6 +89,7 @@ private:
     bool m_useLastDescription;
     bool m_useLastProject;
     bool m_showDurationNotifications;
+    QuickStartProjectOptions m_quickStartProjectsLoading;
 
     int m_eventLoopInterval;
 };

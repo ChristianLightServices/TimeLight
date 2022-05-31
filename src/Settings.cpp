@@ -44,6 +44,14 @@ void Settings::load()
     settings.beginGroup(QStringLiteral("app"));
     m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 1000).toInt();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
+    m_quickStartProjectsLoading =
+        static_cast<QuickStartProjectOptions>(settings
+                                                  .value(QStringLiteral("quickStartProjectsLoading"),
+                                                         static_cast<unsigned int>(QuickStartProjectOptions::AllProjects))
+                                                  .toUInt());
+    if (m_quickStartProjectsLoading >= QuickStartProjectOptions::Undefined ||
+        m_quickStartProjectsLoading < static_cast<QuickStartProjectOptions>(0))
+        m_quickStartProjectsLoading = QuickStartProjectOptions::AllProjects;
     settings.endGroup();
 }
 
@@ -167,6 +175,15 @@ void Settings::setEventLoopInterval(const int interval)
     m_settingsDirty = true;
 }
 
+void Settings::setQuickStartProjectsLoading(const QuickStartProjectOptions &option)
+{
+    if (option == m_quickStartProjectsLoading)
+        return;
+    m_quickStartProjectsLoading = option;
+    emit quickStartProjectsLoadingChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::save()
 {
     QSettings settings;
@@ -188,5 +205,6 @@ void Settings::save()
     settings.beginGroup(QStringLiteral("app"));
     settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
     settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
+    settings.setValue(QStringLiteral("quickStartProjectsLoading"), static_cast<unsigned int>(m_quickStartProjectsLoading));
     settings.endGroup();
 }

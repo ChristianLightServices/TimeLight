@@ -165,6 +165,7 @@ TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSys
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     });
+    connect(Settings::instance(), &Settings::quickStartProjectsLoadingChanged, this, [this] { updateQuickStartList(); });
 
     connect(m_manager, &AbstractTimeServiceManager::ratelimited, this, [this](bool ratelimited) {
         m_ratelimited = ratelimited;
@@ -403,7 +404,8 @@ void TrayIcons::setUpTrayIcons()
         connect(menu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
                 m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is down."));
+                                            tr("The request could not be completed because the internet connection is "
+                                               "down."));
 
             if (!m_user.hasRunningTimeEntry()) [[likely]]
             {
@@ -415,7 +417,8 @@ void TrayIcons::setUpTrayIcons()
         connect(menu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
                 m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is down."));
+                                            tr("The request could not be completed because the internet connection is "
+                                               "down."));
 
             if (m_user.hasRunningTimeEntry()) [[likely]]
             {
@@ -434,8 +437,7 @@ void TrayIcons::setUpTrayIcons()
                 &QAction::triggered,
                 this,
                 [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
-        connect(
-            menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+        connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
         connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
         connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
     };
@@ -547,6 +549,7 @@ void TrayIcons::setUpTrayIcons()
 
         updateQuickStartList();
     });
+    connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateQuickStartList);
 
     updateTrayIcons();
 }
@@ -571,6 +574,9 @@ void TrayIcons::setTimerState(TimerState state)
             m_runningJob->setToolTip(tr("You are working"));
             m_runningJob->setIcon(QIcon{":/icons/greenlight.png"});
         }
+
+        if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::OnBreak)
+            emit jobStarted();
         break;
     case TimerState::OnBreak:
         m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
@@ -632,24 +638,14 @@ void TrayIcons::updateQuickStartList()
         m_quickStartMenu = new QMenu{tr("Switch to")};
     m_quickStartMenu->clear();
 
-    auto entries = m_user.getTimeEntries(m_manager->paginationStartsAt(), 25);
-    QStringList addedIds;
-    for (const auto &entry : entries)
-    {
-        if (addedIds.size() >= 10)
-            break;
-        if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId()) [[unlikely]]
-            continue;
-        if (addedIds.contains(entry.project().id()))
-            continue;
-        addedIds.push_back(entry.project().id());
-
-        connect(m_quickStartMenu->addAction(entry.project().name()), &QAction::triggered, this, [projectId = entry.project().id(), this] {
+    auto addMenuEntry = [this](const Project &project) {
+        connect(m_quickStartMenu->addAction(project.name()), &QAction::triggered, this, [projectId = project.id(), this] {
             m_eventLoop.stop();
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
                 m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is down."));
+                                            tr("The request could not be completed because the internet connection is "
+                                               "down."));
                 m_eventLoop.start();
                 return;
             }
@@ -669,8 +665,39 @@ void TrayIcons::updateQuickStartList()
             m_user.startTimeEntry(projectId, defaultProject().description(), now, true);
             if (hadRunningJob)
                 emit jobEnded();
+            emit jobStarted();
             m_eventLoop.start();
         });
+    };
+
+    switch (Settings::instance()->quickStartProjectsLoading())
+    {
+    case Settings::QuickStartProjectOptions::AllProjects:
+    {
+        for (const auto &project : m_manager->projects())
+            addMenuEntry(project);
+        break;
+    }
+    case Settings::QuickStartProjectOptions::RecentProjects:
+    {
+        auto entries = m_user.getTimeEntries(m_manager->paginationStartsAt(), 25);
+        QStringList addedIds;
+        for (const auto &entry : entries)
+        {
+            if (addedIds.size() >= 10)
+                break;
+            if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
+                [[unlikely]]
+                continue;
+            if (addedIds.contains(entry.project().id()))
+                continue;
+            addedIds.push_back(entry.project().id());
+            addMenuEntry(entry.project());
+        }
+        break;
+    }
+    default:
+        break;
     }
 }
 

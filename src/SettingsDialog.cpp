@@ -362,9 +362,16 @@ QWidget *SettingsDialog::createAppPage()
     auto showNotifications{new QCheckBox{tr("Show how much time was worked when a job is stopped"), appPage}};
     showNotifications->setChecked(Settings::instance()->showDurationNotifications());
 
+    auto quickStartOptions{new QComboBox{appPage}};
+    quickStartOptions->addItem(tr("All projects"), QVariant::fromValue(Settings::QuickStartProjectOptions::AllProjects));
+    quickStartOptions->addItem(tr("Recent projects"),
+                               QVariant::fromValue(Settings::QuickStartProjectOptions::RecentProjects));
+
     layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 0, 0);
     layout->addWidget(eventLoopInterval, 0, 1);
     layout->addWidget(showNotifications, 1, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Projects to display in quick start menu"), appPage}, 2, 0);
+    layout->addWidget(quickStartOptions, 2, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
@@ -384,6 +391,10 @@ QWidget *SettingsDialog::createAppPage()
         default:
             break;
         }
+    });
+    connect(quickStartOptions, &QComboBox::currentIndexChanged, this, [quickStartOptions](int) {
+        Settings::instance()->setQuickStartProjectsLoading(
+            quickStartOptions->currentData().value<Settings::QuickStartProjectOptions>());
     });
 
     return appPage;
