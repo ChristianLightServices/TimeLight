@@ -127,7 +127,7 @@ QWidget *SettingsDialog::createBackendPage()
                                          QMessageBox::Ok))
         {
         case QMessageBox::Ok:
-            Settings::instance()->setTimeService(m_availableManagers[i].second);
+            Settings::instance()->setTimeService(timeServices->currentData().toString());
             TimeLight::restartApp();
             break;
         case QMessageBox::Cancel:
