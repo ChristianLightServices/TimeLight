@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
+option(GENERATE_INSTALLER "Generate an installer." OFF)
+
 project(TimeLight VERSION 1.0.1 LANGUAGES CXX)
 
 set(TimeLight_VERSION_STR "${TimeLight_VERSION_MAJOR}.${TimeLight_VERSION_MINOR}.${TimeLight_VERSION_PATCH}")
@@ -107,11 +109,11 @@ qt_add_translations(TimeLight TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
 
 if(APPLE)
     set_target_properties(TimeLight PROPERTIES
-        MACOSX_BUNDLE_BUNDLE_NAME "TimeLight"
+        MACOSX_BUNDLE_BUNDLE_NAME "${PROJECT_NAME}"
         MACOSX_BUNDLE_BUNDLE_VERSION ${TimeLight_VERSION_STR}
         MACOSX_BUNDLE_COPYRIGHT "Copyright © 2021 Christian Light"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.christianlight.TimeLight"
-        MACOSX_BUNDLE_INFO_STRING "TimeLight"
+        MACOSX_BUNDLE_INFO_STRING "${PROJECT_NAME}"
         MACOSX_BUNDLE_LONG_VERSION_STRING ${TimeLight_VERSION_STR}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${TimeLight_VERSION_STR}
         MACOSX_BUNDLE_ICON_FILE "icons/macicon.icns"
@@ -119,3 +121,65 @@ if(APPLE)
 endif()
 
 target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
+
+install(TARGETS TimeLight RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
+include(InstallRequiredSystemLibraries)
+if(UNIX AND NOT APPLE)
+    install(FILES "TimeLight.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "${PROJECT_NAME}")
+    install(FILES "icons/TimeLight.svg" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps" COMPONENT "${PROJECT_NAME}")
+endif()
+
+# Set up the installer
+# https://www.ics.com/blog/revisiting-qt-installer-framework-cmake and https://cmake.org/cmake/help/latest/cpack_gen/ifw.html
+# were very helpful in creating the installer code
+set(CPACK_GENERATOR "IFW")
+set(CPACK_IFW_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VENDOR "Christian Light")
+set(CPACK_PACKAGE_VERSION ${TimeLight_VERSION_STR})
+set(CPACK_IFW_PACKAGE_TITLE ${CPACK_IFW_PACKAGE_NAME})
+set(CPACK_IFW_PRODUCT_URL "https://github.com/ChristianLightServices/TimeLight")
+set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH 640)
+set(CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT 480)
+set(CPACK_IFW_PACKAGE_WIZARD_STYLE "Modern")
+set(CPACK_IFW_TARGET_DIRECTORY "@ApplicationsDirUser@/Christian Light")
+if(UNIX AND NOT APPLE)
+    set(CPACK_IFW_TARGET_DIRECTORY "~/.local/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+endif()
+if(WIN32)
+    set(CPACK_IFW_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons/winicon.ico")
+elseif(APPLE)
+    set(CPACK_IFW_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/icons/macicon.ico")
+endif()
+set(CPACK_IFW_PACKAGE_WINDOW_ICON "${CMAKE_SOURCE_DIR}/installer/icons/WindowIcon.png")
+set(CPACK_IFW_PACKAGE_LOGO "${CMAKE_SOURCE_DIR}/installer/icons/Logo.png")
+set(CPACK_IFW_PACKAGE_START_MENU_DIRECTORY "Christian Light")
+if(WIN32)
+    set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight.exe")
+else()
+    set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight")
+endif()
+set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT "${CMAKE_SOURCE_DIR}/installer/installscript.qs")
+
+if(WIN32)
+    # set up windeployqt
+    find_program(WINDEPLOYQT windeployqt HINTS "${_qt_bin_dir}")
+    set(WINDEPLOYQT_COMPONENT "${PROJECT_NAME}")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/windeployqt.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/windeployqt.cmake" @ONLY)
+    set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_CURRENT_BINARY_DIR}/windeployqt.cmake")
+endif()
+
+include(CPack)
+include(CPackIFW)
+
+cpack_add_component(TimeLight
+    DISPLAY_NAME "${PROJECT_NAME}"
+    DESCRIPTION "A button for controlling time tracker services from your system tray."
+    REQUIRED
+)
+
+cpack_ifw_configure_component(TimeLight
+    FORCED_INSTALLATION
+    LICENSES "License" LICENSE
+    SCRIPT "${CMAKE_SOURCE_DIR}/installer/shortcuts.qs"
+)
