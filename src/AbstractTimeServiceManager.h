@@ -55,7 +55,11 @@ public:
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
     //! The time entries returned by this function will always be sorted in descending order, i.e. the most recent entry will
     //! be first.
-    QVector<TimeEntry> getTimeEntries(const QString &userId, std::optional<int> pageNumber, std::optional<int> pageSize);
+    QVector<TimeEntry> getTimeEntries(const QString &userId,
+                                      std::optional<int> pageNumber,
+                                      std::optional<int> pageSize,
+                                      std::optional<QDateTime> start = std::nullopt,
+                                      std::optional<QDateTime> end = std::nullopt);
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
     User getApiKeyOwner();
@@ -130,7 +134,10 @@ protected:
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
-    virtual QUrl timeEntriesUrl(const QString &userId, const QString &workspaceId) const = 0;
+    virtual QUrl timeEntriesUrl(const QString &userId,
+                                const QString &workspaceId,
+                                std::optional<QDateTime> start = std::nullopt,
+                                std::optional<QDateTime> end = std::nullopt) const = 0;
     virtual QUrl currentUserUrl() const = 0;
     virtual QUrl workspacesUrl() const = 0;
     virtual QUrl usersUrl(const QString &workspaceId) const = 0;

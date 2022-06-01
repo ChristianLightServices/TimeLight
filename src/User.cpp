@@ -48,9 +48,12 @@ void User::startTimeEntry(const QString &projectId, const QString &description, 
     m_manager->startTimeEntry(m_userId, projectId, description, start, async);
 }
 
-QVector<TimeEntry> User::getTimeEntries(std::optional<int> pageNumber, std::optional<int> pageSize)
+QVector<TimeEntry> User::getTimeEntries(std::optional<int> pageNumber,
+                                        std::optional<int> pageSize,
+                                        std::optional<QDateTime> start,
+                                        std::optional<QDateTime> end)
 {
-    return m_manager->getTimeEntries(m_userId, pageNumber, pageSize);
+    return m_manager->getTimeEntries(m_userId, pageNumber, pageSize, start, end);
 }
 
 User &User::operator=(const User &other)

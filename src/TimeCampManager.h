@@ -24,7 +24,10 @@ protected:
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) final;
-    virtual QUrl timeEntriesUrl(const QString &userId, const QString &workspaceId) const final;
+    virtual QUrl timeEntriesUrl(const QString &userId,
+                                const QString &workspaceId,
+                                std::optional<QDateTime> start = std::nullopt,
+                                std::optional<QDateTime> end = std::nullopt) const final;
     virtual QUrl currentUserUrl() const final;
     virtual QUrl workspacesUrl() const final;
     virtual QUrl usersUrl(const QString &workspaceId) const final;

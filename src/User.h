@@ -27,7 +27,9 @@ public:
     void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
     void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
     QVector<TimeEntry> getTimeEntries(std::optional<int> pageNumber = std::nullopt,
-                                      std::optional<int> pageSize = std::nullopt);
+                                      std::optional<int> pageSize = std::nullopt,
+                                      std::optional<QDateTime> start = std::nullopt,
+                                      std::optional<QDateTime> end = std::nullopt);
 
     User &operator=(const User &other);
 

@@ -168,11 +168,13 @@ void AbstractTimeServiceManager::startTimeEntry(
 
 QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &userId,
                                                               [[maybe_unused]] std::optional<int> pageNumber,
-                                                              [[maybe_unused]] std::optional<int> pageSize)
+                                                              [[maybe_unused]] std::optional<int> pageSize,
+                                                              std::optional<QDateTime> start,
+                                                              std::optional<QDateTime> end)
 {
     QVector<TimeEntry> entries;
 
-    auto url = timeEntriesUrl(userId, workspaceId());
+    auto url = timeEntriesUrl(userId, workspaceId(), start, end);
     auto worker = [this, &url, &entries]() -> bool {
         bool retVal;
         get(url, false, [this, &retVal, &entries](QNetworkReply *rep) {

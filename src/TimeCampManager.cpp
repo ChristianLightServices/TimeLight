@@ -35,15 +35,18 @@ QUrl TimeCampManager::timeEntryUrl(const QString &userId, const QString &workspa
     throw std::logic_error{"TimeCamp doesn't yet support fetching time entries!"};
 }
 
-QUrl TimeCampManager::timeEntriesUrl(const QString &userId, const QString &workspaceId) const
+QUrl TimeCampManager::timeEntriesUrl(const QString &userId,
+                                     const QString &workspaceId,
+                                     std::optional<QDateTime> start,
+                                     std::optional<QDateTime> end) const
 {
     QUrl url{baseUrl() + "/entries"};
     QUrlQuery q;
     q.addQueryItem("user_ids", "me");
     auto date = QDate::currentDate();
-    // The past 2 months should be sufficient for now. Eventually, however, this should paginate.
-    q.addQueryItem("from", date.addDays(-1).toString("yyyy-MM-dd"));
-    q.addQueryItem("to", date.toString("yyyy-MM-dd"));
+    // The past 2 months should be sufficient if a date is not set. I do not like TimeCamp's "pagination".
+    q.addQueryItem("from", (start ? start->date() : date.addDays(-1)).toString("yyyy-MM-dd"));
+    q.addQueryItem("to", (end ? end->date() : date).toString("yyyy-MM-dd"));
     url.setQuery(q);
     return url;
 }
