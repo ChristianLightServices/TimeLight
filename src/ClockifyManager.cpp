@@ -75,9 +75,10 @@ bool ClockifyManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
     return !j.empty();
 }
 
-TimeEntry ClockifyManager::jsonToRunningTimeEntry(const nlohmann::json &j)
+std::optional<TimeEntry> ClockifyManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
-    return jsonToTimeEntry(j);
+    auto e{jsonToTimeEntry(j)};
+    return e.isValid() ? std::optional{e} : std::nullopt;
 }
 
 TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)

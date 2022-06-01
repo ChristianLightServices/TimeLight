@@ -20,8 +20,7 @@ public:
     User(const User &that);
     User(QObject *parent = nullptr);
 
-    bool hasRunningTimeEntry();
-    TimeEntry getRunningTimeEntry();
+    std::optional<TimeEntry> getRunningTimeEntry();
     QDateTime stopCurrentTimeEntry(bool async = false) const;
     void startTimeEntry(const QString &projectId, bool async = false) const;
     void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;

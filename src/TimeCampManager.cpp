@@ -87,10 +87,13 @@ bool TimeCampManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
     }
 }
 
-TimeEntry TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
+std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
     try
     {
+        if (!j["isTimerRunning"].get<bool>())
+            return std::nullopt;
+
         return TimeEntry{j["entry_id"].get<QString>(),
                          Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
                          {},
@@ -102,7 +105,7 @@ TimeEntry TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
     catch (const std::exception &e)
     {
         std::cerr << "Error while parsing running time entry: " << e.what() << std::endl;
-        return {this};
+        return std::nullopt;
     }
 }
 

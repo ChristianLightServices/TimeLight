@@ -287,18 +287,17 @@ void TrayIcons::updateTrayIcons()
 {
     if (!m_manager->isConnectedToInternet()) [[unlikely]]
         setTimerState(TimerState::Offline);
-    else if (m_user.hasRunningTimeEntry())
+    else if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
     {
         try
         {
-            if (auto runningEntry = m_user.getRunningTimeEntry();
-                Settings::instance()->useSeparateBreakTime() &&
-                runningEntry.project().id() == Settings::instance()->breakTimeId())
+            if (Settings::instance()->useSeparateBreakTime() &&
+                runningEntry->project().id() == Settings::instance()->breakTimeId())
                 setTimerState(TimerState::OnBreak);
             else
             {
                 setTimerState(TimerState::Running);
-                m_currentRunningJobId = runningEntry.id();
+                m_currentRunningJobId = runningEntry->id();
             }
         }
         catch (const std::exception &ex)
@@ -407,7 +406,7 @@ void TrayIcons::setUpTrayIcons()
                                             tr("The request could not be completed because the internet connection is "
                                                "down."));
 
-            if (!m_user.hasRunningTimeEntry()) [[likely]]
+			if (!m_user.getRunningTimeEntry()) [[likely]]
             {
                 auto project = defaultProject();
                 m_user.startTimeEntry(project.id(), project.description());
@@ -420,7 +419,7 @@ void TrayIcons::setUpTrayIcons()
                                             tr("The request could not be completed because the internet connection is "
                                                "down."));
 
-            if (m_user.hasRunningTimeEntry()) [[likely]]
+			if (!m_user.getRunningTimeEntry()) [[likely]]
             {
                 m_user.stopCurrentTimeEntry();
                 updateTrayIcons();
@@ -462,7 +461,7 @@ void TrayIcons::setUpTrayIcons()
             return;
         }
 
-        if (m_user.hasRunningTimeEntry())
+        if (m_user.getRunningTimeEntry())
             m_user.stopCurrentTimeEntry();
         else
         {
@@ -497,9 +496,9 @@ void TrayIcons::setUpTrayIcons()
                 return;
             }
 
-            if (m_user.hasRunningTimeEntry())
+            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
             {
-                if (m_user.getRunningTimeEntry().project().id() == Settings::instance()->breakTimeId())
+                if (runningEntry->project().id() == Settings::instance()->breakTimeId())
                 {
                     auto time = m_user.stopCurrentTimeEntry();
                     auto project = defaultProject();
@@ -652,10 +651,10 @@ void TrayIcons::updateQuickStartList()
 
             bool hadRunningJob{false};
             QDateTime now{m_manager->currentDateTime()};
-            if (m_user.hasRunningTimeEntry())
+            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
             {
                 hadRunningJob = true;
-                if (m_user.getRunningTimeEntry().project().id() == projectId)
+                if (runningEntry->project().id() == projectId)
                 {
                     m_eventLoop.start();
                     return;

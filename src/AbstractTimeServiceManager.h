@@ -46,9 +46,8 @@ public:
     QString projectName(const QString &projectId);
     QString userName(const QString &userId);
 
-    virtual bool userHasRunningTimeEntry(const QString &userId);
     QDateTime stopRunningTimeEntry(const QString &userId, bool async);
-    TimeEntry getRunningTimeEntry(const QString &userId);
+    std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
     void startTimeEntry(const QString &userId, const QString &projectId, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
@@ -153,7 +152,7 @@ protected:
     virtual int workspacesPaginationPageSize() const { return 50; }
 
     virtual bool jsonToHasRunningTimeEntry(const json &j) = 0;
-    virtual TimeEntry jsonToRunningTimeEntry(const json &j) = 0;
+    virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToTimeEntry(const json &j) = 0;
     virtual User jsonToUser(const json &j) = 0;
     virtual QPair<QString, QString> jsonToUserData(const json &j) = 0;

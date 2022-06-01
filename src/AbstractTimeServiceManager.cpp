@@ -89,40 +89,22 @@ QString AbstractTimeServiceManager::userName(const QString &userId)
     return "";
 }
 
-bool AbstractTimeServiceManager::userHasRunningTimeEntry(const QString &userId)
-{
-    bool status = false;
-    timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
-                 TimeEntryAction::GetRunningTimeEntry,
-                 getRunningTimeEntryPayload(),
-                 false,
-                 [this, &status](QNetworkReply *rep) {
-                     try
-                     {
-                         status = jsonToHasRunningTimeEntry(json::parse(rep->readAll()));
-                     }
-                     catch (const std::exception &e)
-                     {
-                         std::cerr << "Error while parsing time entries: " << e.what() << std::endl;
-                     }
-                 });
-
-    return status;
-}
-
 QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
 {
     auto now = currentDateTime();
     auto t = getRunningTimeEntry(userId);
-    t.setEnd(now);
-    timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
-                 TimeEntryAction::StopTimeEntry,
-                 QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::StopTimeEntry).dump()),
-                 async);
+    if (t)
+    {
+        t->setEnd(now);
+        timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
+                     TimeEntryAction::StopTimeEntry,
+                     QByteArray::fromStdString(timeEntryToJson(*t, TimeEntryAction::StopTimeEntry).dump()),
+                     async);
+    }
     return now;
 }
 
-TimeEntry AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
+std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
 {
     json j;
     timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
@@ -140,7 +122,10 @@ TimeEntry AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
                      }
                  });
 
-    return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
+    if (j.is_null())
+        return std::nullopt;
+    else
+        return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
 }
 
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)

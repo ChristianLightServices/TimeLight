@@ -31,7 +31,7 @@ protected:
     virtual QUrl projectsUrl(const QString &workspaceId) const final;
 
     virtual bool jsonToHasRunningTimeEntry(const json &j) final;
-    virtual TimeEntry jsonToRunningTimeEntry(const json &j) final;
+    virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) final;
     virtual TimeEntry jsonToTimeEntry(const json &j) final;
     virtual User jsonToUser(const json &j) final;
     virtual QPair<QString, QString> jsonToUserData(const json &j) final;

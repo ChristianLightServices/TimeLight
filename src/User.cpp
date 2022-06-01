@@ -18,12 +18,7 @@ User::User(const User &that) : QObject{that.parent()}
 
 User::User(QObject *parent) : QObject{parent}, m_isValid{false} {}
 
-bool User::hasRunningTimeEntry()
-{
-    return m_manager->userHasRunningTimeEntry(m_userId);
-}
-
-TimeEntry User::getRunningTimeEntry()
+std::optional<TimeEntry> User::getRunningTimeEntry()
 {
     return m_manager->getRunningTimeEntry(m_userId);
 }
