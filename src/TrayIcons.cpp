@@ -319,7 +319,8 @@ void TrayIcons::updateTrayIcons()
                     m_timeUpWarning = TimeUpWarning::Done;
                 }
                 // warn 1 hour before time is up
-                else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 && m_timeUpWarning != TimeUpWarning::AlmostDone)
+                else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 &&
+                         m_timeUpWarning != TimeUpWarning::AlmostDone)
                 {
                     m_timerRunning->showMessage(tr("You're almost done"),
                                                 tr("You have less than an hour to go to complete your work this week!"));
@@ -433,7 +434,7 @@ void TrayIcons::setUpTrayIcons()
                                             tr("The request could not be completed because the internet connection is "
                                                "down."));
 
-			if (!m_user.getRunningTimeEntry()) [[likely]]
+            if (!m_user.getRunningTimeEntry()) [[likely]]
             {
                 auto project = defaultProject();
                 m_user.startTimeEntry(project.id(), project.description());
@@ -446,7 +447,7 @@ void TrayIcons::setUpTrayIcons()
                                             tr("The request could not be completed because the internet connection is "
                                                "down."));
 
-			if (!m_user.getRunningTimeEntry()) [[likely]]
+            if (!m_user.getRunningTimeEntry()) [[likely]]
             {
                 m_user.stopCurrentTimeEntry();
                 updateTrayIcons();
