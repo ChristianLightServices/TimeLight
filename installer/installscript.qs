@@ -1,8 +1,57 @@
+// Uninstall stuff based on https://nheko.im/nheko-reborn/nheko/-/blob/master/deploy/installer/controlscript.qs.
+// Everything else is probably my own random imaginings, with a bit of StackOverflow thrown in.
+
+function silentUninstall()
+{
+    return installer.value("PleaseDeleteMeWithNaryAWordOfProtest") === "AbsolutelyGoRightAhead";
+}
+
 function Controller()
 {
     installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
     if (systemInfo.productType !== "windows")
         installer.setDefaultPageVisible(QInstaller.StartMenuSelection, false);
+
+    if (silentUninstall() && installer.isUninstaller())
+    {
+        installer.setDefaultPageVisible(QInstaller.Introduction, false);
+        installer.setDefaultPageVisible(QInstaller.TargetDirectory, false);
+        installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
+        installer.setDefaultPageVisible(QInstaller.LicenseCheck, false);
+        installer.setDefaultPageVisible(QInstaller.StartMenuSelection, false);
+        installer.setDefaultPageVisible(QInstaller.ReadyForInstallation, false);
+
+        this.FinishedPageCallback = function()
+        {
+            gui.clickButton(buttons.FinishButton);
+        }
+    }
+}
+
+Controller.prototype.TargetDirectoryPageCallback = function()
+{
+    var page = gui.currentPageWidget();
+    page.TargetDirectoryLineEdit.textChanged.connect(this, Controller.prototype.checkForExistingInstall);
+    Controller.prototype.checkForExistingInstall(page.TargetDirectoryLineEdit.text);
+}
+
+Controller.prototype.checkForExistingInstall = function(text)
+{
+    let oldInstaller = text + "/maintenancetool.exe";
+    if (text != "" && installer.fileExists(oldInstaller))
+        if (QMessageBox.question("uninstallprevious.question",
+                                 "Remove previous installation",
+                                 "Do you want to remove the previous installation of TimeLight before installing this version?",
+                                 QMessageBox.Yes | QMessageBox.No)
+                === QMessageBox.Yes)
+            installer.execute(oldInstaller, ["PleaseDeleteMeWithNaryAWordOfProtest=AbsolutelyGoRightAhead"]);
+}
+
+Controller.prototype.PerformInstallationPageCallback = function()
+{
+    let processName = (systemInfo.productType === "windows" ? "TimeLight.exe" : "TimeLight");
+    if (installer.isUninstaller() && installer.isProcessRunning(processName))
+        installer.killProcess(processName);
 }
 
 Controller.prototype.FinishedPageCallback = function()
