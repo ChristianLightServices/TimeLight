@@ -378,6 +378,7 @@ QWidget *SettingsDialog::createAppPage()
     quickStartOptions->addItem(tr("All projects"), QVariant::fromValue(Settings::QuickStartProjectOptions::AllProjects));
     quickStartOptions->addItem(tr("Recent projects"),
                                QVariant::fromValue(Settings::QuickStartProjectOptions::RecentProjects));
+    quickStartOptions->setCurrentIndex(static_cast<int>(Settings::instance()->quickStartProjectsLoading()));
 
     layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 0, 0);
     layout->addWidget(eventLoopInterval, 0, 1);
