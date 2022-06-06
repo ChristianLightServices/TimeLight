@@ -31,6 +31,8 @@ public:
     bool showDurationNotifications() const { return m_showDurationNotifications; }
     int eventLoopInterval() const { return m_eventLoopInterval; }
     QuickStartProjectOptions quickStartProjectsLoading() const { return m_quickStartProjectsLoading; }
+    bool alertOnTimeUp() const { return m_alertOnTimeUp; }
+    double weekHours() const { return m_weekHours; }
 
     static void init();
     static Settings *instance() { return s_instance; }
@@ -49,6 +51,8 @@ public slots:
     void setShowDurationNotifications(const bool show);
     void setEventLoopInterval(const int interval);
     void setQuickStartProjectsLoading(const Settings::QuickStartProjectOptions &option);
+    void setAlertOnTimeUp(const bool alert);
+    void setWeekHours(const double hours);
 
 signals:
     void timeServiceChanged();
@@ -64,6 +68,8 @@ signals:
     void showDurationNotificationsChanged();
     void eventLoopIntervalChanged();
     void quickStartProjectsLoadingChanged();
+    void alertOnTimeUpChanged();
+    void weekHoursChanged();
 
 private:
     explicit Settings(QObject *parent = nullptr);
@@ -89,8 +95,10 @@ private:
     bool m_useLastDescription;
     bool m_useLastProject;
     bool m_showDurationNotifications;
+    bool m_alertOnTimeUp;
     QuickStartProjectOptions m_quickStartProjectsLoading;
 
+    double m_weekHours;
     int m_eventLoopInterval;
 };
 

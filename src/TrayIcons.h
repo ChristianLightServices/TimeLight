@@ -50,6 +50,13 @@ private:
         StateUnset,
     };
 
+    enum class TimeUpWarning
+    {
+        NotDone,
+        AlmostDone,
+        Done,
+    };
+
     template<TimeManager Manager> void initializeManager();
     void setUpTrayIcons();
     void setTimerState(TimerState state);
@@ -69,6 +76,8 @@ private:
 
     bool m_valid{true};
     bool m_ratelimited{false};
+
+    TimeUpWarning m_timeUpWarning{TimeUpWarning::NotDone};
 };
 
 #endif // TRAYICONS_H

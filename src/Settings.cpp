@@ -52,6 +52,8 @@ void Settings::load()
     if (m_quickStartProjectsLoading >= QuickStartProjectOptions::Undefined ||
         m_quickStartProjectsLoading < static_cast<QuickStartProjectOptions>(0))
         m_quickStartProjectsLoading = QuickStartProjectOptions::AllProjects;
+    m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
+    m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
     settings.endGroup();
 }
 
@@ -184,6 +186,24 @@ void Settings::setQuickStartProjectsLoading(const QuickStartProjectOptions &opti
     m_settingsDirty = true;
 }
 
+void Settings::setAlertOnTimeUp(const bool alert)
+{
+    if (alert == m_alertOnTimeUp)
+        return;
+    m_alertOnTimeUp = alert;
+    emit alertOnTimeUpChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setWeekHours(const double hours)
+{
+    if (hours == m_weekHours)
+        return;
+    m_weekHours = hours;
+    emit weekHoursChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::save()
 {
     QSettings settings;
@@ -206,5 +226,7 @@ void Settings::save()
     settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
     settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
     settings.setValue(QStringLiteral("quickStartProjectsLoading"), static_cast<unsigned int>(m_quickStartProjectsLoading));
+    settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);
+    settings.setValue(QStringLiteral("weekHours"), m_weekHours);
     settings.endGroup();
 }

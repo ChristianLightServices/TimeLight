@@ -299,6 +299,33 @@ void TrayIcons::updateTrayIcons()
                 setTimerState(TimerState::Running);
                 m_currentRunningJobId = runningEntry->id();
             }
+
+            if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done)
+            {
+                auto now = QDateTime::currentDateTime();
+                auto entries = m_user.getTimeEntries(std::nullopt,
+                                                     std::nullopt,
+                                                     now.addDays(-(now.date().dayOfWeek() % 7)),
+                                                     now.addDays(6 - (now.date().dayOfWeek() % 7)));
+                double hoursThisWeek =
+                    std::accumulate(
+                        entries.begin(), entries.end(), 0, [](auto a, auto b) { return a + b.start().msecsTo(b.end()); }) /
+                    (1000 * 60 * 60);
+                if (hoursThisWeek >= Settings::instance()->weekHours())
+                {
+                    m_timerRunning->showMessage(
+                        tr("Your week is done"),
+                        tr("You have now worked %n hour(s) this week!", nullptr, Settings::instance()->weekHours()));
+                    m_timeUpWarning = TimeUpWarning::Done;
+                }
+                // warn 1 hour before time is up
+                else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 && m_timeUpWarning != TimeUpWarning::AlmostDone)
+                {
+                    m_timerRunning->showMessage(tr("You're almost done"),
+                                                tr("You have less than an hour to go to complete your work this week!"));
+                    m_timeUpWarning = TimeUpWarning::AlmostDone;
+                }
+            }
         }
         catch (const std::exception &ex)
         {

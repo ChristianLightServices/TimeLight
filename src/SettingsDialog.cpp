@@ -362,6 +362,18 @@ QWidget *SettingsDialog::createAppPage()
     auto showNotifications{new QCheckBox{tr("Show how much time was worked when a job is stopped"), appPage}};
     showNotifications->setChecked(Settings::instance()->showDurationNotifications());
 
+    auto showTimeUpWarning{new QCheckBox{tr("Notify when a full week's time has been logged"), appPage}};
+    showTimeUpWarning->setChecked(Settings::instance()->alertOnTimeUp());
+
+    auto weekHours{new QDoubleSpinBox{appPage}};
+    weekHours->setSuffix(tr(" hours"));
+    weekHours->setSingleStep(0.5);
+    weekHours->setValue(Settings::instance()->weekHours());
+    weekHours->setDecimals(1);
+    weekHours->setMinimum(1);
+    weekHours->setMaximum(100);
+    weekHours->setEnabled(Settings::instance()->alertOnTimeUp());
+
     auto quickStartOptions{new QComboBox{appPage}};
     quickStartOptions->addItem(tr("All projects"), QVariant::fromValue(Settings::QuickStartProjectOptions::AllProjects));
     quickStartOptions->addItem(tr("Recent projects"),
@@ -370,8 +382,11 @@ QWidget *SettingsDialog::createAppPage()
     layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 0, 0);
     layout->addWidget(eventLoopInterval, 0, 1);
     layout->addWidget(showNotifications, 1, 0, 1, 2);
-    layout->addWidget(new QLabel{tr("Projects to display in quick start menu"), appPage}, 2, 0);
-    layout->addWidget(quickStartOptions, 2, 1);
+    layout->addWidget(showTimeUpWarning, 2, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 3, 0);
+    layout->addWidget(weekHours, 3, 1);
+    layout->addWidget(new QLabel{tr("Projects to display in quick start menu"), appPage}, 4, 0);
+    layout->addWidget(quickStartOptions, 4, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
@@ -392,6 +407,23 @@ QWidget *SettingsDialog::createAppPage()
             break;
         }
     });
+    connect(showTimeUpWarning, &QCheckBox::stateChanged, showTimeUpWarning, [weekHours](int state) {
+        switch (state)
+        {
+        case Qt::Checked:
+        case Qt::PartiallyChecked:
+            Settings::instance()->setAlertOnTimeUp(true);
+            weekHours->setEnabled(true);
+            break;
+        case Qt::Unchecked:
+            Settings::instance()->setAlertOnTimeUp(false);
+            weekHours->setEnabled(false);
+            break;
+        default:
+            break;
+        }
+    });
+    connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
     connect(quickStartOptions, &QComboBox::currentIndexChanged, this, [quickStartOptions](int) {
         Settings::instance()->setQuickStartProjectsLoading(
             quickStartOptions->currentData().value<Settings::QuickStartProjectOptions>());
