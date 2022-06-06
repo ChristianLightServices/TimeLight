@@ -175,9 +175,9 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
     QVector<TimeEntry> entries;
 
     auto url = timeEntriesUrl(userId, workspaceId(), start, end);
-    auto worker = [this, &url, &entries]() -> bool {
+    auto worker = [this, &url, &entries, &pageSize]() -> bool {
         bool retVal;
-        get(url, false, [this, &retVal, &entries](QNetworkReply *rep) {
+        get(url, false, [this, &retVal, &entries, &pageSize](QNetworkReply *rep) {
             try
             {
                 json j{json::parse(rep->readAll().toStdString())};
@@ -190,7 +190,7 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
 
                 if (timeEntriesSortOrder() == Qt::AscendingOrder)
                     std::reverse(entries.begin(), entries.end());
-                retVal = !j.empty();
+                retVal = !j.empty() && entries.size() == pageSize.value_or(timeEntriesPaginationPageSize());
             }
             catch (const std::exception &e)
             {
@@ -207,7 +207,9 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
         // The loop will only run once if there a specific page number has been requested.
         do
         {
-            QUrlQuery query;
+            QUrlQuery query{url};
+            query.removeAllQueryItems(timeEntriesPageSizeHeaderName());
+            query.removeAllQueryItems(timeEntriesPageHeaderName());
             query.addQueryItem(timeEntriesPageSizeHeaderName(),
                                QString::number(pageSize.value_or(timeEntriesPaginationPageSize())));
             query.addQueryItem(timeEntriesPageHeaderName(), QString::number(page++));
@@ -379,7 +381,9 @@ void AbstractTimeServiceManager::updateUsers()
 
         do
         {
-            QUrlQuery query;
+            QUrlQuery query{url};
+            query.removeAllQueryItems(usersPageSizeHeaderName());
+            query.removeAllQueryItems(usersPageHeaderName());
             query.addQueryItem(usersPageSizeHeaderName(), QString::number(usersPaginationPageSize()));
             query.addQueryItem(usersPageHeaderName(), QString::number(page++));
             url.setQuery(query);
@@ -441,7 +445,9 @@ void AbstractTimeServiceManager::updateProjects()
 
         do
         {
-            QUrlQuery query;
+            QUrlQuery query{url};
+            query.removeAllQueryItems(projectsPageSizeHeaderName());
+            query.removeAllQueryItems(projectsPageHeaderName());
             query.addQueryItem(projectsPageSizeHeaderName(), QString::number(projectsPaginationPageSize()));
             query.addQueryItem(projectsPageHeaderName(), QString::number(page++));
             url.setQuery(query);
