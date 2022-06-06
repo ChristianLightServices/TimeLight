@@ -25,7 +25,7 @@ if(NOT nlohmann_json_FOUND)
 
     FetchContent_Declare(json
       GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-      GIT_TAG v3.10.0
+	  GIT_TAG v3.10.0
     )
 
     FetchContent_GetProperties(json)
@@ -122,9 +122,19 @@ endif()
 
 target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
 
-install(TARGETS TimeLight RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
+if(APPLE)
+	set(INSTALL_TYPE "BUNDLE")
+	# Apparently this is not always set on macOS: https://github.com/ChristianLightServices/TimeLight/runs/6763058520
+	set(CMAKE_INSTALL_BINDIR "/bin")
+else()
+	set(INSTALL_TYPE "RUNTIME")
+endif()
+
+install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
-include(InstallRequiredSystemLibraries)
+if(WIN32)
+	include(InstallRequiredSystemLibraries)
+endif()
 if(UNIX AND NOT APPLE)
     install(FILES "TimeLight.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "${PROJECT_NAME}")
     install(FILES "icons/TimeLight.svg" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps" COMPONENT "${PROJECT_NAME}")

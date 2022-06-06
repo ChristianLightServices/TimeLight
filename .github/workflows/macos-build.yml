@@ -23,6 +23,8 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt-version }}
+          # work around https://github.com/jurplel/install-qt-action/issues/142 as per https://github.com/jurplel/install-qt-action/issues/130
+          setup-python: false
 
       - name: Checkout code
         uses: actions/checkout@v2
