@@ -206,6 +206,8 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
     case TimeEntryAction::StartTimeEntry:
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Post;
+    default:
+        return HttpVerb::Post;
     }
 }
 
