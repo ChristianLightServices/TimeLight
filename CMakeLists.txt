@@ -18,7 +18,7 @@ find_package(Qt6 6.2 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
 # (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
-find_package(nlohmann_json 3.2.0)
+find_package(nlohmann_json 3.10.5)
 
 if(NOT nlohmann_json_FOUND)
 	message("Fetching nlohmann/json from GitHub...")
@@ -27,7 +27,7 @@ if(NOT nlohmann_json_FOUND)
 
     FetchContent_Declare(json
       GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-	  GIT_TAG v3.10.0
+	  GIT_TAG v3.10.5
     )
 
     FetchContent_GetProperties(json)
