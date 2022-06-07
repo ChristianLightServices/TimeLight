@@ -56,12 +56,17 @@ set(SRC_TIMECAMP
 if(WIN32)
     set(OS_HACKS "WIN32")
     set(APP_ICON_RESOURCE "winres.rc")
+	set(INSTALL_TYPE "RUNTIME")
 elseif(APPLE)
     set(OS_HACKS "MACOSX_BUNDLE")
     set(APP_ICON_RESOURCE "icons/macicon.icns")
+	set(INSTALL_TYPE "BUNDLE")
+	# Apparently this is not always set on macOS: https://github.com/ChristianLightServices/TimeLight/runs/6763058520
+	set(CMAKE_INSTALL_BINDIR "/bin")
 else()
     set(OS_HACKS "")
     set(APP_ICON_RESOURCE "")
+	set(INSTALL_TYPE "RUNTIME")
 endif()
 
 set(SRC
@@ -123,14 +128,6 @@ if(APPLE)
 endif()
 
 target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
-
-if(APPLE)
-	set(INSTALL_TYPE "BUNDLE")
-	# Apparently this is not always set on macOS: https://github.com/ChristianLightServices/TimeLight/runs/6763058520
-	set(CMAKE_INSTALL_BINDIR "/bin")
-else()
-	set(INSTALL_TYPE "RUNTIME")
-endif()
 
 install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
