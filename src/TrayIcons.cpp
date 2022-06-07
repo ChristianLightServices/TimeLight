@@ -428,31 +428,6 @@ void TrayIcons::setUpTrayIcons()
     updateQuickStartList();
 
     auto addMenuActions = [this](QMenu *menu) {
-        connect(menu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
-            if (!m_manager->isConnectedToInternet()) [[unlikely]]
-                m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is "
-                                               "down."));
-
-            if (!m_user.getRunningTimeEntry()) [[likely]]
-            {
-                auto project = defaultProject();
-                m_user.startTimeEntry(project.id(), project.description());
-                updateTrayIcons();
-            }
-        });
-        connect(menu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
-            if (!m_manager->isConnectedToInternet()) [[unlikely]]
-                m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is "
-                                               "down."));
-
-            if (!m_user.getRunningTimeEntry()) [[likely]]
-            {
-                m_user.stopCurrentTimeEntry();
-                updateTrayIcons();
-            }
-        });
         menu->addMenu(m_quickStartMenu);
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
@@ -470,6 +445,27 @@ void TrayIcons::setUpTrayIcons()
     };
 
     auto timerRunningMenu = new QMenu;
+    connect(timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+            showOfflineNotification();
+
+        if (!m_user.getRunningTimeEntry()) [[likely]]
+        {
+            auto project = defaultProject();
+            m_user.startTimeEntry(project.id(), project.description());
+            updateTrayIcons();
+        }
+    });
+    connect(timerRunningMenu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+            showOfflineNotification();
+
+        if (m_user.getRunningTimeEntry()) [[likely]]
+        {
+            m_user.stopCurrentTimeEntry();
+            updateTrayIcons();
+        }
+    });
     addMenuActions(timerRunningMenu);
     m_timerRunning->setContextMenu(timerRunningMenu);
     connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
@@ -483,8 +479,7 @@ void TrayIcons::setUpTrayIcons()
 
         if (!m_manager->isConnectedToInternet()) [[unlikely]]
         {
-            m_timerRunning->showMessage(tr("Internet connection lost"),
-                                        tr("The request could not be completed because the internet connection is down."));
+            showOfflineNotification();
             m_eventLoop.start();
             return;
         }
@@ -504,6 +499,35 @@ void TrayIcons::setUpTrayIcons()
     if (Settings::instance()->useSeparateBreakTime())
     {
         auto runningJobMenu = new QMenu;
+        connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
+                showOfflineNotification();
+
+            if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
+            {
+                if (e->project().id() == Settings::instance()->breakTimeId())
+                    return;
+
+                m_user.stopCurrentTimeEntry();
+            }
+            m_user.startTimeEntry(Settings::instance()->breakTimeId());
+            updateTrayIcons();
+        });
+        connect(runningJobMenu->addAction(tr("Resume")), &QAction::triggered, this, [this]() {
+            if (!m_manager->isConnectedToInternet()) [[unlikely]]
+                showOfflineNotification();
+
+            if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
+            {
+                if (e->project().id() != Settings::instance()->breakTimeId())
+                    return;
+
+                m_user.stopCurrentTimeEntry();
+            }
+            auto project = defaultProject();
+            m_user.startTimeEntry(project.id(), project.description());
+            updateTrayIcons();
+        });
         addMenuActions(runningJobMenu);
         m_runningJob->setContextMenu(runningJobMenu);
         connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
@@ -517,9 +541,7 @@ void TrayIcons::setUpTrayIcons()
 
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
-                m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is "
-                                               "down."));
+                showOfflineNotification();
                 m_eventLoop.start();
                 return;
             }
@@ -670,9 +692,7 @@ void TrayIcons::updateQuickStartList()
             m_eventLoop.stop();
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
-                m_timerRunning->showMessage(tr("Internet connection lost"),
-                                            tr("The request could not be completed because the internet connection is "
-                                               "down."));
+                showOfflineNotification();
                 m_eventLoop.start();
                 return;
             }
@@ -726,6 +746,13 @@ void TrayIcons::updateQuickStartList()
     default:
         break;
     }
+}
+
+void TrayIcons::showOfflineNotification()
+{
+    m_timerRunning->showMessage(tr("Internet connection lost"),
+                                tr("The request could not be completed because the internet connection is "
+                                   "down."));
 }
 
 template<TimeManager Manager> void TrayIcons::initializeManager()

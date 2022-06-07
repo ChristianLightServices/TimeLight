@@ -61,6 +61,7 @@ private:
     void setUpTrayIcons();
     void setTimerState(TimerState state);
     void updateQuickStartList();
+    void showOfflineNotification();
 
     AbstractTimeServiceManager *m_manager;
 
