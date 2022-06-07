@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v3
+        uses: actions/cache@v1
         with:
           path: ../Qt
           key: qt-cache-${{ matrix.qt-version }}-${{ runner.os }}
