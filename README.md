@@ -32,8 +32,6 @@ Please note that this project requires C++20 features (most notably concepts) th
 
 ## Getting nightly builds
 
-### ⚠ Warning: macOS builds are temporarily disabled. ⚠
-
 If you want to get the absolute latest and greatest code, you can try out the CI builds (available from [GitHub Actions](https://github.com/ChristianLightServices/TimeLight/actions/)). Please take note of several things:
 
 1. The CI builds do not ship Qt libraries. You will have to manually install Qt and make the libraries available to the binary.
