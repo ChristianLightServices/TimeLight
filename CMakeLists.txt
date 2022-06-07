@@ -21,6 +21,8 @@ find_package(Qt6 6.2 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 find_package(nlohmann_json 3.2.0)
 
 if(NOT nlohmann_json_FOUND)
+	message("Fetching nlohmann/json from GitHub...")
+
     include(FetchContent)
 
     FetchContent_Declare(json
