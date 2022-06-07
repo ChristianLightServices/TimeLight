@@ -18,17 +18,33 @@ The "Interval between updates of data" setting on the "App settings" tab allows 
 
 ## Building
 
+#### Binaries
+
 Make sure you have Qt 6.2 or newer installed and available. Then, it's a simple matter of:
 
 ```
 mkdir build && cd build
 cmake ..
-cmake --build .
+cmake --build . --config Release
 ```
 
 and you have a binary!
 
 Please note that this project requires C++20 features (most notably concepts) that will not compile with GCC at the moment (unless you set special flags for GCC). Therefore, you will want to use the latest Clang or MSVC to compile this project.
+
+#### Installer
+
+##### ⚠ The installer has been developed for Windows only; while it will likely run on other platforms, it may not work correctly. ⚠
+
+Install Qt IFW (any version in the 4.x series should work; others haven't been tested). Then rerun CMake in the build directory, like so:
+
+```
+cd build
+cmake -DGENERATE_INSTALLER=ON ..
+cmake --build . --config release --target package
+```
+
+An installer will be generated in `build`. Its name will vary slightly from platform to platform, but will look something like `TimeLight-2.0.0-win64.exe` on Windows.
 
 ## Getting nightly builds
 
