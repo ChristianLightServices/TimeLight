@@ -23,7 +23,11 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt-version }}
-          tools: 'tools-ifw'
+
+      - name: Install Qt IFW
+        uses: jmarrec/setup-qtifw@v1.0.3
+        with:
+          qtifw-version: '4.x'
 
       - name: Checkout code
         uses: actions/checkout@v2
