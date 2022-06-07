@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DGENERATE_INSTALLER=ON ..
-          cmake --build . --config Release --target all package
+          cmake --build . --config Release --target package
           cd ..
 
       - name: Upload binary
