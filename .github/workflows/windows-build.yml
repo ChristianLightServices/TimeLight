@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build . --config Release
+          cmake --build . --config Release --target package
           cd ..
 
       - name: Upload binary
@@ -49,8 +49,7 @@ jobs:
         run: |
           mkdir release_dir
           cd release_dir
-          cp ..\build\Release\TimeLight.exe .
-          windeployqt TimeLight.exe
+          cp ..\build\Release\TimeLight-*-win*.exe .
           cd ..
           7z a -tzip TimeLight.zip release_dir
 
