@@ -19,10 +19,18 @@ jobs:
         qt-version: ['6.2.3', '6.3.0']
 
     steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v3
+        with:
+          path: ../Qt
+          key: qt-cache-${{ matrix.qt-version }}-${{ runner.os }}
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt-version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: Install Qt IFW
         uses: jmarrec/setup-qtifw@v1.0.3
