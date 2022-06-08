@@ -9,6 +9,7 @@ TimeEntry::TimeEntry(const QString &id,
                      const QString &userId,
                      const QDateTime &start,
                      const QDateTime &end,
+                     std::optional<bool> running,
                      QObject *parent)
     : QObject{parent},
       m_id{id},
@@ -17,6 +18,7 @@ TimeEntry::TimeEntry(const QString &id,
       m_userId{userId},
       m_start{start},
       m_end{end},
+      m_running{running},
       m_isValid{true}
 {}
 
@@ -35,6 +37,7 @@ TimeEntry &TimeEntry::operator=(const TimeEntry &other)
     m_userId = other.m_userId;
     m_start = other.m_start;
     m_end = other.m_end;
+    m_running = other.m_running;
     m_isValid = other.m_isValid;
 
     return *this;

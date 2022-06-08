@@ -159,7 +159,7 @@ void AbstractTimeServiceManager::startTimeEntry(
         p = *it;
     else
         p = Project{projectId, projectName(projectId)};
-    TimeEntry t{{}, p, description, userId, start, {}};
+    TimeEntry t{{}, p, description, userId, start, {}, {}};
     timeEntryReq(startTimeEntryUrl(userId, m_workspaceId),
                  TimeEntryAction::StartTimeEntry,
                  QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::StartTimeEntry).dump()),

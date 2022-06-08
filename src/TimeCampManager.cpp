@@ -103,6 +103,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
                          getApiKeyOwner().userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
+                         true,
                          this};
     }
     catch (const std::exception &e)
@@ -123,6 +124,7 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
                          j["user_id"].get<QString>(),
                          QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
                          QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
+                         false,
                          this};
     }
     catch (const std::exception &e)

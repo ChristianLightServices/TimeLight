@@ -581,7 +581,7 @@ void TrayIcons::setUpTrayIcons()
         if (jobs.isEmpty())
             return;
         auto job{jobs.first()};
-        if (!m_currentRunningJobId.isEmpty() && job.id() != m_currentRunningJobId)
+        if ((!m_currentRunningJobId.isEmpty() && job.id() != m_currentRunningJobId) || job.running())
             return;
         m_currentRunningJobId.clear();
 
