@@ -295,10 +295,8 @@ void TrayIcons::updateTrayIcons()
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
                 setTimerState(TimerState::OnBreak);
             else
-            {
                 setTimerState(TimerState::Running);
-                m_currentRunningJobId = runningEntry->id();
-            }
+            m_currentRunningJobId = runningEntry->id();
 
             if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done)
             {
@@ -577,24 +575,24 @@ void TrayIcons::setUpTrayIcons()
         if (!Settings::instance()->showDurationNotifications())
             return;
 
-        auto jobs = m_user.getTimeEntries(1, 1);
+        // This will either return the job that just ended, plus the job before, or the job that just started and the job that just ended. Either way, we can get enough info to run the notifications.
+        auto jobs = m_user.getTimeEntries(1, 2);
         if (jobs.isEmpty())
             return;
-        auto job{jobs.first()};
-        if ((!m_currentRunningJobId.isEmpty() && job.id() != m_currentRunningJobId) || job.running())
+        auto job = std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_currentRunningJobId; });
+        if (job == jobs.end() || job->running().value_or(false))
             return;
-        m_currentRunningJobId.clear();
 
-        QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job.start().msecsTo(job.end())))};
+        QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
         QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
         if (duration.hour() > 0)
             timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
         else
             timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
-        m_timerRunning->showMessage(tr("Job ended"),
-                                    tr("You worked %1 on %2").arg(timeString, job.project().name()),
-                                    QSystemTrayIcon::Information,
-                                    5000);
+        auto message = (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
+                           tr("You were on break for %1") :
+                           tr("You worked %2 on %1").arg(job->project().name());
+        m_timerRunning->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
 
         updateQuickStartList();
     });
@@ -624,6 +622,8 @@ void TrayIcons::setTimerState(TimerState state)
             m_runningJob->setIcon(QIcon{":/icons/greenlight.png"});
         }
 
+        if (m_timerState == TimerState::OnBreak)
+            emit jobEnded();
         if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::OnBreak)
             emit jobStarted();
         break;
@@ -639,6 +639,8 @@ void TrayIcons::setTimerState(TimerState state)
 
         if (m_timerState == TimerState::Running)
             emit jobEnded();
+        else if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::Running)
+            emit jobStarted();
         break;
     case TimerState::NotRunning:
         m_timerRunning->setToolTip(tr("%1 is not running").arg(m_manager->serviceName()));
@@ -650,7 +652,7 @@ void TrayIcons::setTimerState(TimerState state)
             m_runningJob->setIcon(QIcon{":/icons/redlight.png"});
         }
 
-        if (m_timerState == TimerState::Running)
+        if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
             emit jobEnded();
         break;
     case TimerState::Offline:
