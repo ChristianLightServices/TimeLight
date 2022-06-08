@@ -575,7 +575,8 @@ void TrayIcons::setUpTrayIcons()
         if (!Settings::instance()->showDurationNotifications())
             return;
 
-        // This will either return the job that just ended, plus the job before, or the job that just started and the job that just ended. Either way, we can get enough info to run the notifications.
+        // This will either return the job that just ended, plus the job before, or the job that just started and the job
+        // that just ended. Either way, we can get enough info to run the notifications.
         auto jobs = m_user.getTimeEntries(1, 2);
         if (jobs.isEmpty())
             return;
@@ -589,9 +590,10 @@ void TrayIcons::setUpTrayIcons()
             timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
         else
             timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
-        auto message = (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
-                           tr("You were on break for %1") :
-                           tr("You worked %2 on %1").arg(job->project().name());
+        auto message =
+            (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
+                tr("You were on break for %1") :
+                tr("You worked %2 on %1").arg(job->project().name());
         m_timerRunning->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
 
         updateQuickStartList();
