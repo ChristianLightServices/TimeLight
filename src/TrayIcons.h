@@ -71,7 +71,8 @@ private:
 
     User m_user;
     TimerState m_timerState{TimerState::StateUnset};
-    QString m_currentRunningJobId;
+    TimeEntry m_currentRunningJob;
+    TimeEntry m_jobToBeNotified;
 
     QTimer m_eventLoop;
 

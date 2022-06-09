@@ -291,12 +291,14 @@ void TrayIcons::updateTrayIcons()
     {
         try
         {
+            m_currentRunningJob = *runningEntry;
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
                 setTimerState(TimerState::OnBreak);
             else
                 setTimerState(TimerState::Running);
-            m_currentRunningJobId = runningEntry->id();
+            // At this point, the previous job will have been notified for, so it's safe to overwrite it
+            m_jobToBeNotified = *runningEntry;
 
             if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done)
             {
@@ -580,7 +582,7 @@ void TrayIcons::setUpTrayIcons()
         auto jobs = m_user.getTimeEntries(1, 2);
         if (jobs.isEmpty())
             return;
-        auto job = std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_currentRunningJobId; });
+        auto job = std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
         if (job == jobs.end() || job->running().value_or(false))
             return;
 
@@ -615,14 +617,16 @@ void TrayIcons::setTimerState(TimerState state)
     switch (state)
     {
     case TimerState::Running:
-        m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
         if (m_runningJob)
         {
-            m_runningJob->setToolTip(tr("You are working"));
+            m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
+            m_runningJob->setToolTip(tr("Working on %1").arg(m_currentRunningJob.project().name()));
             m_runningJob->setIcon(QIcon{":/icons/greenlight.png"});
         }
+        else
+            m_timerRunning->setToolTip(tr("Working on %1").arg(m_currentRunningJob.project().name()));
 
         if (m_timerState == TimerState::OnBreak)
             emit jobEnded();
