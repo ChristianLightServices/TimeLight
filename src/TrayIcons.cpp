@@ -582,7 +582,8 @@ void TrayIcons::setUpTrayIcons()
         auto jobs = m_user.getTimeEntries(1, 2);
         if (jobs.isEmpty())
             return;
-        auto job = std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
+        auto job =
+            std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
         if (job == jobs.end() || job->running().value_or(false))
             return;
 
