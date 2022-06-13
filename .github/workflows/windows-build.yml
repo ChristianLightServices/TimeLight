@@ -60,7 +60,7 @@ jobs:
         if: ${{ github.event.inputs.packageRelease }}
         # Windows deployments tend to be big, so we'll zip them before uploading
         run: |
-          7z a -tzip TimeLight.zip build\Release\TimeLight-*-win*.exe
+          7z a -tzip TimeLight.zip build\TimeLight-*-win*.exe
 
       - name: Upload release package
         if: ${{ github.event.inputs.packageRelease }}
