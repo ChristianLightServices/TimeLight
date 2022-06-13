@@ -56,16 +56,10 @@ jobs:
           path: build\Release\TimeLight.exe
           retention-days: 7
 
-      - name: Build release package
-        if: ${{ github.event.inputs.packageRelease }}
-        # Windows deployments tend to be big, so we'll zip them before uploading
-        run: |
-          7z a -tzip TimeLight.zip build\TimeLight-*-win*.exe
-
       - name: Upload release package
         if: ${{ github.event.inputs.packageRelease }}
         uses: actions/upload-artifact@v2
         with:
           name: Windows package (64-bit, Qt ${{ matrix.qt-version }})
-          path: TimeLight.zip
+          path: build\TimeLight-*-win*.exe
           retention-days: 7
