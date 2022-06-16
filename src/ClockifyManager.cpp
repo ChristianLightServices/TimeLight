@@ -223,6 +223,8 @@ int ClockifyManager::httpReturnCodeForVerb(const HttpVerb verb) const
         return 200;
     case HttpVerb::Post:
         return 201;
+    case HttpVerb::Delete:
+        return 204;
     default:
         // for unused verbs
         return -1;

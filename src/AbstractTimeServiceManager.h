@@ -114,6 +114,7 @@ protected:
         Patch,
         Put,
         Head,
+        Delete,
     };
     enum class TimeEntryAction
     {

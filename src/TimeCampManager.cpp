@@ -215,6 +215,16 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
 
 int TimeCampManager::httpReturnCodeForVerb(const HttpVerb verb) const
 {
-    // NOTE: if DELETE methods are ever implemented, DELETE returns 204
-    return 200;
+    switch (verb)
+    {
+    case HttpVerb::Get:
+    case HttpVerb::Patch:
+    case HttpVerb::Head:
+    case HttpVerb::Post:
+        return 200;
+    case HttpVerb::Delete:
+        return 204;
+    default:
+        return -1;
+    }
 }
