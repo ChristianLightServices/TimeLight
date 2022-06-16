@@ -194,7 +194,7 @@ json TimeCampManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action
         return {{"action", "stop"}, {"stopped_at", dateTimeToJson(t.end())}};
     else if (action == TimeEntryAction::StartTimeEntry)
         return {{"action", "start"},
-                //            {"started_at", dateTimeToJson(t.start())},
+                {"started_at", dateTimeToJson(t.start())},
                 {"task_id", t.project().id()}};
     else
         return {};
