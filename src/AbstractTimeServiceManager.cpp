@@ -185,8 +185,12 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
                 if (!j.is_null() && !j[0].is_null())
-                    for (const auto &entry : j)
-                        entries.push_back(jsonToTimeEntry(entry));
+                {
+                    entries.resize(j.size());
+                    using namespace std::placeholders;
+                                std::transform(j.begin(), j.end(), entries.begin(),
+                     std::bind(&AbstractTimeServiceManager::jsonToTimeEntry, this, _1));
+                }
 
                 if (timeEntriesSortOrder() == Qt::AscendingOrder)
                     std::reverse(entries.begin(), entries.end());
@@ -253,10 +257,9 @@ QVector<Workspace> AbstractTimeServiceManager::getOwnerWorkspaces()
         {
             json j{json::parse(rep->readAll().toStdString())};
             using namespace std::placeholders;
-            //			std::transform(j.begin(), j.end(), workspaces.begin(),
-            // std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
-            for (const auto &workspace : j)
-                workspaces.push_back(jsonToWorkspace(workspace));
+            workspaces.resize(j.size());
+                        std::transform(j.begin(), j.end(), workspaces.begin(),
+             std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
         }
         catch (const std::exception &ex)
         {
@@ -358,11 +361,10 @@ void AbstractTimeServiceManager::updateUsers()
             {
                 json j{json::parse(rep->readAll().toStdString())};
 
+                m_users.resize(j.size());
                 using namespace std::placeholders;
-                //				std::transform(j.begin(), j.end(), m_users.begin(),
-                // std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
-                for (const auto &user : j)
-                    m_users.push_back(jsonToUserData(user));
+                std::transform(
+                    j.begin(), j.end(), m_users.begin(), std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
 
                 retCode = !j.empty();
             }
@@ -419,14 +421,14 @@ void AbstractTimeServiceManager::updateProjects()
                     return;
                 }
 
-                //				using namespace std::placeholders;
-                //				std::transform(j.begin(), j.end(), m_projects.begin(),
-                // std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
                 // I'm not sure why, but nlohmann::json tends to make everything into an array
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
-                for (const auto &project : j)
-                    m_projects.push_back(jsonToProject(project));
+
+                m_projects.resize(j.size());
+                using namespace std::placeholders;
+                std::transform(
+                    j.begin(), j.end(), m_projects.begin(), std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
 
                 retVal = !j.empty() && !j.is_null();
             }

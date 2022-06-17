@@ -101,10 +101,10 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         auto entry = (j.is_array() ? j[0] : j);
 
         auto id = entry["id"].get<QString>();
-        QString projectId;
         Project project;
         if (entry.contains("projectId") && !entry["projectId"].is_null())
         {
+            QString projectId;
             projectId = entry["projectId"].get<QString>();
             project = {projectId,
                        projectName(projectId),
