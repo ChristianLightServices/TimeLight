@@ -507,7 +507,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    get(url, true, 200, successCb, failureCb);
+    get(url, true, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -523,7 +523,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    get(url, async, 200, successCb, failureCb);
+    get(url, async, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -595,7 +595,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    post(url, body, true, 200, successCb, failureCb);
+    post(url, body, true, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -613,7 +613,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    post(url, body, async, 200, successCb, failureCb);
+    post(url, body, async, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -686,7 +686,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        const NetworkReplyCallback &successCb,
                                        const NetworkReplyCallback &failureCb)
 {
-    patch(url, body, true, 200, successCb, failureCb);
+    patch(url, body, true, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -704,7 +704,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        const NetworkReplyCallback &successCb,
                                        const NetworkReplyCallback &failureCb)
 {
-    patch(url, body, async, 200, successCb, failureCb);
+    patch(url, body, async, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -777,7 +777,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    put(url, body, true, 200, successCb, failureCb);
+    put(url, body, true, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -795,7 +795,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    put(url, body, async, 200, successCb, failureCb);
+    put(url, body, async, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -867,7 +867,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    head(url, true, 200, successCb, failureCb);
+    head(url, true, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
@@ -883,7 +883,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    head(url, async, 200, successCb, failureCb);
+    head(url, async, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
