@@ -305,6 +305,23 @@ private:
               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
 
+    void del(const QUrl &url,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             bool async,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             bool async,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+
     QString m_workspaceId;
     QByteArray m_apiKey;
 

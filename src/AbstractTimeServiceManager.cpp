@@ -949,3 +949,90 @@ void AbstractTimeServiceManager::head(const QUrl &url,
     if (done)
         delete done;
 }
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     int expectedReturnCode,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, true, expectedReturnCode, successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     bool async,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     bool async,
+                                     int expectedReturnCode,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    QNetworkRequest req{url};
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    req.setRawHeader("Accept", "application/json");
+    req.setRawHeader(authHeaderName(), apiKeyForRequests());
+
+    auto rep = m_manager.deleteResource(req);
+    m_pendingReplies.insert(rep, {successCb, failureCb});
+
+    bool *done = async ? nullptr : new bool{false};
+
+    connect(
+        rep,
+        &QNetworkReply::finished,
+        this,
+        [this, rep, expectedReturnCode, done]() {
+            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
+                [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
+                m_pendingReplies[rep].first(rep);
+            }
+            else [[unlikely]]
+            {
+                if (status == 0) [[likely]]
+                {
+                    m_isConnectedToInternet = false;
+                    emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
+                }
+                m_pendingReplies[rep].second(rep);
+            }
+
+            if (done)
+                *done = true;
+
+            m_pendingReplies.remove(rep);
+        },
+        Qt::DirectConnection);
+
+    if (!async)
+        while (!(*done))
+        {
+            qApp->processEvents();
+            qApp->sendPostedEvents();
+        }
+
+    if (done)
+        delete done;
+}
