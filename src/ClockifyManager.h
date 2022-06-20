@@ -23,6 +23,7 @@ protected:
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
+    virtual QUrl deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId);
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) final;
     virtual QUrl timeEntriesUrl(const QString &userId,
                                 const QString &workspaceId,
@@ -52,7 +53,7 @@ protected:
     virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-ddTHH:mm:ssZ"); }
     virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTimeUtc(); }
 
-    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction) final;
+    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const final;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const final;

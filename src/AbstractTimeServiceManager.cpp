@@ -188,8 +188,10 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
                 {
                     entries.resize(j.size());
                     using namespace std::placeholders;
-                                std::transform(j.begin(), j.end(), entries.begin(),
-                     std::bind(&AbstractTimeServiceManager::jsonToTimeEntry, this, _1));
+                    std::transform(j.begin(),
+                                   j.end(),
+                                   entries.begin(),
+                                   std::bind(&AbstractTimeServiceManager::jsonToTimeEntry, this, _1));
                 }
 
                 if (timeEntriesSortOrder() == Qt::AscendingOrder)
@@ -226,6 +228,14 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
     return entries;
 }
 
+void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const TimeEntry &t, bool async)
+{
+    timeEntryReq(deleteTimeEntryUrl(userId, m_workspaceId, t.id()),
+                 TimeEntryAction::DeleteTimeEntry,
+                 QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::DeleteTimeEntry).dump()),
+                 async);
+}
+
 User AbstractTimeServiceManager::getApiKeyOwner()
 {
     if (!m_ownerId.isEmpty()) [[likely]]
@@ -258,8 +268,8 @@ QVector<Workspace> AbstractTimeServiceManager::getOwnerWorkspaces()
             json j{json::parse(rep->readAll().toStdString())};
             using namespace std::placeholders;
             workspaces.resize(j.size());
-                        std::transform(j.begin(), j.end(), workspaces.begin(),
-             std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
+            std::transform(
+                j.begin(), j.end(), workspaces.begin(), std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
         }
         catch (const std::exception &ex)
         {
@@ -481,6 +491,8 @@ void AbstractTimeServiceManager::timeEntryReq(const QUrl &url,
         put(url, body, async, httpReturnCodeForVerb(verb), successCb, failureCb);
     else if (verb == HttpVerb::Head)
         head(url, async, httpReturnCodeForVerb(verb), successCb, failureCb);
+    else if (verb == HttpVerb::Delete)
+        del(url, body, async, httpReturnCodeForVerb(verb), successCb, failureCb);
 }
 
 QDateTime AbstractTimeServiceManager::jsonToDateTime(const nlohmann::json &j) const
@@ -953,29 +965,33 @@ void AbstractTimeServiceManager::head(const QUrl &url,
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    del(url, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+    del(url, body, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
                                      int expectedReturnCode,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    del(url, true, expectedReturnCode, successCb, failureCb);
+    del(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
                                      bool async,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    del(url, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+    del(url, body, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
                                      bool async,
                                      int expectedReturnCode,
                                      const NetworkReplyCallback &successCb,

@@ -10,6 +10,7 @@ TimeEntry::TimeEntry(const QString &id,
                      const QDateTime &start,
                      const QDateTime &end,
                      std::optional<bool> running,
+                     json extra,
                      QObject *parent)
     : QObject{parent},
       m_id{id},
@@ -19,6 +20,7 @@ TimeEntry::TimeEntry(const QString &id,
       m_start{start},
       m_end{end},
       m_running{running},
+      extraData{extra},
       m_isValid{true}
 {}
 
@@ -38,6 +40,7 @@ TimeEntry &TimeEntry::operator=(const TimeEntry &other)
     m_start = other.m_start;
     m_end = other.m_end;
     m_running = other.m_running;
+    extraData = other.extraData;
     m_isValid = other.m_isValid;
 
     return *this;

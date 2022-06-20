@@ -434,6 +434,14 @@ void TrayIcons::setUpTrayIcons()
 
     auto addMenuActions = [this](QMenu *menu) {
         menu->addMenu(m_quickStartMenu);
+        auto cancel = menu->addAction(tr("Cancel current job"));
+        connect(cancel, &QAction::triggered, this, [this] {
+            if (auto e = m_user.getRunningTimeEntry(); e)
+            {
+                m_user.deleteTimeEntry(*e, true);
+                updateTrayIcons();
+            }
+        });
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},

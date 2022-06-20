@@ -30,6 +30,14 @@ QUrl TimeCampManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return {baseUrl() + "/timer"};
 }
 
+QUrl TimeCampManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    Q_UNUSED(userId)
+    Q_UNUSED(workspaceId)
+    Q_UNUSED(timeEntryId)
+    return {baseUrl() + "/timer"};
+}
+
 QUrl TimeCampManager::timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     throw std::logic_error{"TimeCamp doesn't yet support fetching time entries!"};
@@ -104,6 +112,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
                          jsonToDateTime(j["start_time"]),
                          {},
                          true,
+                         {{"timer_id", j["timer_id"]}},
                          this};
     }
     catch (const std::exception &e)
@@ -125,6 +134,7 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
                          QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
                          QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
                          false,
+                         {},
                          this};
     }
     catch (const std::exception &e)
@@ -194,6 +204,10 @@ json TimeCampManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action
         return {{"action", "stop"}, {"stopped_at", dateTimeToJson(t.end())}};
     else if (action == TimeEntryAction::StartTimeEntry)
         return {{"action", "start"}, {"started_at", dateTimeToJson(t.start())}, {"task_id", t.project().id()}};
+    else if (action == TimeEntryAction::DeleteTimeEntry)
+    {
+        return {{"timer_id", t.extraData["timer_id"]}};
+    }
     else
         return {};
 }
@@ -206,7 +220,11 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
     case TimeEntryAction::StartTimeEntry:
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Post;
+    case TimeEntryAction::DeleteTimeEntry:
+        return HttpVerb::Delete;
     default:
+        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
+        Q_UNREACHABLE();
         return HttpVerb::Post;
     }
 }
@@ -219,9 +237,8 @@ int TimeCampManager::httpReturnCodeForVerb(const HttpVerb verb) const
     case HttpVerb::Patch:
     case HttpVerb::Head:
     case HttpVerb::Post:
-        return 200;
     case HttpVerb::Delete:
-        return 204;
+        return 200;
     default:
         return -1;
     }

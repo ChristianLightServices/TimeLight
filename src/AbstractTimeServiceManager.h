@@ -60,6 +60,7 @@ public:
                                       std::optional<int> pageSize,
                                       std::optional<QDateTime> start = std::nullopt,
                                       std::optional<QDateTime> end = std::nullopt);
+    void deleteTimeEntry(const QString &userId, const TimeEntry &t, bool async);
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
     User getApiKeyOwner();
@@ -121,6 +122,7 @@ protected:
         StartTimeEntry,
         GetRunningTimeEntry,
         StopTimeEntry,
+        DeleteTimeEntry,
     };
 
     // ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
@@ -134,6 +136,7 @@ protected:
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
+    virtual QUrl deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntriesUrl(const QString &userId,
                                 const QString &workspaceId,
@@ -306,17 +309,21 @@ private:
               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
 
     void del(const QUrl &url,
+             const QByteArray &body,
              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
     void del(const QUrl &url,
+             const QByteArray &body,
              int expectedReturnCode,
              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
     void del(const QUrl &url,
+             const QByteArray &body,
              bool async,
              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
     void del(const QUrl &url,
+             const QByteArray &body,
              bool async,
              int expectedReturnCode,
              const NetworkReplyCallback &successCb = s_defaultSuccessCb,

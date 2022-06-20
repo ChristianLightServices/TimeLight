@@ -29,6 +29,11 @@ QUrl ClockifyManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return timeEntriesUrl(userId, workspaceId);
 }
 
+QUrl ClockifyManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    return timeEntryUrl(userId, workspaceId, timeEntryId);
+}
+
 QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId,
                                    const QString &workspaceId,
                                    const QString &timeEntryId)
@@ -122,7 +127,7 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         else
             running = true;
 
-        return TimeEntry{id, project, project.description(), userId, start, end, running, this};
+        return TimeEntry{id, project, project.description(), userId, start, end, running, {}, this};
     }
     catch (const std::exception &e)
     {
@@ -185,8 +190,11 @@ Project ClockifyManager::jsonToProject(const nlohmann::json &j)
     }
 }
 
-json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction)
+json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action)
 {
+    if (action == TimeEntryAction::DeleteTimeEntry)
+        return {};
+
     json j;
     j["start"] = dateTimeToJson(t.start());
     if (!t.end().isNull())
@@ -207,7 +215,10 @@ AbstractTimeServiceManager::HttpVerb ClockifyManager::httpVerbForAction(const Ti
         return HttpVerb::Post;
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Patch;
+    case TimeEntryAction::DeleteTimeEntry:
+        return HttpVerb::Delete;
     default:
+        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
         Q_UNREACHABLE();
         return HttpVerb::Get;
     }

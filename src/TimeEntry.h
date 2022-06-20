@@ -25,6 +25,7 @@ public:
               const QDateTime &start,
               const QDateTime &end,
               std::optional<bool> running,
+              json extra = {},
               QObject *parent = nullptr);
     TimeEntry(const TimeEntry &that);
     TimeEntry(QObject *parent = nullptr);
@@ -43,6 +44,9 @@ public:
     bool isValid() const { return m_isValid; }
 
     TimeEntry &operator=(const TimeEntry &other);
+
+    //! Use this to store extra data about the entry (especially info about running time entries).
+    json extraData;
 
 private:
     QString m_id;

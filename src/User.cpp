@@ -48,6 +48,11 @@ void User::startTimeEntry(const QString &projectId, const QString &description, 
     m_manager->startTimeEntry(m_userId, projectId, description, start, async);
 }
 
+void User::deleteTimeEntry(const TimeEntry &t, bool async)
+{
+    m_manager->deleteTimeEntry(m_userId, t, async);
+}
+
 QVector<TimeEntry> User::getTimeEntries(std::optional<int> pageNumber,
                                         std::optional<int> pageSize,
                                         std::optional<QDateTime> start,
