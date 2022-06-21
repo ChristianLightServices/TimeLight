@@ -93,7 +93,6 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
 
         return TimeEntry{j["entry_id"].get<QString>(),
                          Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
-                         {},
                          getApiKeyOwner().userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
@@ -115,7 +114,6 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
         auto day = QDate::fromString(j["date"].get<QString>(), QStringLiteral("yyyy-MM-dd"));
         return TimeEntry{QString::number(j["id"].get<int>()),
                          Project{j["task_id"].get<QString>(), j["name"].get<QString>(), {}, this},
-                         {},
                          j["user_id"].get<QString>(),
                          QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
                          QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
