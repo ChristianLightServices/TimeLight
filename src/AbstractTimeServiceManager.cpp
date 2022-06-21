@@ -89,45 +89,6 @@ QString AbstractTimeServiceManager::userName(const QString &userId)
     return "";
 }
 
-QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
-{
-    auto now = currentDateTime();
-    auto t = getRunningTimeEntry(userId);
-    if (t)
-    {
-        t->setEnd(now);
-        timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
-                     TimeEntryAction::StopTimeEntry,
-                     QByteArray::fromStdString(timeEntryToJson(*t, TimeEntryAction::StopTimeEntry).dump()),
-                     async);
-    }
-    return now;
-}
-
-std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
-{
-    json j;
-    timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
-                 TimeEntryAction::GetRunningTimeEntry,
-                 getRunningTimeEntryPayload(),
-                 false,
-                 [&j](QNetworkReply *rep) {
-                     try
-                     {
-                         j = json::parse(rep->readAll().toStdString());
-                     }
-                     catch (...)
-                     {
-                         j = {};
-                     }
-                 });
-
-    if (j.is_null())
-        return std::nullopt;
-    else
-        return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
-}
-
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
 {
     startTimeEntry(userId, projectId, QString{}, currentDateTime(), async);
@@ -164,6 +125,45 @@ void AbstractTimeServiceManager::startTimeEntry(
                  TimeEntryAction::StartTimeEntry,
                  QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::StartTimeEntry).dump()),
                  async);
+}
+
+std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
+{
+    json j;
+    timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
+                 TimeEntryAction::GetRunningTimeEntry,
+                 getRunningTimeEntryPayload(),
+                 false,
+                 [&j](QNetworkReply *rep) {
+                     try
+                     {
+                         j = json::parse(rep->readAll().toStdString());
+                     }
+                     catch (...)
+                     {
+                         j = {};
+                     }
+                 });
+
+    if (j.is_null())
+        return std::nullopt;
+    else
+        return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
+}
+
+QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
+{
+    auto now = currentDateTime();
+    auto t = getRunningTimeEntry(userId);
+    if (t)
+    {
+        t->setEnd(now);
+        timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
+                     TimeEntryAction::StopTimeEntry,
+                     QByteArray::fromStdString(timeEntryToJson(*t, TimeEntryAction::StopTimeEntry).dump()),
+                     async);
+    }
+    return now;
 }
 
 QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &userId,

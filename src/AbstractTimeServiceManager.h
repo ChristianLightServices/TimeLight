@@ -46,13 +46,13 @@ public:
     QString projectName(const QString &projectId);
     QString userName(const QString &userId);
 
-    QDateTime stopRunningTimeEntry(const QString &userId, bool async);
-    std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
     void startTimeEntry(const QString &userId, const QString &projectId, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
     void startTimeEntry(
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+    std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
+    QDateTime stopRunningTimeEntry(const QString &userId, bool async);
     //! The time entries returned by this function will always be sorted in descending order, i.e. the most recent entry will
     //! be first.
     QVector<TimeEntry> getTimeEntries(const QString &userId,
