@@ -127,6 +127,8 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         else
             running = true;
 
+        start.setTimeSpec(Qt::UTC);
+        end.setTimeSpec(Qt::UTC);
         return TimeEntry{id, project, userId, start, end, running, {}, this};
     }
     catch (const std::exception &e)
@@ -196,9 +198,9 @@ json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action
         return {};
 
     json j;
-    j["start"] = dateTimeToJson(t.start());
+    j["start"] = dateTimeToJson(t.start().toUTC());
     if (!t.end().isNull())
-        j["end"] = dateTimeToJson(t.end());
+        j["end"] = dateTimeToJson(t.end().toUTC());
     if (!t.project().description().isEmpty())
         j["description"] = t.project().description();
     j["projectId"] = t.project().id();

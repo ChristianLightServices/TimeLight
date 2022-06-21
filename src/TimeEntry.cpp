@@ -20,7 +20,12 @@ TimeEntry::TimeEntry(const QString &id,
       m_running{running},
       extraData{extra},
       m_isValid{true}
-{}
+{
+    if (m_start.timeSpec() != Qt::LocalTime)
+        m_start = m_start.toLocalTime();
+    if (m_end.timeSpec() != Qt::LocalTime)
+        m_end = m_end.toLocalTime();
+}
 
 TimeEntry::TimeEntry(QObject *parent) : QObject{parent} {}
 
