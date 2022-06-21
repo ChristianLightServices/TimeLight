@@ -371,10 +371,11 @@ void AbstractTimeServiceManager::updateUsers()
             {
                 json j{json::parse(rep->readAll().toStdString())};
 
-                m_users.resize(j.size());
+                auto appendPos = m_users.size();
+                m_users.resize(appendPos + j.size());
                 using namespace std::placeholders;
                 std::transform(
-                    j.begin(), j.end(), m_users.begin(), std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
+                    j.begin(), j.end(), m_users.begin() + appendPos, std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
 
                 retCode = !j.empty();
             }
@@ -435,10 +436,11 @@ void AbstractTimeServiceManager::updateProjects()
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
 
-                m_projects.resize(j.size());
+                auto appendPos = m_projects.size();
+                m_projects.resize(appendPos + j.size());
                 using namespace std::placeholders;
                 std::transform(
-                    j.begin(), j.end(), m_projects.begin(), std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
+                    j.begin(), j.end(), m_projects.begin() + appendPos, std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
 
                 retVal = !j.empty() && !j.is_null();
             }
