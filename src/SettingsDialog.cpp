@@ -33,7 +33,7 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
         m_availableProjects.second.push_back(project.name());
     }
 
-    auto buttons = new QDialogButtonBox;
+    auto buttons = new QDialogButtonBox{this};
     buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
 
     m_backendPage = createBackendPage();

@@ -26,6 +26,7 @@ public:
     void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
     void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
     void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
+    void modifyTimeEntry(const TimeEntry &t, bool async = false);
     void deleteTimeEntry(const TimeEntry &t, bool async = false);
     QVector<TimeEntry> getTimeEntries(std::optional<int> pageNumber = std::nullopt,
                                       std::optional<int> pageSize = std::nullopt,

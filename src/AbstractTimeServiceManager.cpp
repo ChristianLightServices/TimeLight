@@ -166,6 +166,14 @@ QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId
     return now;
 }
 
+void AbstractTimeServiceManager::modifyTimeEntry(const QString &userId, const TimeEntry &t, bool async)
+{
+    timeEntryReq(modifyTimeEntryUrl(userId, m_workspaceId, t.id()),
+                 TimeEntryAction::ModifyTimeEntry,
+                 QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::ModifyTimeEntry).dump()),
+                 async);
+}
+
 QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &userId,
                                                               [[maybe_unused]] std::optional<int> pageNumber,
                                                               [[maybe_unused]] std::optional<int> pageSize,
@@ -372,8 +380,10 @@ void AbstractTimeServiceManager::updateUsers()
                 auto appendPos = m_users.size();
                 m_users.resize(appendPos + j.size());
                 using namespace std::placeholders;
-                std::transform(
-                    j.begin(), j.end(), m_users.begin() + appendPos, std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
+                std::transform(j.begin(),
+                               j.end(),
+                               m_users.begin() + appendPos,
+                               std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
 
                 retCode = !j.empty();
             }
@@ -437,8 +447,10 @@ void AbstractTimeServiceManager::updateProjects()
                 auto appendPos = m_projects.size();
                 m_projects.resize(appendPos + j.size());
                 using namespace std::placeholders;
-                std::transform(
-                    j.begin(), j.end(), m_projects.begin() + appendPos, std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
+                std::transform(j.begin(),
+                               j.end(),
+                               m_projects.begin() + appendPos,
+                               std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
 
                 retVal = !j.empty() && !j.is_null();
             }

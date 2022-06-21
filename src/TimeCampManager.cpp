@@ -30,6 +30,13 @@ QUrl TimeCampManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return {baseUrl() + "/timer"};
 }
 
+QUrl TimeCampManager::modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    Q_UNUSED(userId)
+    Q_UNUSED(workspaceId)
+    return {baseUrl() + "/entries"};
+}
+
 QUrl TimeCampManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     Q_UNUSED(userId)
@@ -191,10 +198,23 @@ json TimeCampManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action
         return {{"action", "stop"}, {"stopped_at", dateTimeToJson(t.end())}};
     else if (action == TimeEntryAction::StartTimeEntry)
         return {{"action", "start"}, {"started_at", dateTimeToJson(t.start())}, {"task_id", t.project().id()}};
-    else if (action == TimeEntryAction::DeleteTimeEntry)
+    else if (action == TimeEntryAction::ModifyTimeEntry)
     {
-        return {{"timer_id", t.extraData["timer_id"]}};
+        json j = {{"id", t.id()},
+                  {"start_time", t.start().time().toString(QStringLiteral("HH:mm:ss"))},
+                  {"task_id", t.project().id()},
+                  {"description", t.project().description()}};
+        if (!t.end().isNull())
+        {
+            QDateTime endTime{t.end()};
+            if (t.end().date() > t.start().date())
+                endTime = QDateTime{t.start().date().endOfDay()};
+            j["end_time"] = endTime.time().toString(QStringLiteral("HH:mm:ss"));
+        }
+        return j;
     }
+    else if (action == TimeEntryAction::DeleteTimeEntry)
+        return {{"timer_id", t.extraData["timer_id"]}};
     else
         return {};
 }
@@ -207,6 +227,8 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
     case TimeEntryAction::StartTimeEntry:
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Post;
+    case TimeEntryAction::ModifyTimeEntry:
+        return HttpVerb::Put;
     case TimeEntryAction::DeleteTimeEntry:
         return HttpVerb::Delete;
     default:
@@ -224,6 +246,7 @@ int TimeCampManager::httpReturnCodeForVerb(const HttpVerb verb) const
     case HttpVerb::Patch:
     case HttpVerb::Head:
     case HttpVerb::Post:
+    case HttpVerb::Put:
     case HttpVerb::Delete:
         return 200;
     default:

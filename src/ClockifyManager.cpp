@@ -29,6 +29,11 @@ QUrl ClockifyManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return timeEntriesUrl(userId, workspaceId);
 }
 
+QUrl ClockifyManager::modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    return timeEntryUrl(userId, workspaceId, timeEntryId);
+}
+
 QUrl ClockifyManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     return timeEntryUrl(userId, workspaceId, timeEntryId);
@@ -210,6 +215,8 @@ AbstractTimeServiceManager::HttpVerb ClockifyManager::httpVerbForAction(const Ti
         return HttpVerb::Post;
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Patch;
+    case TimeEntryAction::ModifyTimeEntry:
+        return HttpVerb::Put;
     case TimeEntryAction::DeleteTimeEntry:
         return HttpVerb::Delete;
     default:
@@ -226,6 +233,7 @@ int ClockifyManager::httpReturnCodeForVerb(const HttpVerb verb) const
     case HttpVerb::Get:
     case HttpVerb::Patch:
     case HttpVerb::Head:
+    case HttpVerb::Put:
         return 200;
     case HttpVerb::Post:
         return 201;

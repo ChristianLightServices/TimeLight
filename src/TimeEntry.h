@@ -37,6 +37,7 @@ public:
     std::optional<bool> running() const { return m_running; }
 
     void setProject(const Project &project) { m_project = project; }
+    void setStart(const QDateTime &start) { m_start = start; }
     void setEnd(const QDateTime &end) { m_end = end; }
 
     bool isValid() const { return m_isValid; }

@@ -53,6 +53,7 @@ public:
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
     std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
     QDateTime stopRunningTimeEntry(const QString &userId, bool async);
+    void modifyTimeEntry(const QString &userId, const TimeEntry &t, bool async);
     //! The time entries returned by this function will always be sorted in descending order, i.e. the most recent entry will
     //! be first.
     QVector<TimeEntry> getTimeEntries(const QString &userId,
@@ -122,6 +123,7 @@ protected:
         StartTimeEntry,
         GetRunningTimeEntry,
         StopTimeEntry,
+        ModifyTimeEntry,
         DeleteTimeEntry,
     };
 
@@ -136,6 +138,7 @@ protected:
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
+    virtual QUrl modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntriesUrl(const QString &userId,
