@@ -290,8 +290,6 @@ void AbstractTimeServiceManager::setApiKey(const QString &apiKey)
 void AbstractTimeServiceManager::setWorkspaceId(const QString &workspaceId)
 {
     // TODO: validate this
-    //	auto it = std::find_if(m_workspaces.begin(), m_workspaces.end(), [&workspaceId](Workspace &w) { return w.id() ==
-    // workspaceId; }); 	if (it != m_workspaces.end)
     m_workspaceId = workspaceId;
     m_projectsLoaded = false;
     m_usersLoaded = false;
