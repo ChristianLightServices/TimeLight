@@ -452,8 +452,13 @@ void TrayIcons::setUpTrayIcons()
         connect(cancel, &QAction::triggered, this, [this] {
             if (auto e = m_user.getRunningTimeEntry(); e)
             {
-                m_user.deleteTimeEntry(*e, true);
-                updateTrayIcons();
+                if (QMessageBox::question(nullptr,
+                                          tr("Cancel job"),
+                                          tr("Are you sure you want to cancel the current job?")) == QMessageBox::Yes)
+                {
+                    m_user.deleteTimeEntry(*e, true);
+                    updateTrayIcons();
+                }
             }
         });
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
