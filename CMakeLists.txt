@@ -98,7 +98,7 @@ set(SRC
 )
 
 set(TRANSLATIONS
-    TimeLight_en_US.ts
+	lang/TimeLight_en_US.ts
 )
 
 set(LIBRARIES
