@@ -85,11 +85,6 @@ const QFlags<AbstractTimeServiceManager::Pagination> ClockifyManager::supportedP
     return f;
 }
 
-bool ClockifyManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
-{
-    return !j.empty();
-}
-
 std::optional<TimeEntry> ClockifyManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
     auto e{jsonToTimeEntry(j)};

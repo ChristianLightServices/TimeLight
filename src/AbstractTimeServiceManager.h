@@ -162,7 +162,6 @@ protected:
     virtual int timeEntriesPaginationPageSize() const { return 50; }
     virtual int workspacesPaginationPageSize() const { return 50; }
 
-    virtual bool jsonToHasRunningTimeEntry(const json &j) = 0;
     virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToTimeEntry(const json &j) = 0;
     virtual User jsonToUser(const json &j) = 0;

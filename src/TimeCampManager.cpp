@@ -84,20 +84,6 @@ const QFlags<AbstractTimeServiceManager::Pagination> TimeCampManager::supportedP
     return {};
 }
 
-bool TimeCampManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
-{
-    try
-    {
-        auto &val = j.is_array() ? j[0] : j;
-        return j["isTimerRunning"].get<bool>();
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << "Error while parsing running time entry: " << e.what() << std::endl;
-        return false;
-    }
-}
-
 std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
     try
