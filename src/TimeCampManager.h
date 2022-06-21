@@ -14,7 +14,7 @@ public:
     virtual QString serviceName() const final { return QStringLiteral("TimeCamp"); }
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")}; }
     virtual const QFlags<Pagination> supportedPagination() const final;
-    virtual Qt::SortOrder timeEntriesSortOrder() const final { return Qt::AscendingOrder; }
+    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTime(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("Authorization"); }
@@ -43,13 +43,13 @@ protected:
     virtual Project jsonToProject(const json &j) final;
 
     virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-dd HH:mm:ss"); }
-    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTime(); }
 
     virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const final;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const final;
     virtual QByteArray getRunningTimeEntryPayload() const final { return QByteArrayLiteral(R"({"action":"status"})"); }
+    virtual Qt::SortOrder timeEntriesSortOrder() const final { return Qt::AscendingOrder; }
 };
 
 #endif // TIMECAMPMANAGER_H
