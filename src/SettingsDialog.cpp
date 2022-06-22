@@ -65,6 +65,8 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
             }
         });
     }
+
+    resize(600, -1);
 }
 
 void SettingsDialog::switchToPage(Pages page)
