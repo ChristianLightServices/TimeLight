@@ -144,7 +144,12 @@ User TimeCampManager::jsonToUser(const nlohmann::json &j)
 {
     try
     {
-        return User{j["user_id"].get<QString>(), j["display_name"].get<QString>(), j["root_group_id"].get<QString>(), this};
+        return User{j["user_id"].get<QString>(),
+                    j["display_name"].get<QString>(),
+                    j["root_group_id"].get<QString>(),
+                    {},
+                    j["email"].get<QString>(),
+                    this};
     }
     catch (const std::exception &e)
     {

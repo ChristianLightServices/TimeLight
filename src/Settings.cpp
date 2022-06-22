@@ -205,6 +205,15 @@ void Settings::setWeekHours(const double hours)
     m_settingsDirty = true;
 }
 
+void Settings::setDeveloperMode(const bool state)
+{
+    if (state == m_developerMode)
+        return;
+    m_developerMode = state;
+    emit developerModeChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::save()
 {
     QSettings settings;

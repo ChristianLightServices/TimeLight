@@ -143,7 +143,12 @@ User ClockifyManager::jsonToUser(const nlohmann::json &j)
 {
     try
     {
-        return User{j["id"].get<QString>(), j["name"].get<QString>(), j["defaultWorkspace"].get<QString>(), this};
+        return User{j["id"].get<QString>(),
+                    j["name"].get<QString>(),
+                    j["defaultWorkspace"].get<QString>(),
+                    j["profilePicture"].get<QString>(),
+                    j["email"].get<QString>(),
+                    this};
     }
     catch (const std::exception &e)
     {

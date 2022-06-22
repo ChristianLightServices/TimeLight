@@ -6,11 +6,15 @@
 User::User(const QString &userId,
            const QString &name,
            const QString &workspaceId,
+           const QString &avatarUrl,
+           const QString &email,
            AbstractTimeServiceManager *parent)
     : QObject{parent},
       m_userId{userId},
       m_name{name},
       m_workspaceId{workspaceId},
+      m_avatarUrl{avatarUrl},
+      m_email{email},
       m_manager{parent}
 {}
 
@@ -78,6 +82,8 @@ User &User::operator=(const User &other)
     m_userId = other.m_userId;
     m_name = other.m_name;
     m_workspaceId = other.m_workspaceId;
+    m_avatarUrl = other.m_avatarUrl;
+    m_email = other.m_email;
     m_manager = other.m_manager;
     m_isValid = other.m_isValid;
 

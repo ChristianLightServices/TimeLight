@@ -17,6 +17,7 @@
 #include <SingleApplication>
 
 #include "ClockifyManager.h"
+#include "DeveloperTools.h"
 #include "JsonHelper.h"
 #include "ModifyJobDialog.h"
 #include "Project.h"
@@ -467,6 +468,11 @@ void TrayIcons::setUpTrayIcons()
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
                               {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
+            d.exec();
+        });
+        if (Settings::instance()->developerMode())
+        connect(menu->addAction(tr("Developer tools")), &QAction::triggered, this, [this] {
+            DeveloperTools d{m_manager};
             d.exec();
         });
         connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),

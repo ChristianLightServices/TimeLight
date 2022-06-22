@@ -33,6 +33,7 @@ public:
     QuickStartProjectOptions quickStartProjectsLoading() const { return m_quickStartProjectsLoading; }
     bool alertOnTimeUp() const { return m_alertOnTimeUp; }
     double weekHours() const { return m_weekHours; }
+    bool developerMode() const { return m_developerMode; }
 
     static void init();
     static Settings *instance() { return s_instance; }
@@ -53,6 +54,7 @@ public slots:
     void setQuickStartProjectsLoading(const Settings::QuickStartProjectOptions &option);
     void setAlertOnTimeUp(const bool alert);
     void setWeekHours(const double hours);
+    void setDeveloperMode(const bool state);
 
 signals:
     void timeServiceChanged();
@@ -70,6 +72,7 @@ signals:
     void quickStartProjectsLoadingChanged();
     void alertOnTimeUpChanged();
     void weekHoursChanged();
+    void developerModeChanged();
 
 private:
     explicit Settings(QObject *parent = nullptr);
@@ -100,6 +103,8 @@ private:
 
     double m_weekHours;
     int m_eventLoopInterval;
+
+    bool m_developerMode;
 };
 
 #endif // SETTINGS_H

@@ -75,6 +75,8 @@ set(SRC
 
     src/AbstractTimeServiceManager.cpp
     src/AbstractTimeServiceManager.h
+    src/DeveloperTools.cpp
+    src/DeveloperTools.h
     src/JsonHelper.h
     src/main.cpp
     src/ModifyJobDialog.cpp

@@ -16,7 +16,9 @@ public:
     explicit User(const QString &userId,
                   const QString &name,
                   const QString &workspaceId,
-                  AbstractTimeServiceManager *parent = nullptr);
+                  const QString &avatarUrl,
+                  const QString &email,
+                  AbstractTimeServiceManager *parent);
     User(const User &that);
     User(QObject *parent = nullptr);
 
@@ -38,6 +40,8 @@ public:
     QString userId() const { return m_userId; }
     QString name() const { return m_name; }
     QString workspaceId() const { return m_workspaceId; }
+    QString avatarUrl() const { return m_avatarUrl; }
+    QString email() const { return m_email; }
     bool isValid() const { return m_isValid; }
 
 signals:
@@ -46,6 +50,8 @@ private:
     QString m_userId;
     QString m_workspaceId;
     QString m_name;
+    QString m_avatarUrl;
+    QString m_email;
 
     bool m_isValid{true};
 
