@@ -246,10 +246,6 @@ void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const Ti
 
 User AbstractTimeServiceManager::getApiKeyOwner()
 {
-    if (!m_ownerId.isEmpty()) [[likely]]
-        return User{m_ownerId, {}, m_workspaceId, this};
-    else
-    {
         json j;
         get(currentUserUrl(), false, [&j](QNetworkReply *rep) {
             try
@@ -263,7 +259,6 @@ User AbstractTimeServiceManager::getApiKeyOwner()
         });
 
         return j.empty() ? User{this} : jsonToUser(j);
-    }
 }
 
 QVector<Workspace> AbstractTimeServiceManager::getOwnerWorkspaces()

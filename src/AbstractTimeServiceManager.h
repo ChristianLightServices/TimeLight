@@ -334,8 +334,6 @@ private:
     QString m_workspaceId;
     QByteArray m_apiKey;
 
-    QString m_ownerId;
-
     QVector<Project> m_projects;
 
     // this is ordered as <id, name>
