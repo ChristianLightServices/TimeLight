@@ -49,9 +49,7 @@ Controller.prototype.checkForExistingInstall = function(text)
 
 Controller.prototype.PerformInstallationPageCallback = function()
 {
-    let processName = (systemInfo.productType === "windows" ? "TimeLight.exe" : "TimeLight");
-    if (installer.isUninstaller() && installer.isProcessRunning(processName))
-        installer.killProcess(processName);
+    installer.killProcess("@TargetDir@/bin/" + (systemInfo.productType === "windows" ? "TimeLight.exe" : "TimeLight"));
 }
 
 Controller.prototype.FinishedPageCallback = function()
