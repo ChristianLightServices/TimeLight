@@ -55,6 +55,7 @@ void Settings::load()
         m_quickStartProjectsLoading = QuickStartProjectOptions::AllProjects;
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
     m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
+    m_developerMode = settings.value(QStringLiteral("developerMode"), false).toBool();
     settings.endGroup();
 }
 
@@ -238,5 +239,6 @@ void Settings::save()
     settings.setValue(QStringLiteral("quickStartProjectsLoading"), static_cast<unsigned int>(m_quickStartProjectsLoading));
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);
     settings.setValue(QStringLiteral("weekHours"), m_weekHours);
+    settings.setValue(QStringLiteral("developerMode"), m_developerMode);
     settings.endGroup();
 }
