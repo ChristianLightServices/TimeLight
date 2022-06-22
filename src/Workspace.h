@@ -16,6 +16,7 @@ public:
     {}
 
     Workspace &operator=(const Workspace &other);
+    bool operator==(const Workspace &other) const;
 
     QString id() const { return m_id; }
     QString name() const { return m_name; }

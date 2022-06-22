@@ -115,6 +115,7 @@ QWidget *SettingsDialog::createBackendPage()
     auto workspaces{new QComboBox{backendPage}};
     for (const auto &workspace : m_manager->workspaces())
         workspaces->addItem(workspace.name(), workspace.id());
+    workspaces->setCurrentIndex(m_manager->workspaces().indexOf(m_manager->currentWorkspace()));
 
     layout->addWidget(new QLabel{tr("Workspace to track time on"), backendPage}, 2, 0);
     layout->addWidget(workspaces, 2, 1, 1, 2);
@@ -171,8 +172,9 @@ QWidget *SettingsDialog::createBackendPage()
         }
     });
 
-    connect(workspaces, &QComboBox::currentIndexChanged, workspaces, [workspaces](int) {
+    connect(workspaces, &QComboBox::currentIndexChanged, workspaces, [this, workspaces](int) {
         Settings::instance()->setWorkspaceId(workspaces->currentData().toString());
+        m_manager->setWorkspaceId(workspaces->currentData().toString());
     });
 
     return backendPage;
