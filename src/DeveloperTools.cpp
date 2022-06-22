@@ -26,7 +26,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     auto userGroupLayout = new QGridLayout{userGroup};
 
     auto image = new QLabel{userGroup};
-    image->setPixmap(QPixmap{64, 64});
+    image->setPixmap(QPixmap{});
     if (user.avatarUrl().isEmpty())
         image->setVisible(false);
     else
@@ -39,7 +39,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
             if (p.isNull())
                 image->setVisible(false);
             else
-                image->setPixmap(p.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                image->setPixmap(p.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             m->deleteLater();
             rep->deleteLater();
         });
