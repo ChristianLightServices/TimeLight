@@ -8,7 +8,10 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QTableWidget>
+#include <QTableView>
 #include <QPixmap>
+#include <QHeaderView>
 #include <QVBoxLayout>
 
 #include "User.h"
@@ -19,6 +22,10 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     : QDialog{parent}
 {
     auto user = manager->getApiKeyOwner();
+    auto projects = manager->projects();
+    auto workspace = manager->currentWorkspace();
+
+    resize(700, 600);
 
     auto layout = new QVBoxLayout{this};
 
@@ -56,7 +63,32 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     userGroupLayout->addWidget(new QLabel{user.email()}, 1, 4);
     userGroupLayout->addWidget(userId, 2, 4);
 
-    layout->addWidget(userGroup);
+    auto workspaceGroup = new QGroupBox{tr("Workspace"), this};
+    auto workspaceGroupLayout = new QGridLayout{workspaceGroup};
+
+    auto workspaceId = new QLineEdit{workspace.id(), workspaceGroup};
+    workspaceId->setReadOnly(true);
+
+    workspaceGroupLayout->addWidget(new QLabel{tr("Name:")}, 0, 0);
+    workspaceGroupLayout->addWidget(new QLabel{tr("Workspace ID:")}, 1, 0);
+    workspaceGroupLayout->addWidget(new QLabel{workspace.name()}, 0, 1);
+    workspaceGroupLayout->addWidget(workspaceId, 1, 1);
+
+    auto projectGroup = new QGroupBox{tr("Projects"), this};
+    auto projectGroupLayout = new QGridLayout{projectGroup};
+
+    auto projectTable = new QTableWidget{static_cast<int>(projects.count()), 2, workspaceGroup};
+    for (int i = 0; i < projects.size(); ++i)
+    {
+        projectTable->setItem(i, 0, new QTableWidgetItem{projects[i].name()});
+        projectTable->setItem(i, 1, new QTableWidgetItem{projects[i].id()});
+    }
+    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID"));
+    projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
+    projectTable->verticalHeader()->setVisible(false);
+    projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    projectGroupLayout->addWidget(projectTable, 0, 0);
 
     auto buttons = new QDialogButtonBox{this};
     connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this](bool) {
@@ -72,6 +104,9 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     });
     buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
 
+    layout->addWidget(userGroup);
+    layout->addWidget(workspaceGroup);
+    layout->addWidget(projectGroup);
     layout->addWidget(buttons);
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
