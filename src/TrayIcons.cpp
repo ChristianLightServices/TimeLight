@@ -18,6 +18,7 @@
 
 #include "ClockifyManager.h"
 #include "JsonHelper.h"
+#include "ModifyJobDialog.h"
 #include "Project.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
@@ -434,6 +435,32 @@ void TrayIcons::setUpTrayIcons()
 
     auto addMenuActions = [this](QMenu *menu) {
         menu->addMenu(m_quickStartMenu);
+        auto modifyJob = menu->addAction(tr("Modify current job"));
+        connect(modifyJob, &QAction::triggered, this, [this] {
+            if (auto e = m_user.getRunningTimeEntry(); e)
+            {
+                auto dialog = new ModifyJobDialog{m_manager, *e};
+                dialog->show();
+                connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
+                    if (result == QDialog::Accepted)
+                        m_user.modifyTimeEntry(std::move(dialog->entry()), true);
+                    dialog->deleteLater();
+                });
+            }
+        });
+        auto cancel = menu->addAction(tr("Cancel current job"));
+        connect(cancel, &QAction::triggered, this, [this] {
+            if (auto e = m_user.getRunningTimeEntry(); e)
+            {
+                if (QMessageBox::question(nullptr,
+                                          tr("Cancel job"),
+                                          tr("Are you sure you want to cancel the current job?")) == QMessageBox::Yes)
+                {
+                    m_user.deleteTimeEntry(*e, true);
+                    updateTrayIcons();
+                }
+            }
+        });
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},

@@ -76,7 +76,9 @@ set(SRC
     src/AbstractTimeServiceManager.cpp
     src/AbstractTimeServiceManager.h
     src/JsonHelper.h
-    src/main.cpp
+	src/main.cpp
+	src/ModifyJobDialog.cpp
+	src/ModifyJobDialog.h
     src/Project.cpp
     src/Project.h
     src/Settings.cpp
@@ -96,7 +98,7 @@ set(SRC
 )
 
 set(TRANSLATIONS
-    TimeLight_en_US.ts
+	lang/TimeLight_en_US.ts
 )
 
 set(LIBRARIES

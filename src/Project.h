@@ -21,7 +21,10 @@ public:
     QString name() const { return m_name; }
     QString description() const { return m_description; }
 
+    void setDescription(const QString &description) { m_description = description; }
+
     Project &operator=(const Project &other);
+    bool operator==(const Project &other) const;
 
 private:
     QString m_id;

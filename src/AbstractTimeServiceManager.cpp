@@ -89,45 +89,6 @@ QString AbstractTimeServiceManager::userName(const QString &userId)
     return "";
 }
 
-QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
-{
-    auto now = currentDateTime();
-    auto t = getRunningTimeEntry(userId);
-    if (t)
-    {
-        t->setEnd(now);
-        timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
-                     TimeEntryAction::StopTimeEntry,
-                     QByteArray::fromStdString(timeEntryToJson(*t, TimeEntryAction::StopTimeEntry).dump()),
-                     async);
-    }
-    return now;
-}
-
-std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
-{
-    json j;
-    timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
-                 TimeEntryAction::GetRunningTimeEntry,
-                 getRunningTimeEntryPayload(),
-                 false,
-                 [&j](QNetworkReply *rep) {
-                     try
-                     {
-                         j = json::parse(rep->readAll().toStdString());
-                     }
-                     catch (...)
-                     {
-                         j = {};
-                     }
-                 });
-
-    if (j.is_null())
-        return std::nullopt;
-    else
-        return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
-}
-
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
 {
     startTimeEntry(userId, projectId, QString{}, currentDateTime(), async);
@@ -158,11 +119,58 @@ void AbstractTimeServiceManager::startTimeEntry(
     if (it != m_projects.end())
         p = *it;
     else
-        p = Project{projectId, projectName(projectId)};
-    TimeEntry t{{}, p, description, userId, start, {}, {}};
+        p = Project{projectId, projectName(projectId), description};
+    TimeEntry t{{}, p, userId, start, {}, {}};
     timeEntryReq(startTimeEntryUrl(userId, m_workspaceId),
                  TimeEntryAction::StartTimeEntry,
                  QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::StartTimeEntry).dump()),
+                 async);
+}
+
+std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const QString &userId)
+{
+    json j;
+    timeEntryReq(runningTimeEntryUrl(userId, m_workspaceId),
+                 TimeEntryAction::GetRunningTimeEntry,
+                 getRunningTimeEntryPayload(),
+                 false,
+                 [&j](QNetworkReply *rep) {
+                     try
+                     {
+                         j = json::parse(rep->readAll().toStdString());
+                     }
+                     catch (...)
+                     {
+                         j = {};
+                     }
+                 });
+
+    if (j.is_null())
+        return std::nullopt;
+    else
+        return jsonToRunningTimeEntry(j.is_array() ? j[0] : j);
+}
+
+QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
+{
+    auto now = currentDateTime();
+    auto t = getRunningTimeEntry(userId);
+    if (t)
+    {
+        t->setEnd(now);
+        timeEntryReq(stopTimeEntryUrl(userId, m_workspaceId),
+                     TimeEntryAction::StopTimeEntry,
+                     QByteArray::fromStdString(timeEntryToJson(*t, TimeEntryAction::StopTimeEntry).dump()),
+                     async);
+    }
+    return now;
+}
+
+void AbstractTimeServiceManager::modifyTimeEntry(const QString &userId, const TimeEntry &t, bool async)
+{
+    timeEntryReq(modifyTimeEntryUrl(userId, m_workspaceId, t.id()),
+                 TimeEntryAction::ModifyTimeEntry,
+                 QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::ModifyTimeEntry).dump()),
                  async);
 }
 
@@ -185,8 +193,14 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
                 if (!j.is_null() && !j[0].is_null())
-                    for (const auto &entry : j)
-                        entries.push_back(jsonToTimeEntry(entry));
+                {
+                    entries.resize(j.size());
+                    using namespace std::placeholders;
+                    std::transform(j.begin(),
+                                   j.end(),
+                                   entries.begin(),
+                                   std::bind(&AbstractTimeServiceManager::jsonToTimeEntry, this, _1));
+                }
 
                 if (timeEntriesSortOrder() == Qt::AscendingOrder)
                     std::reverse(entries.begin(), entries.end());
@@ -222,6 +236,14 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
     return entries;
 }
 
+void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const TimeEntry &t, bool async)
+{
+    timeEntryReq(deleteTimeEntryUrl(userId, m_workspaceId, t.id()),
+                 TimeEntryAction::DeleteTimeEntry,
+                 QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::DeleteTimeEntry).dump()),
+                 async);
+}
+
 User AbstractTimeServiceManager::getApiKeyOwner()
 {
     if (!m_ownerId.isEmpty()) [[likely]]
@@ -253,10 +275,9 @@ QVector<Workspace> AbstractTimeServiceManager::getOwnerWorkspaces()
         {
             json j{json::parse(rep->readAll().toStdString())};
             using namespace std::placeholders;
-            //			std::transform(j.begin(), j.end(), workspaces.begin(),
-            // std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
-            for (const auto &workspace : j)
-                workspaces.push_back(jsonToWorkspace(workspace));
+            workspaces.resize(j.size());
+            std::transform(
+                j.begin(), j.end(), workspaces.begin(), std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
         }
         catch (const std::exception &ex)
         {
@@ -277,8 +298,6 @@ void AbstractTimeServiceManager::setApiKey(const QString &apiKey)
 void AbstractTimeServiceManager::setWorkspaceId(const QString &workspaceId)
 {
     // TODO: validate this
-    //	auto it = std::find_if(m_workspaces.begin(), m_workspaces.end(), [&workspaceId](Workspace &w) { return w.id() ==
-    // workspaceId; }); 	if (it != m_workspaces.end)
     m_workspaceId = workspaceId;
     m_projectsLoaded = false;
     m_usersLoaded = false;
@@ -358,11 +377,13 @@ void AbstractTimeServiceManager::updateUsers()
             {
                 json j{json::parse(rep->readAll().toStdString())};
 
+                auto appendPos = m_users.size();
+                m_users.resize(appendPos + j.size());
                 using namespace std::placeholders;
-                //				std::transform(j.begin(), j.end(), m_users.begin(),
-                // std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
-                for (const auto &user : j)
-                    m_users.push_back(jsonToUserData(user));
+                std::transform(j.begin(),
+                               j.end(),
+                               m_users.begin() + appendPos,
+                               std::bind(&AbstractTimeServiceManager::jsonToUserData, this, _1));
 
                 retCode = !j.empty();
             }
@@ -419,14 +440,17 @@ void AbstractTimeServiceManager::updateProjects()
                     return;
                 }
 
-                //				using namespace std::placeholders;
-                //				std::transform(j.begin(), j.end(), m_projects.begin(),
-                // std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
                 // I'm not sure why, but nlohmann::json tends to make everything into an array
                 if (j.is_array() && j[0].is_array())
                     j = j[0];
-                for (const auto &project : j)
-                    m_projects.push_back(jsonToProject(project));
+
+                auto appendPos = m_projects.size();
+                m_projects.resize(appendPos + j.size());
+                using namespace std::placeholders;
+                std::transform(j.begin(),
+                               j.end(),
+                               m_projects.begin() + appendPos,
+                               std::bind(&AbstractTimeServiceManager::jsonToProject, this, _1));
 
                 retVal = !j.empty() && !j.is_null();
             }
@@ -479,6 +503,8 @@ void AbstractTimeServiceManager::timeEntryReq(const QUrl &url,
         put(url, body, async, httpReturnCodeForVerb(verb), successCb, failureCb);
     else if (verb == HttpVerb::Head)
         head(url, async, httpReturnCodeForVerb(verb), successCb, failureCb);
+    else if (verb == HttpVerb::Delete)
+        del(url, body, async, httpReturnCodeForVerb(verb), successCb, failureCb);
 }
 
 QDateTime AbstractTimeServiceManager::jsonToDateTime(const nlohmann::json &j) const
@@ -507,7 +533,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    get(url, true, 200, successCb, failureCb);
+    get(url, true, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -523,7 +549,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    get(url, async, 200, successCb, failureCb);
+    get(url, async, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -595,7 +621,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    post(url, body, true, 200, successCb, failureCb);
+    post(url, body, true, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -613,7 +639,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    post(url, body, async, 200, successCb, failureCb);
+    post(url, body, async, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -686,7 +712,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        const NetworkReplyCallback &successCb,
                                        const NetworkReplyCallback &failureCb)
 {
-    patch(url, body, true, 200, successCb, failureCb);
+    patch(url, body, true, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -704,7 +730,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        const NetworkReplyCallback &successCb,
                                        const NetworkReplyCallback &failureCb)
 {
-    patch(url, body, async, 200, successCb, failureCb);
+    patch(url, body, async, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -777,7 +803,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    put(url, body, true, 200, successCb, failureCb);
+    put(url, body, true, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -795,7 +821,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      const NetworkReplyCallback &successCb,
                                      const NetworkReplyCallback &failureCb)
 {
-    put(url, body, async, 200, successCb, failureCb);
+    put(url, body, async, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -867,7 +893,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    head(url, true, 200, successCb, failureCb);
+    head(url, true, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
@@ -883,7 +909,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       const NetworkReplyCallback &successCb,
                                       const NetworkReplyCallback &failureCb)
 {
-    head(url, async, 200, successCb, failureCb);
+    head(url, async, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
@@ -898,6 +924,97 @@ void AbstractTimeServiceManager::head(const QUrl &url,
     req.setRawHeader(authHeaderName(), apiKeyForRequests());
 
     auto rep = m_manager.head(req);
+    m_pendingReplies.insert(rep, {successCb, failureCb});
+
+    bool *done = async ? nullptr : new bool{false};
+
+    connect(
+        rep,
+        &QNetworkReply::finished,
+        this,
+        [this, rep, expectedReturnCode, done]() {
+            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
+                [[likely]]
+            {
+                if (m_isRatelimited)
+                {
+                    m_isRatelimited = false;
+                    emit ratelimited(false);
+                }
+                m_pendingReplies[rep].first(rep);
+            }
+            else [[unlikely]]
+            {
+                if (status == 0) [[likely]]
+                {
+                    m_isConnectedToInternet = false;
+                    emit internetConnectionChanged(false);
+                }
+                else if (status == 429)
+                {
+                    m_isRatelimited = true;
+                    emit ratelimited(true);
+                }
+                m_pendingReplies[rep].second(rep);
+            }
+
+            if (done)
+                *done = true;
+
+            m_pendingReplies.remove(rep);
+        },
+        Qt::DirectConnection);
+
+    if (!async)
+        while (!(*done))
+        {
+            qApp->processEvents();
+            qApp->sendPostedEvents();
+        }
+
+    if (done)
+        delete done;
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, body, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
+                                     int expectedReturnCode,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, body, true, expectedReturnCode, successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
+                                     bool async,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    del(url, body, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::del(const QUrl &url,
+                                     const QByteArray &body,
+                                     bool async,
+                                     int expectedReturnCode,
+                                     const NetworkReplyCallback &successCb,
+                                     const NetworkReplyCallback &failureCb)
+{
+    QNetworkRequest req{url};
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    req.setRawHeader("Accept", "application/json");
+    req.setRawHeader(authHeaderName(), apiKeyForRequests());
+
+    auto rep = m_manager.deleteResource(req);
     m_pendingReplies.insert(rep, {successCb, failureCb});
 
     bool *done = async ? nullptr : new bool{false};

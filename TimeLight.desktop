@@ -6,5 +6,5 @@ Comment=A button for controlling time tracker services from your system tray.
 GenericName=TimeLight
 Terminal=false
 Type=Application
-StartupNotify=true
+StartupNotify=false
 Categories=Qt;Network;

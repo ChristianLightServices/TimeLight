@@ -2,7 +2,6 @@
 #define JSONHELPER_H
 
 #include <QByteArray>
-#include <QDateTime>
 #include <QString>
 
 #include <memory>

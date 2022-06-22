@@ -30,6 +30,21 @@ QUrl TimeCampManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return {baseUrl() + "/timer"};
 }
 
+QUrl TimeCampManager::modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    Q_UNUSED(userId)
+    Q_UNUSED(workspaceId)
+    return {baseUrl() + "/entries"};
+}
+
+QUrl TimeCampManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    Q_UNUSED(userId)
+    Q_UNUSED(workspaceId)
+    Q_UNUSED(timeEntryId)
+    return {baseUrl() + "/timer"};
+}
+
 QUrl TimeCampManager::timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     throw std::logic_error{"TimeCamp doesn't yet support fetching time entries!"};
@@ -76,20 +91,6 @@ const QFlags<AbstractTimeServiceManager::Pagination> TimeCampManager::supportedP
     return {};
 }
 
-bool TimeCampManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
-{
-    try
-    {
-        auto &val = j.is_array() ? j[0] : j;
-        return j["isTimerRunning"].get<bool>();
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << "Error while parsing running time entry: " << e.what() << std::endl;
-        return false;
-    }
-}
-
 std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
     try
@@ -99,11 +100,11 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
 
         return TimeEntry{j["entry_id"].get<QString>(),
                          Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
-                         {},
                          getApiKeyOwner().userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
                          true,
+                         {{"timer_id", j["timer_id"]}},
                          this};
     }
     catch (const std::exception &e)
@@ -118,14 +119,18 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
     try
     {
         auto day = QDate::fromString(j["date"].get<QString>(), QStringLiteral("yyyy-MM-dd"));
-        return TimeEntry{QString::number(j["id"].get<int>()),
-                         Project{j["task_id"].get<QString>(), j["name"].get<QString>(), {}, this},
-                         {},
-                         j["user_id"].get<QString>(),
-                         QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
-                         QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss"))},
-                         false,
-                         this};
+        return TimeEntry{
+            QString::number(j["id"].get<int>()),
+            Project{j["task_id"].get<QString>(),
+                    j["name"].get<QString>(),
+                    j.contains("description") ? j["description"].get<QString>() : QString{},
+                    this},
+            j["user_id"].get<QString>(),
+            QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss")), Qt::LocalTime},
+            QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss")), Qt::LocalTime},
+            false,
+            {},
+            this};
     }
     catch (const std::exception &e)
     {
@@ -193,9 +198,24 @@ json TimeCampManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action
     if (action == TimeEntryAction::StopTimeEntry)
         return {{"action", "stop"}, {"stopped_at", dateTimeToJson(t.end())}};
     else if (action == TimeEntryAction::StartTimeEntry)
-        return {{"action", "start"},
-                //            {"started_at", dateTimeToJson(t.start())},
-                {"task_id", t.project().id()}};
+        return {{"action", "start"}, {"started_at", dateTimeToJson(t.start())}, {"task_id", t.project().id()}};
+    else if (action == TimeEntryAction::ModifyTimeEntry)
+    {
+        json j = {{"id", t.id()},
+                  {"start_time", t.start().time().toString(QStringLiteral("HH:mm:ss"))},
+                  {"task_id", t.project().id()},
+                  {"description", t.project().description()}};
+        if (!t.end().isNull())
+        {
+            QDateTime endTime{t.end()};
+            if (t.end().date() > t.start().date())
+                endTime = QDateTime{t.start().date().endOfDay()};
+            j["end_time"] = endTime.time().toString(QStringLiteral("HH:mm:ss"));
+        }
+        return j;
+    }
+    else if (action == TimeEntryAction::DeleteTimeEntry)
+        return {{"timer_id", t.extraData["timer_id"]}};
     else
         return {};
 }
@@ -208,13 +228,29 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
     case TimeEntryAction::StartTimeEntry:
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Post;
+    case TimeEntryAction::ModifyTimeEntry:
+        return HttpVerb::Put;
+    case TimeEntryAction::DeleteTimeEntry:
+        return HttpVerb::Delete;
     default:
+        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
+        Q_UNREACHABLE();
         return HttpVerb::Post;
     }
 }
 
 int TimeCampManager::httpReturnCodeForVerb(const HttpVerb verb) const
 {
-    // NOTE: if DELETE methods are ever implemented, DELETE returns 204
-    return 200;
+    switch (verb)
+    {
+    case HttpVerb::Get:
+    case HttpVerb::Patch:
+    case HttpVerb::Head:
+    case HttpVerb::Post:
+    case HttpVerb::Put:
+    case HttpVerb::Delete:
+        return 200;
+    default:
+        return -1;
+    }
 }

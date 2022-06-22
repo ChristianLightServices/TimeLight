@@ -14,7 +14,7 @@ public:
     virtual QString serviceName() const final { return QStringLiteral("Clockify"); }
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://clockify.me/tracker")}; }
     virtual const QFlags<Pagination> supportedPagination() const final;
-    virtual Qt::SortOrder timeEntriesSortOrder() const final { return Qt::DescendingOrder; }
+    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTimeUtc(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("X-Api-Key"); }
@@ -23,6 +23,8 @@ protected:
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
+    virtual QUrl modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) final;
+    virtual QUrl deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) final;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) final;
     virtual QUrl timeEntriesUrl(const QString &userId,
                                 const QString &workspaceId,
@@ -41,7 +43,6 @@ protected:
     virtual const QString usersPageHeaderName() const final { return QStringLiteral("page"); }
     virtual const QString timeEntriesPageHeaderName() const final { return QStringLiteral("page"); }
 
-    virtual bool jsonToHasRunningTimeEntry(const json &j) final;
     virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) final;
     virtual TimeEntry jsonToTimeEntry(const json &j) final;
     virtual User jsonToUser(const json &j) final;
@@ -50,12 +51,12 @@ protected:
     virtual Project jsonToProject(const json &j) final;
 
     virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-ddTHH:mm:ssZ"); }
-    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTimeUtc(); }
 
-    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction) final;
+    virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const final;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const final;
+    virtual Qt::SortOrder timeEntriesSortOrder() const final { return Qt::DescendingOrder; }
 };
 
 #endif // CLOCKIFYMANAGER_H

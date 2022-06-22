@@ -42,7 +42,7 @@ void Settings::load()
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("app"));
-    m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 1000).toInt();
+    m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 3000).toInt();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
     m_quickStartProjectsLoading =
         static_cast<QuickStartProjectOptions>(settings

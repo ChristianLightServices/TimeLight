@@ -29,6 +29,16 @@ QUrl ClockifyManager::stopTimeEntryUrl(const QString &userId, const QString &wor
     return timeEntriesUrl(userId, workspaceId);
 }
 
+QUrl ClockifyManager::modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    return timeEntryUrl(userId, workspaceId, timeEntryId);
+}
+
+QUrl ClockifyManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
+{
+    return timeEntryUrl(userId, workspaceId, timeEntryId);
+}
+
 QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId,
                                    const QString &workspaceId,
                                    const QString &timeEntryId)
@@ -80,11 +90,6 @@ const QFlags<AbstractTimeServiceManager::Pagination> ClockifyManager::supportedP
     return f;
 }
 
-bool ClockifyManager::jsonToHasRunningTimeEntry(const nlohmann::json &j)
-{
-    return !j.empty();
-}
-
 std::optional<TimeEntry> ClockifyManager::jsonToRunningTimeEntry(const nlohmann::json &j)
 {
     auto e{jsonToTimeEntry(j)};
@@ -101,10 +106,10 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         auto entry = (j.is_array() ? j[0] : j);
 
         auto id = entry["id"].get<QString>();
-        QString projectId;
         Project project;
         if (entry.contains("projectId") && !entry["projectId"].is_null())
         {
+            QString projectId;
             projectId = entry["projectId"].get<QString>();
             project = {projectId,
                        projectName(projectId),
@@ -122,7 +127,9 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         else
             running = true;
 
-        return TimeEntry{id, project, project.description(), userId, start, end, running, this};
+        start.setTimeSpec(Qt::UTC);
+        end.setTimeSpec(Qt::UTC);
+        return TimeEntry{id, project, userId, start, end, running, {}, this};
     }
     catch (const std::exception &e)
     {
@@ -185,14 +192,17 @@ Project ClockifyManager::jsonToProject(const nlohmann::json &j)
     }
 }
 
-json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction)
+json ClockifyManager::timeEntryToJson(const TimeEntry &t, TimeEntryAction action)
 {
+    if (action == TimeEntryAction::DeleteTimeEntry)
+        return {};
+
     json j;
-    j["start"] = dateTimeToJson(t.start());
+    j["start"] = dateTimeToJson(t.start().toUTC());
     if (!t.end().isNull())
-        j["end"] = dateTimeToJson(t.end());
-    if (!t.description().isEmpty())
-        j["description"] = t.description();
+        j["end"] = dateTimeToJson(t.end().toUTC());
+    if (!t.project().description().isEmpty())
+        j["description"] = t.project().description();
     j["projectId"] = t.project().id();
     return j;
 }
@@ -207,7 +217,12 @@ AbstractTimeServiceManager::HttpVerb ClockifyManager::httpVerbForAction(const Ti
         return HttpVerb::Post;
     case TimeEntryAction::StopTimeEntry:
         return HttpVerb::Patch;
+    case TimeEntryAction::ModifyTimeEntry:
+        return HttpVerb::Put;
+    case TimeEntryAction::DeleteTimeEntry:
+        return HttpVerb::Delete;
     default:
+        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
         Q_UNREACHABLE();
         return HttpVerb::Get;
     }
@@ -220,9 +235,12 @@ int ClockifyManager::httpReturnCodeForVerb(const HttpVerb verb) const
     case HttpVerb::Get:
     case HttpVerb::Patch:
     case HttpVerb::Head:
+    case HttpVerb::Put:
         return 200;
     case HttpVerb::Post:
         return 201;
+    case HttpVerb::Delete:
+        return 204;
     default:
         // for unused verbs
         return -1;

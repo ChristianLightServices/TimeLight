@@ -46,13 +46,14 @@ public:
     QString projectName(const QString &projectId);
     QString userName(const QString &userId);
 
-    QDateTime stopRunningTimeEntry(const QString &userId, bool async);
-    std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
     void startTimeEntry(const QString &userId, const QString &projectId, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
     void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
     void startTimeEntry(
         const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+    std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
+    QDateTime stopRunningTimeEntry(const QString &userId, bool async);
+    void modifyTimeEntry(const QString &userId, const TimeEntry &t, bool async);
     //! The time entries returned by this function will always be sorted in descending order, i.e. the most recent entry will
     //! be first.
     QVector<TimeEntry> getTimeEntries(const QString &userId,
@@ -60,6 +61,7 @@ public:
                                       std::optional<int> pageSize,
                                       std::optional<QDateTime> start = std::nullopt,
                                       std::optional<QDateTime> end = std::nullopt);
+    void deleteTimeEntry(const QString &userId, const TimeEntry &t, bool async);
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
     User getApiKeyOwner();
@@ -114,12 +116,15 @@ protected:
         Patch,
         Put,
         Head,
+        Delete,
     };
     enum class TimeEntryAction
     {
         StartTimeEntry,
         GetRunningTimeEntry,
         StopTimeEntry,
+        ModifyTimeEntry,
+        DeleteTimeEntry,
     };
 
     // ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
@@ -133,6 +138,8 @@ protected:
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
+    virtual QUrl modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
+    virtual QUrl deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId) = 0;
     virtual QUrl timeEntriesUrl(const QString &userId,
                                 const QString &workspaceId,
@@ -158,7 +165,6 @@ protected:
     virtual int timeEntriesPaginationPageSize() const { return 50; }
     virtual int workspacesPaginationPageSize() const { return 50; }
 
-    virtual bool jsonToHasRunningTimeEntry(const json &j) = 0;
     virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToTimeEntry(const json &j) = 0;
     virtual User jsonToUser(const json &j) = 0;
@@ -303,6 +309,27 @@ private:
               int expectedReturnCode,
               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+
+    void del(const QUrl &url,
+             const QByteArray &body,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             const QByteArray &body,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             const QByteArray &body,
+             bool async,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+    void del(const QUrl &url,
+             const QByteArray &body,
+             bool async,
+             int expectedReturnCode,
+             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
+             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
 
     QString m_workspaceId;
     QByteArray m_apiKey;
