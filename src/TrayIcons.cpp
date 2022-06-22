@@ -26,7 +26,9 @@
 #include "User.h"
 #include "version.h"
 
-TrayIcons::TrayIcons(QObject *parent) : QObject{parent}, m_timerRunning{new QSystemTrayIcon}
+TrayIcons::TrayIcons(QObject *parent)
+    : QObject{parent},
+      m_timerRunning{new QSystemTrayIcon}
 {
     while (Settings::instance()->timeService().isEmpty())
     {

@@ -4,7 +4,8 @@
 
 #include "User.h"
 
-TimeCampManager::TimeCampManager(const QByteArray &apiKey, QObject *parent) : AbstractTimeServiceManager{apiKey, parent}
+TimeCampManager::TimeCampManager(const QByteArray &apiKey, QObject *parent)
+    : AbstractTimeServiceManager{apiKey, parent}
 {
     callInitVirtualMethods();
     // TimeCamp seems to like to fail on the first fetch, so we'll make a fetch now

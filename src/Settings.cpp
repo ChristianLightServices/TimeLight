@@ -2,7 +2,8 @@
 
 #include <QSettings>
 
-Settings::Settings(QObject *parent) : QObject{parent}
+Settings::Settings(QObject *parent)
+    : QObject{parent}
 {
     load();
 

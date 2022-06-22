@@ -9,14 +9,19 @@ Project::Project(const QString &id, const QString &name, const QString &descript
       m_description{description}
 {}
 
-Project::Project(const QString &id, const QString &name, QObject *parent) : Project{id, name, {}, parent} {}
+Project::Project(const QString &id, const QString &name, QObject *parent)
+    : Project{id, name, {}, parent}
+{}
 
-Project::Project(const Project &that) : QObject{that.parent()}
+Project::Project(const Project &that)
+    : QObject{that.parent()}
 {
     *this = that;
 }
 
-Project::Project(QObject *parent) : QObject{parent} {}
+Project::Project(QObject *parent)
+    : QObject{parent}
+{}
 
 Project &Project::operator=(const Project &other)
 {

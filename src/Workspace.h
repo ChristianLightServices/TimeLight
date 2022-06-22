@@ -10,7 +10,9 @@ class Workspace : public QObject
 public:
     explicit Workspace(const QString &id, const QString &name, QObject *parent = nullptr);
     explicit Workspace(const Workspace &that);
-    Workspace(QObject *parent = nullptr) : QObject{parent} {}
+    Workspace(QObject *parent = nullptr)
+        : QObject{parent}
+    {}
 
     Workspace &operator=(const Workspace &other);
 

@@ -5,7 +5,8 @@
 #include "TimeEntry.h"
 #include "User.h"
 
-ClockifyManager::ClockifyManager(const QByteArray &apiKey, QObject *parent) : AbstractTimeServiceManager{apiKey, parent}
+ClockifyManager::ClockifyManager(const QByteArray &apiKey, QObject *parent)
+    : AbstractTimeServiceManager{apiKey, parent}
 {
     callInitVirtualMethods();
 }

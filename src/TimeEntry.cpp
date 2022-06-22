@@ -27,9 +27,12 @@ TimeEntry::TimeEntry(const QString &id,
         m_end = m_end.toLocalTime();
 }
 
-TimeEntry::TimeEntry(QObject *parent) : QObject{parent} {}
+TimeEntry::TimeEntry(QObject *parent)
+    : QObject{parent}
+{}
 
-TimeEntry::TimeEntry(const TimeEntry &that) : QObject{that.parent()}
+TimeEntry::TimeEntry(const TimeEntry &that)
+    : QObject{that.parent()}
 {
     *this = that;
 }

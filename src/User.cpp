@@ -3,7 +3,10 @@
 #include "ClockifyManager.h"
 #include "JsonHelper.h"
 
-User::User(const QString &userId, const QString &name, const QString &workspaceId, AbstractTimeServiceManager *parent)
+User::User(const QString &userId,
+           const QString &name,
+           const QString &workspaceId,
+           AbstractTimeServiceManager *parent)
     : QObject{parent},
       m_userId{userId},
       m_name{name},
@@ -11,12 +14,16 @@ User::User(const QString &userId, const QString &name, const QString &workspaceI
       m_manager{parent}
 {}
 
-User::User(const User &that) : QObject{that.parent()}
+User::User(const User &that)
+    : QObject{that.parent()}
 {
     *this = that;
 }
 
-User::User(QObject *parent) : QObject{parent}, m_isValid{false} {}
+User::User(QObject *parent)
+    : QObject{parent},
+      m_isValid{false}
+{}
 
 std::optional<TimeEntry> User::getRunningTimeEntry()
 {
