@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
             SingleApplication a{argc, argv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
 
-            QTranslator translator;
-            if (translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
+            if (QTranslator translator;
+                translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
                 QApplication::installTranslator(&translator);
 
             Settings::init();
