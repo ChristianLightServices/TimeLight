@@ -16,32 +16,59 @@ A few settings deserve a bit of explanation. On the "Default project" page, ther
 
 The "Interval between updates of data" setting on the "App settings" tab allows you to configure how often TimeLight checks the status of your time entries on the web server. If you are using TimeCamp, it is recommended to set this to a large value, as checking too often will result in TimeLight being temporarily blocked; Clockify users should not have to worry about this, because Clockify allows apps to perform 10 checks per second.
 
+## Requirements
+
+This project depends on the following libraries:
+
+- [Qt](https://qt.io) 6.2 or higher
+- [nlohmann/json](https://github.com/nlohmann/json) 3.10.5 or higher
+- [SingleApplication](https://github.com/itay-grudev/SingleApplication) (bundled as a submodule)
+
+Additionally, building the application requires the following:
+
+- [CMake](https://cmake.org) 3.23 or higher
+- A [C++20-capable compiler](https://en.cppreference.com/w/cpp/compiler_support/20) (the latest Clang, MSVC, and GCC all work)
+- [Qt Installer Framework](https://doc.qt.io/qtinstallerframework/index.html) 4.x (if you are building the installer)
+
+
+## Getting the code
+
+Since SingleApplication is bundled as a submodule, cloning the source should generally look like this:
+
+```
+$ git clone https://github.com/ChristianLightServices/TimeLight.git --recurse-submodules
+```
+
+Alternately, if you cloned without fetching submodules, just do this:
+
+```
+$ git submodule update --init --recursive
+```
+
 ## Building
 
-#### Binaries
+### Binaries
 
 Make sure you have Qt 6.2 or newer installed and available. Then, it's a simple matter of:
 
 ```
-mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+$ mkdir build && cd build
+$ cmake ..
+$ cmake --build . --config Release
 ```
 
 and you have a binary!
 
-Please note that this project requires C++20 features (most notably concepts) that will not compile with GCC at the moment (unless you set special flags for GCC). Therefore, you will want to use the latest Clang or MSVC to compile this project.
+### Installer
 
-#### Installer
+#### ⚠ The installer has been developed for Windows only; while it will likely run on other platforms, it may not work correctly. ⚠
 
-##### ⚠ The installer has been developed for Windows only; while it will likely run on other platforms, it may not work correctly. ⚠
-
-Install Qt IFW (any version in the 4.x series should work; others haven't been tested). Then rerun CMake in the build directory, like so:
+Rerun CMake in the build directory, like so:
 
 ```
-cd build
-cmake -DGENERATE_INSTALLER=ON ..
-cmake --build . --config release --target package
+$ cd build
+$ cmake -DGENERATE_INSTALLER=ON ..
+$ cmake --build . --config release --target package
 ```
 
 An installer will be generated in `build`. Its name will vary slightly from platform to platform, but will look something like `TimeLight-2.0.0-win64.exe` on Windows.
@@ -59,4 +86,11 @@ However, if you are running Windows or you can figure out a way to patch the .ap
 
 ## Contributing
 
-Before committing, please run `clang-format -i *.cpp *.h`.
+Before committing, please run the following commands:
+
+```
+$ ./format.sh
+$ ./translations.sh
+```
+
+These scripts were built with Linux in mind; contributions for a set of Windows scripts are welcome.
