@@ -338,7 +338,6 @@ private:
 
     // this is ordered as <id, name>
     QVector<QPair<QString, QString>> m_users;
-    QHash<QString, int> m_numUsers;
 
     QNetworkAccessManager m_manager{this};
 
