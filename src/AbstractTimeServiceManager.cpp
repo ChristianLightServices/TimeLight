@@ -38,19 +38,26 @@ AbstractTimeServiceManager::AbstractTimeServiceManager(const QByteArray &apiKey,
     m_manager.setCookieJar(new NoCookies);
     m_manager.setAutoDeleteReplies(true);
 
-    m_expireUsersTimer.setInterval(15 * 60 * 1000); // every 15 mins
-    m_expireUsersTimer.callOnTimeout(this, [this]() {
-        m_usersLoaded = false;
-        m_users.clear();
-    });
-    m_expireUsersTimer.setSingleShot(true);
-
     m_expireProjectsTimer.setInterval(15 * 60 * 1000);
     m_expireProjectsTimer.callOnTimeout(this, [this]() {
         m_projectsLoaded = false;
         m_projects.clear();
     });
     m_expireProjectsTimer.setSingleShot(true);
+
+    m_expireWorkspacesTimer.setInterval(15 * 60 * 1000); // every 15 mins
+    m_expireWorkspacesTimer.callOnTimeout(this, [this]() {
+        m_workspacesLoaded = false;
+        m_workspaces.clear();
+    });
+    m_expireWorkspacesTimer.setSingleShot(true);
+
+    m_expireUsersTimer.setInterval(15 * 60 * 1000); // every 15 mins
+    m_expireUsersTimer.callOnTimeout(this, [this]() {
+        m_usersLoaded = false;
+        m_users.clear();
+    });
+    m_expireUsersTimer.setSingleShot(true);
 
     // We won't actually populate the user or project list yet; why do it when we probably won't need it for a long time?
 }
@@ -61,6 +68,14 @@ QVector<Project> &AbstractTimeServiceManager::projects()
         updateProjects();
 
     return m_projects;
+}
+
+QVector<Workspace> &AbstractTimeServiceManager::workspaces()
+{
+    if (!m_workspacesLoaded)
+        updateWorkspaces();
+
+    return m_workspaces;
 }
 
 QVector<QPair<QString, QString>> &AbstractTimeServiceManager::users()
@@ -261,26 +276,15 @@ User AbstractTimeServiceManager::getApiKeyOwner()
         return j.empty() ? User{this} : jsonToUser(j);
 }
 
-QVector<Workspace> AbstractTimeServiceManager::getOwnerWorkspaces()
+Workspace AbstractTimeServiceManager::currentWorkspace()
 {
-    QVector<Workspace> workspaces;
-
-    get(workspacesUrl(), false, [this, &workspaces](QNetworkReply *rep) {
-        try
-        {
-            json j{json::parse(rep->readAll().toStdString())};
-            using namespace std::placeholders;
-            workspaces.resize(j.size());
-            std::transform(
-                j.begin(), j.end(), workspaces.begin(), std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
-        }
-        catch (const std::exception &ex)
-        {
-            std::cerr << "Error while loading workspaces: " << ex.what() << std::endl;
-        }
-    });
-
-    return workspaces;
+    // By calling workspaces(), we ensure that the loading logic will happen if needed.
+    auto it =
+        std::find_if(workspaces().begin(), workspaces().end(), [this](const auto &w) { return w.id() == m_workspaceId; });
+    if (it == m_workspaces.end())
+        return {this};
+    else
+        return *it;
 }
 
 void AbstractTimeServiceManager::setApiKey(const QString &apiKey)
@@ -478,6 +482,72 @@ void AbstractTimeServiceManager::updateProjects()
     m_projectsLoaded = true;
     m_loadingProjects = false;
     m_expireProjectsTimer.start();
+}
+
+void AbstractTimeServiceManager::updateWorkspaces()
+{
+    if (m_loadingWorkspaces)
+        return;
+
+    m_loadingWorkspaces = true;
+    m_workspacesLoaded = false;
+    m_workspaces.clear();
+
+    auto url = workspacesUrl();
+    auto worker = [this, &url]() -> bool {
+        bool retVal;
+        get(url, false, [this, &retVal](QNetworkReply *rep) {
+            try
+            {
+                json j{json::parse(rep->readAll().toStdString())};
+                if (j.empty() || j.is_null())
+                {
+                    retVal = false;
+                    return;
+                }
+
+                if (j.is_array() && j[0].is_array())
+                    j = j[0];
+
+                auto appendPos = m_workspaces.size();
+                m_workspaces.resize(appendPos + j.size());
+                using namespace std::placeholders;
+                std::transform(j.begin(),
+                               j.end(),
+                               m_workspaces.begin() + appendPos,
+                               std::bind(&AbstractTimeServiceManager::jsonToWorkspace, this, _1));
+
+                retVal = !j.empty() && !j.is_null();
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Error in parsing workspaces: " << e.what() << std::endl;
+                retVal = false;
+            }
+        });
+        return retVal;
+    };
+
+    if (supportedPagination().testFlag(Pagination::Workspaces))
+    {
+        int page = paginationStartsAt();
+
+        do
+        {
+            QUrlQuery query{url};
+            query.removeAllQueryItems(workspacesPageSizeHeaderName());
+            query.removeAllQueryItems(workspacesPageHeaderName());
+            query.addQueryItem(workspacesPageSizeHeaderName(), QString::number(workspacesPaginationPageSize()));
+            query.addQueryItem(workspacesPageHeaderName(), QString::number(page++));
+            url.setQuery(query);
+        } while (worker());
+    }
+    else
+        worker();
+
+    m_workspacesLoaded = true;
+    m_loadingWorkspaces = false;
+    m_expireWorkspacesTimer.start();
 }
 
 void AbstractTimeServiceManager::timeEntryReq(const QUrl &url,

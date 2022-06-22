@@ -16,6 +16,7 @@ Workspace &Workspace::operator=(const Workspace &other)
 {
     this->m_id = other.m_id;
     this->m_name = other.m_name;
+    this->m_valid = other.m_valid;
 
     return *this;
 }

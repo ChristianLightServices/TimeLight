@@ -113,7 +113,7 @@ QWidget *SettingsDialog::createBackendPage()
     layout->addWidget(useNewApiKey, 1, 2);
 
     auto workspaces{new QComboBox{backendPage}};
-    for (const auto &workspace : m_manager->getOwnerWorkspaces())
+    for (const auto &workspace : m_manager->workspaces())
         workspaces->addItem(workspace.name(), workspace.id());
 
     layout->addWidget(new QLabel{tr("Workspace to track time on"), backendPage}, 2, 0);

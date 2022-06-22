@@ -41,6 +41,7 @@ public:
     bool isValid() const { return m_isValid; }
 
     QVector<Project> &projects();
+    QVector<Workspace> &workspaces();
     QVector<QPair<QString, QString>> &users();
 
     QString projectName(const QString &projectId);
@@ -65,7 +66,7 @@ public:
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
     User getApiKeyOwner();
-    QVector<Workspace> getOwnerWorkspaces();
+    Workspace currentWorkspace();
 
     QString apiKey() const { return m_apiKey; }
     QString workspaceId() const { return m_workspaceId; }
@@ -201,8 +202,9 @@ protected:
 
 private:
     void updateCurrentUser();
-    void updateUsers();
     void updateProjects();
+    void updateWorkspaces();
+    void updateUsers();
 
     QByteArray apiKeyForRequests() const { return apiKeyTemplate().arg(m_apiKey).toUtf8(); }
 
@@ -335,7 +337,7 @@ private:
     QByteArray m_apiKey;
 
     QVector<Project> m_projects;
-
+    QVector<Workspace> m_workspaces;
     // this is ordered as <id, name>
     QVector<QPair<QString, QString>> m_users;
 
@@ -347,8 +349,9 @@ private:
     // trying to juggle pointers to dynamically-allocated std::functions.
     QHash<QNetworkReply *, QPair<NetworkReplyCallback, NetworkReplyCallback>> m_pendingReplies;
 
-    QTimer m_expireUsersTimer;
     QTimer m_expireProjectsTimer;
+    QTimer m_expireWorkspacesTimer;
+    QTimer m_expireUsersTimer;
     QTimer m_checkConnectionTimer;
 
     static const NetworkReplyCallback s_defaultSuccessCb;
@@ -356,8 +359,10 @@ private:
 
     bool m_isValid{false};
     bool m_projectsLoaded{false};
+    bool m_workspacesLoaded{false};
     bool m_usersLoaded{false};
     bool m_loadingProjects{false};
+    bool m_loadingWorkspaces{false};
     bool m_loadingUsers{false};
     bool m_isConnectedToInternet{true}; // assume connected at start
     bool m_isRatelimited{false};

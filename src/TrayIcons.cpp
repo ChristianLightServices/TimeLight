@@ -116,7 +116,7 @@ TrayIcons::TrayIcons(QObject *parent)
     m_user = m_manager->getApiKeyOwner();
     if (Settings::instance()->workspaceId().isEmpty())
     {
-        auto workspaces = m_manager->getOwnerWorkspaces();
+        auto workspaces = m_manager->workspaces();
         QStringList names;
         for (const auto &w : workspaces)
             names << w.name();
