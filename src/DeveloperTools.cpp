@@ -48,7 +48,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
             else
             {
                 image->setPixmap(p.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-                userGroupLayout->addWidget(image, 0, 0, 3, 3);
+                userGroupLayout->addWidget(image, 0, 0, 4, 1);
             }
             m->deleteLater();
             rep->deleteLater();
@@ -57,12 +57,16 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
 
     auto userId = new QLineEdit{user.userId(), userGroup};
     userId->setReadOnly(true);
-    userGroupLayout->addWidget(new QLabel{tr("Name:")}, 0, 3);
-    userGroupLayout->addWidget(new QLabel{tr("Email:")}, 1, 3);
-    userGroupLayout->addWidget(new QLabel{tr("User ID:")}, 2, 3);
-    userGroupLayout->addWidget(new QLabel{user.name()}, 0, 4);
-    userGroupLayout->addWidget(new QLabel{user.email()}, 1, 4);
-    userGroupLayout->addWidget(userId, 2, 4);
+    auto apiKey = new QLineEdit{manager->apiKey(), userGroup};
+    apiKey->setReadOnly(true);
+    userGroupLayout->addWidget(new QLabel{tr("Name:")}, 0, 1);
+    userGroupLayout->addWidget(new QLabel{tr("Email:")}, 1, 1);
+    userGroupLayout->addWidget(new QLabel{tr("User ID:")}, 2, 1);
+    userGroupLayout->addWidget(new QLabel{tr("API key:")}, 3, 1);
+    userGroupLayout->addWidget(new QLabel{user.name()}, 0, 2);
+    userGroupLayout->addWidget(new QLabel{user.email()}, 1, 2);
+    userGroupLayout->addWidget(userId, 2, 2);
+    userGroupLayout->addWidget(apiKey, 3, 2);
 
     auto workspaceGroup = new QGroupBox{tr("Workspace"), this};
     auto workspaceGroupLayout = new QGridLayout{workspaceGroup};

@@ -9,53 +9,58 @@
         <translation>User</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="60"/>
-        <location filename="../src/DeveloperTools.cpp" line="73"/>
+        <location filename="../src/DeveloperTools.cpp" line="62"/>
+        <location filename="../src/DeveloperTools.cpp" line="77"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="61"/>
+        <location filename="../src/DeveloperTools.cpp" line="63"/>
         <source>Email:</source>
         <translation>Email:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="62"/>
+        <location filename="../src/DeveloperTools.cpp" line="64"/>
         <source>User ID:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="67"/>
+        <location filename="../src/DeveloperTools.cpp" line="65"/>
+        <source>API key:</source>
+        <translation>API key:</translation>
+    </message>
+    <message>
+        <location filename="../src/DeveloperTools.cpp" line="71"/>
         <source>Workspace</source>
         <translation>Workspace</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="74"/>
+        <location filename="../src/DeveloperTools.cpp" line="78"/>
         <source>Workspace ID:</source>
         <translation>Workspace ID:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="78"/>
+        <location filename="../src/DeveloperTools.cpp" line="82"/>
         <source>Projects</source>
         <translation>Projects</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="89"/>
+        <location filename="../src/DeveloperTools.cpp" line="93"/>
         <source>Project name</source>
         <translation>Project name</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="89"/>
+        <location filename="../src/DeveloperTools.cpp" line="93"/>
         <source>Project ID</source>
         <translation>Project ID</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="101"/>
+        <location filename="../src/DeveloperTools.cpp" line="105"/>
         <source>Disable developer mode</source>
         <translation>Disable developer mode</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="108"/>
+        <location filename="../src/DeveloperTools.cpp" line="112"/>
         <source>Done</source>
         <translation>Done</translation>
     </message>
