@@ -464,6 +464,17 @@ void TrayIcons::setUpTrayIcons()
                 }
             }
         });
+        modifyJob->setDisabled(true);
+        cancel->setDisabled(true);
+        connect(this, &TrayIcons::jobEnded, this, [modifyJob, cancel] {
+            modifyJob->setDisabled(true);
+            cancel->setDisabled(true);
+        });
+        connect(this, &TrayIcons::jobStarted, this, [modifyJob, cancel] {
+            modifyJob->setDisabled(false);
+            cancel->setDisabled(false);
+        });
+
         connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
             SettingsDialog d{m_manager,
                              {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
@@ -677,7 +688,7 @@ void TrayIcons::setTimerState(TimerState state)
 
         if (m_timerState == TimerState::OnBreak)
             emit jobEnded();
-        if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::OnBreak)
+        if (m_timerState != TimerState::Running)
             emit jobStarted();
         break;
     case TimerState::OnBreak:
@@ -692,7 +703,7 @@ void TrayIcons::setTimerState(TimerState state)
 
         if (m_timerState == TimerState::Running)
             emit jobEnded();
-        else if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::Running)
+        if (m_timerState != TimerState::OnBreak)
             emit jobStarted();
         break;
     case TimerState::NotRunning:
