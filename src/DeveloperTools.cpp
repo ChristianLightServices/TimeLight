@@ -81,12 +81,18 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     for (int i = 0; i < projects.size(); ++i)
     {
         projectTable->setItem(i, 0, new QTableWidgetItem{projects[i].name()});
-        projectTable->setItem(i, 1, new QTableWidgetItem{projects[i].id()});
+        auto id = new QLineEdit{projects[i].id()};
+        id->setReadOnly(true);
+        projectTable->setCellWidget(i, 1, id);
     }
     projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID"));
     projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
     projectTable->verticalHeader()->setVisible(false);
     projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    projectTable->setSortingEnabled(true);
+    projectTable->sortItems(0, Qt::AscendingOrder);
+    projectTable->setSelectionBehavior(QTableWidget::SelectItems);
+    projectTable->setSelectionMode(QTableWidget::SingleSelection);
 
     projectGroupLayout->addWidget(projectTable, 0, 0);
 
