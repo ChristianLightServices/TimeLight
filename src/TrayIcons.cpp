@@ -384,6 +384,9 @@ void TrayIcons::showAboutDialog()
     connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, &dialog] {
         showLicenseDialog(&dialog);
     });
+    connect(bb->addButton(tr("Show source code"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [] {
+        QDesktopServices::openUrl(QUrl{QStringLiteral("https://github.com/ChristianLightServices/TimeLight")});
+    });
     connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
 
     layout->addWidget(bb);
