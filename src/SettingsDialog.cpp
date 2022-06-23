@@ -54,15 +54,11 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
     {
         auto devMode = new QShortcut{Qt::Key_F7, this};
         connect(devMode, &QShortcut::activated, this, [this] {
-            if (QMessageBox::information(this,
-                                      tr("Enable developer mode"),
-                                      tr("In order to enable developer mode, the app needs to restart."),
-                                      QMessageBox::Ok | QMessageBox::Cancel,
-                                      QMessageBox::Ok) == QMessageBox::Ok)
-            {
-                Settings::instance()->setDeveloperMode(true);
-                TimeLight::restartApp();
-            }
+            QMessageBox::information(this,
+                                     tr("Developer mode"),
+                                     tr("Developer mode has been enabled!"),
+                                     QMessageBox::Ok);
+            Settings::instance()->setDeveloperMode(true);
         });
     }
 

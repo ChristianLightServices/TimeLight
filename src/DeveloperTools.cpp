@@ -98,15 +98,8 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
 
     auto buttons = new QDialogButtonBox{this};
     connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this](bool) {
-        if (QMessageBox::information(this,
-                                  tr("Disable developer mode"),
-                                  tr("In order to disable developer mode, the app needs to restart."),
-                                  QMessageBox::Ok | QMessageBox::Cancel,
-                                  QMessageBox::Ok) == QMessageBox::Ok)
-        {
-            Settings::instance()->setDeveloperMode(false);
-            TimeLight::restartApp();
-        }
+        Settings::instance()->setDeveloperMode(false);
+        close();
     });
     buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
 

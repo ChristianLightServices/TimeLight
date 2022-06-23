@@ -470,11 +470,17 @@ void TrayIcons::setUpTrayIcons()
                               {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
             d.exec();
         });
-        if (Settings::instance()->developerMode())
-        connect(menu->addAction(tr("Developer tools")), &QAction::triggered, this, [this] {
+
+        auto devTools = menu->addAction(tr("Developer tools"));
+        devTools->setVisible(Settings::instance()->developerMode());
+        connect(devTools, &QAction::triggered, this, [this] {
             DeveloperTools d{m_manager};
             d.exec();
         });
+        connect(Settings::instance(), &Settings::developerModeChanged, devTools, [devTools] {
+            devTools->setVisible(Settings::instance()->developerMode());
+        });
+
         connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
                 &QAction::triggered,
                 this,
