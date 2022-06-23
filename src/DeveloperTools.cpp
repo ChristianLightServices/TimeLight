@@ -40,13 +40,16 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     {
         auto m = new QNetworkAccessManager;
         auto rep = m->get(QNetworkRequest{user.avatarUrl()});
-        connect(rep, &QNetworkReply::finished, image, [m, rep, image] {
+        connect(rep, &QNetworkReply::finished, image, [m, rep, image, userGroupLayout] {
             QPixmap p;
             p.loadFromData(rep->readAll());
             if (p.isNull())
-                image->setVisible(false);
+                image->deleteLater();
             else
+            {
                 image->setPixmap(p.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                userGroupLayout->addWidget(image, 0, 0, 3, 3);
+            }
             m->deleteLater();
             rep->deleteLater();
         });
@@ -54,8 +57,6 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
 
     auto userId = new QLineEdit{user.userId(), userGroup};
     userId->setReadOnly(true);
-
-    userGroupLayout->addWidget(image, 0, 0, 3, 3);
     userGroupLayout->addWidget(new QLabel{tr("Name:")}, 0, 3);
     userGroupLayout->addWidget(new QLabel{tr("Email:")}, 1, 3);
     userGroupLayout->addWidget(new QLabel{tr("User ID:")}, 2, 3);
