@@ -261,19 +261,19 @@ void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const Ti
 
 User AbstractTimeServiceManager::getApiKeyOwner()
 {
-        json j;
-        get(currentUserUrl(), false, [&j](QNetworkReply *rep) {
-            try
-            {
-                j = json::parse(rep->readAll().toStdString());
-            }
-            catch (const std::exception &ex)
-            {
-                std::cout << ex.what() << std::endl;
-            }
-        });
+    json j;
+    get(currentUserUrl(), false, [&j](QNetworkReply *rep) {
+        try
+        {
+            j = json::parse(rep->readAll().toStdString());
+        }
+        catch (const std::exception &ex)
+        {
+            std::cout << ex.what() << std::endl;
+        }
+    });
 
-        return j.empty() ? User{this} : jsonToUser(j);
+    return j.empty() ? User{this} : jsonToUser(j);
 }
 
 Workspace AbstractTimeServiceManager::currentWorkspace()

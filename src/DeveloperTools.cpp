@@ -3,19 +3,19 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QMessageBox>
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QTableWidget>
-#include <QTableView>
-#include <QPixmap>
 #include <QHeaderView>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPixmap>
+#include <QPushButton>
+#include <QTableView>
+#include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "User.h"
 #include "Settings.h"
+#include "User.h"
 #include "Utils.h"
 
 DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *parent)
@@ -98,10 +98,13 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     projectGroupLayout->addWidget(projectTable, 0, 0);
 
     auto buttons = new QDialogButtonBox{this};
-    connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this](bool) {
-        Settings::instance()->setDeveloperMode(false);
-        close();
-    });
+    connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole),
+            &QPushButton::clicked,
+            this,
+            [this](bool) {
+                Settings::instance()->setDeveloperMode(false);
+                close();
+            });
     buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
 
     layout->addWidget(userGroup);
