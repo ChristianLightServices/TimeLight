@@ -96,8 +96,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     projectTable->setSortingEnabled(true);
     projectTable->sortItems(0, Qt::AscendingOrder);
-    projectTable->setSelectionBehavior(QTableWidget::SelectItems);
-    projectTable->setSelectionMode(QTableWidget::SingleSelection);
+    projectTable->setSelectionMode(QTableWidget::NoSelection);
 
     projectGroupLayout->addWidget(projectTable, 0, 0);
 
