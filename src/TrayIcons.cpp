@@ -363,12 +363,12 @@ void TrayIcons::showAboutDialog()
 {
     // put this into a variable to handle this gonzo string more nicely
     auto aboutText = tr("TimeLight %1 copyright © 2022. Licensed "
-                          "under the MIT license.\n\nIcons from "
-                          "[1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) "
-                          "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))"
-                          " and [Microsoft](https://github.com/microsoft/fluentui-system-icons) "
-                          "(power icon, licensed [MIT](https://mit-license.org)).")
-                           .arg(VERSION_STR);
+                        "under the MIT license.\n\nIcons from "
+                        "[1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) "
+                        "(light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))"
+                        " and [Microsoft](https://github.com/microsoft/fluentui-system-icons) "
+                        "(power icon, licensed [MIT](https://mit-license.org)).")
+                         .arg(VERSION_STR);
 
     QDialog dialog;
 
