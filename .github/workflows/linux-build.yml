@@ -46,19 +46,27 @@ jobs:
 
       # now we can deploy the release if necessary
       - name: Install LinuxDeploy
-        if: ${{ github.event.inputs.packageRelease }}
+        #if: ${{ github.event.inputs.packageRelease }} # disable for test commit
         uses: miurahr/install-linuxdeploy-action@v1
         with:
           plugins: qt appimage
           dir: ${{ github.workspace }}
 
       - name: Build release package
-        if: ${{ github.event.inputs.packageRelease }}
+        #if: ${{ github.event.inputs.packageRelease }}
         run: |
-          linuxdeploy-x86_64.AppImage --plugin qt --output appimage --desktop-file TimeLight.desktop --icon-file icons/TimeLight.svg --executable build/TimeLight --appdir AppDir
+          mkdir appimagedesktopfile
+          cp TimeLight.desktop appimagedesktopfile/TimeLight.desktop
+
+          cat << EOF >> appimagedesktopfile/TimeLight.desktop
+          X-AppImage-Name=TimeLight
+          X-AppImage-Version=$(git tag --contains HEAD 2> /dev/null | tail -n 1)
+          EOF
+
+          linuxdeploy-x86_64.AppImage --plugin qt --output appimage --desktop-file appimagedesktopfile/TimeLight.desktop --icon-file icons/TimeLight.svg --executable build/TimeLight --appdir AppDir
 
       - name: Upload release package
-        if: ${{ github.event.inputs.packageRelease }}
+        #if: ${{ github.event.inputs.packageRelease }}
         uses: actions/upload-artifact@v2
         with:
           name: Linux package (64-bit, Qt ${{ matrix.qt-version }})
