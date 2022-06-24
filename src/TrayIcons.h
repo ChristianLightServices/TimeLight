@@ -62,6 +62,7 @@ private:
     void setTimerState(TimerState state);
     void updateQuickStartList();
     void showOfflineNotification();
+    void checkForFinishedWeek();
 
     AbstractTimeServiceManager *m_manager;
 
@@ -75,6 +76,7 @@ private:
     TimeEntry m_jobToBeNotified;
 
     QTimer m_eventLoop;
+    QTimer m_alertOnTimeUpTimer;
 
     bool m_valid{true};
     bool m_ratelimited{false};

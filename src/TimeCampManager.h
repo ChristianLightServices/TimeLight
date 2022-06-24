@@ -2,6 +2,7 @@
 #define TIMECAMPMANAGER_H
 
 #include "AbstractTimeServiceManager.h"
+#include "src/TimeEntry.h"
 
 class TimeCampManager : public AbstractTimeServiceManager
 {

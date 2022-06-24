@@ -166,8 +166,14 @@ TrayIcons::TrayIcons(QObject *parent)
     m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
     m_eventLoop.start();
 
+    m_alertOnTimeUpTimer.setInterval(Settings::instance()->eventLoopInterval() * 60);
+    m_alertOnTimeUpTimer.setSingleShot(false);
+    m_alertOnTimeUpTimer.callOnTimeout(this, &TrayIcons::checkForFinishedWeek);
+    m_alertOnTimeUpTimer.start();
+
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
+        m_alertOnTimeUpTimer.setInterval(Settings::instance()->eventLoopInterval() * 60);
     });
     connect(Settings::instance(), &Settings::quickStartProjectsLoadingChanged, this, [this] { updateQuickStartList(); });
 
@@ -201,6 +207,7 @@ void TrayIcons::show()
     m_timerRunning->show();
     if (m_runningJob)
         m_runningJob->show();
+    checkForFinishedWeek();
 }
 
 Project TrayIcons::defaultProject()
@@ -308,34 +315,6 @@ void TrayIcons::updateTrayIcons()
                 setTimerState(TimerState::Running);
             // At this point, the previous job will have been notified for, so it's safe to overwrite it
             m_jobToBeNotified = *runningEntry;
-
-            if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done)
-            {
-                auto now = QDateTime::currentDateTime();
-                auto entries = m_user.getTimeEntries(std::nullopt,
-                                                     std::nullopt,
-                                                     now.addDays(-(now.date().dayOfWeek() % 7)),
-                                                     now.addDays(6 - (now.date().dayOfWeek() % 7)));
-                double hoursThisWeek =
-                    std::accumulate(
-                        entries.begin(), entries.end(), 0, [](auto a, auto b) { return a + b.start().msecsTo(b.end()); }) /
-                    (1000 * 60 * 60);
-                if (hoursThisWeek >= Settings::instance()->weekHours())
-                {
-                    m_timerRunning->showMessage(
-                        tr("Your week is done"),
-                        tr("You have now worked %n hour(s) this week!", nullptr, Settings::instance()->weekHours()));
-                    m_timeUpWarning = TimeUpWarning::Done;
-                }
-                // warn 1 hour before time is up
-                else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 &&
-                         m_timeUpWarning != TimeUpWarning::AlmostDone)
-                {
-                    m_timerRunning->showMessage(tr("You're almost done"),
-                                                tr("You have less than an hour to go to complete your work this week!"));
-                    m_timeUpWarning = TimeUpWarning::AlmostDone;
-                }
-            }
         }
         catch (const std::exception &ex)
         {
@@ -822,6 +801,38 @@ void TrayIcons::showOfflineNotification()
     m_timerRunning->showMessage(tr("Internet connection lost"),
                                 tr("The request could not be completed because the internet connection is "
                                    "down."));
+}
+
+void TrayIcons::checkForFinishedWeek()
+{
+    // we can't show a bubble if the icon isn't visible
+    if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done && m_timerRunning->isVisible())
+    {
+        auto now = QDateTime::currentDateTime();
+        auto entries = m_user.getTimeEntries(std::nullopt,
+                                             std::nullopt,
+                                             now.addDays(-(now.date().dayOfWeek() % 7)),
+                                             now.addDays(6 - (now.date().dayOfWeek() % 7)));
+        double msecsThisWeek = std::accumulate(
+            entries.begin(), entries.end(), 0, [](auto a, auto b) { return a + b.start().msecsTo(b.end()); });
+        double hoursThisWeek = msecsThisWeek / (1000 * 60 * 60);
+        if (hoursThisWeek >= Settings::instance()->weekHours())
+        {
+            m_timerRunning->showMessage(
+                tr("Your week is done"),
+                tr("You have now worked %n hour(s) this week!", nullptr, Settings::instance()->weekHours()));
+            m_timeUpWarning = TimeUpWarning::Done;
+        }
+        // warn 1 hour before time is up
+        else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 &&
+                 m_timeUpWarning != TimeUpWarning::AlmostDone)
+        {
+            m_timerRunning->showMessage(tr("You're almost done"),
+                                        tr("You have less than an hour to go to complete your work this week!"));
+            m_timeUpWarning = TimeUpWarning::AlmostDone;
+            QTimer::singleShot(msecsThisWeek + 15000, this, &TrayIcons::checkForFinishedWeek);
+        }
+    }
 }
 
 template<TimeManager Manager> void TrayIcons::initializeManager()
