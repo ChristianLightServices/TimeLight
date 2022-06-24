@@ -815,7 +815,7 @@ void TrayIcons::checkForFinishedWeek()
                                              now.addDays(6 - (now.date().dayOfWeek() % 7)));
         double msecsThisWeek = std::accumulate(
             entries.begin(), entries.end(), 0, [](auto a, auto b) {
-            if (b.end().isNull())
+            if (b.end().isNull() && b.running().value_or(true))
                 b.setEnd(QDateTime::currentDateTime());
             return a + b.start().msecsTo(b.end());
         });
