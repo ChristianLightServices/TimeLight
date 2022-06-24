@@ -166,14 +166,14 @@ TrayIcons::TrayIcons(QObject *parent)
     m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
     m_eventLoop.start();
 
-    m_alertOnTimeUpTimer.setInterval(Settings::instance()->eventLoopInterval() * 60);
+    // check for completed work time every hour
+    m_alertOnTimeUpTimer.setInterval(1000 * 60 * 60);
     m_alertOnTimeUpTimer.setSingleShot(false);
     m_alertOnTimeUpTimer.callOnTimeout(this, &TrayIcons::checkForFinishedWeek);
     m_alertOnTimeUpTimer.start();
 
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
-        m_alertOnTimeUpTimer.setInterval(Settings::instance()->eventLoopInterval() * 60);
     });
     connect(Settings::instance(), &Settings::quickStartProjectsLoadingChanged, this, [this] { updateQuickStartList(); });
 
