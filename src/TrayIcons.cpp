@@ -813,8 +813,7 @@ void TrayIcons::checkForFinishedWeek()
                                              std::nullopt,
                                              now.addDays(-(now.date().dayOfWeek() % 7)),
                                              now.addDays(6 - (now.date().dayOfWeek() % 7)));
-        double msecsThisWeek = std::accumulate(
-            entries.begin(), entries.end(), 0, [](auto a, auto b) {
+        double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [](auto a, auto b) {
             if (b.end().isNull() && b.running().value_or(true))
                 b.setEnd(QDateTime::currentDateTime());
             return a + b.start().msecsTo(b.end());
@@ -828,8 +827,7 @@ void TrayIcons::checkForFinishedWeek()
             m_timeUpWarning = TimeUpWarning::Done;
         }
         // warn 1 hour before time is up
-        else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 &&
-                 m_timeUpWarning != TimeUpWarning::AlmostDone)
+        else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 && m_timeUpWarning != TimeUpWarning::AlmostDone)
         {
             m_timerRunning->showMessage(tr("You're almost done"),
                                         tr("You have less than an hour to go to complete your work this week!"));
