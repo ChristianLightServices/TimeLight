@@ -87,6 +87,9 @@ public:
     //! service.
     virtual QUrl timeTrackerWebpageUrl() const = 0;
 
+    //! The URL that is the base of all API requests.
+    virtual const QString apiBaseUrl() const = 0;
+
     //! A list of items that may be loaded with pagination.
     virtual const QFlags<Pagination> supportedPagination() const = 0;
 
@@ -135,7 +138,6 @@ protected:
     //! than just the API key for authorization.
     virtual const QString apiKeyTemplate() const { return QStringLiteral("%1"); }
 
-    virtual const QString baseUrl() const = 0;
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) = 0;

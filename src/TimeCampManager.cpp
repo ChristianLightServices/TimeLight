@@ -16,26 +16,26 @@ QUrl TimeCampManager::runningTimeEntryUrl(const QString &userId, const QString &
 {
     Q_UNUSED(userId)
     Q_UNUSED(workspaceId)
-    return {baseUrl() + "/timer"};
+    return {apiBaseUrl() + "/timer"};
 }
 
 QUrl TimeCampManager::startTimeEntryUrl(const QString &userId, const QString &workspaceId)
 {
-    return {baseUrl() + "/timer"};
+    return {apiBaseUrl() + "/timer"};
 }
 
 QUrl TimeCampManager::stopTimeEntryUrl(const QString &userId, const QString &workspaceId)
 {
     Q_UNUSED(userId)
     Q_UNUSED(workspaceId)
-    return {baseUrl() + "/timer"};
+    return {apiBaseUrl() + "/timer"};
 }
 
 QUrl TimeCampManager::modifyTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
 {
     Q_UNUSED(userId)
     Q_UNUSED(workspaceId)
-    return {baseUrl() + "/entries"};
+    return {apiBaseUrl() + "/entries"};
 }
 
 QUrl TimeCampManager::deleteTimeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
@@ -43,7 +43,7 @@ QUrl TimeCampManager::deleteTimeEntryUrl(const QString &userId, const QString &w
     Q_UNUSED(userId)
     Q_UNUSED(workspaceId)
     Q_UNUSED(timeEntryId)
-    return {baseUrl() + "/timer"};
+    return {apiBaseUrl() + "/timer"};
 }
 
 QUrl TimeCampManager::timeEntryUrl(const QString &userId, const QString &workspaceId, const QString &timeEntryId)
@@ -56,7 +56,7 @@ QUrl TimeCampManager::timeEntriesUrl(const QString &userId,
                                      std::optional<QDateTime> start,
                                      std::optional<QDateTime> end) const
 {
-    QUrl url{baseUrl() + "/entries"};
+    QUrl url{apiBaseUrl() + "/entries"};
     QUrlQuery q;
     q.addQueryItem("user_ids", "me");
     auto date = QDate::currentDate();
@@ -69,22 +69,22 @@ QUrl TimeCampManager::timeEntriesUrl(const QString &userId,
 
 QUrl TimeCampManager::currentUserUrl() const
 {
-    return {baseUrl() + "/me"};
+    return {apiBaseUrl() + "/me"};
 }
 
 QUrl TimeCampManager::workspacesUrl() const
 {
-    return {baseUrl() + "/group"};
+    return {apiBaseUrl() + "/group"};
 }
 
 QUrl TimeCampManager::usersUrl(const QString &workspaceId) const
 {
-    return {baseUrl() + "/group/" + workspaceId + "/user"};
+    return {apiBaseUrl() + "/group/" + workspaceId + "/user"};
 }
 
 QUrl TimeCampManager::projectsUrl(const QString &workspaceId) const
 {
-    return {baseUrl() + "/tasks"};
+    return {apiBaseUrl() + "/tasks"};
 }
 
 const QFlags<AbstractTimeServiceManager::Pagination> TimeCampManager::supportedPagination() const

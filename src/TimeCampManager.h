@@ -14,13 +14,13 @@ public:
     virtual QString serviceIdentifier() const final { return QStringLiteral("com.timecamp"); }
     virtual QString serviceName() const final { return QStringLiteral("TimeCamp"); }
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")}; }
+    virtual const QString apiBaseUrl() const final { return QStringLiteral("https://app.timecamp.com/third_party/api"); }
     virtual const QFlags<Pagination> supportedPagination() const final;
     virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTime(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("Authorization"); }
 
-    virtual const QString baseUrl() const final { return QStringLiteral("https://app.timecamp.com/third_party/api"); }
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;

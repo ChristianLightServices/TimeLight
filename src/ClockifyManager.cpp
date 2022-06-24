@@ -44,7 +44,7 @@ QUrl ClockifyManager::timeEntryUrl([[maybe_unused]] const QString &userId,
                                    const QString &workspaceId,
                                    const QString &timeEntryId)
 {
-    return {baseUrl() + "/workspaces/" + workspaceId + "/time-entries/" + timeEntryId};
+    return {apiBaseUrl() + "/workspaces/" + workspaceId + "/time-entries/" + timeEntryId};
 }
 
 QUrl ClockifyManager::timeEntriesUrl(const QString &userId,
@@ -52,7 +52,7 @@ QUrl ClockifyManager::timeEntriesUrl(const QString &userId,
                                      std::optional<QDateTime> start,
                                      std::optional<QDateTime> end) const
 {
-    QUrl url{baseUrl() + "/workspaces/" + workspaceId + "/user/" + userId + "/time-entries"};
+    QUrl url{apiBaseUrl() + "/workspaces/" + workspaceId + "/user/" + userId + "/time-entries"};
     QUrlQuery q;
     if (start)
         q.addQueryItem(QStringLiteral("start"), start->toString(jsonTimeFormatString()));
@@ -64,22 +64,22 @@ QUrl ClockifyManager::timeEntriesUrl(const QString &userId,
 
 QUrl ClockifyManager::currentUserUrl() const
 {
-    return {baseUrl() + "/user"};
+    return {apiBaseUrl() + "/user"};
 }
 
 QUrl ClockifyManager::workspacesUrl() const
 {
-    return {baseUrl() + "/workspaces"};
+    return {apiBaseUrl() + "/workspaces"};
 }
 
 QUrl ClockifyManager::usersUrl(const QString &workspaceId) const
 {
-    return {baseUrl() + "/workspaces/" + workspaceId + "/users"};
+    return {apiBaseUrl() + "/workspaces/" + workspaceId + "/users"};
 }
 
 QUrl ClockifyManager::projectsUrl(const QString &workspaceId) const
 {
-    return {baseUrl() + "/workspaces/" + workspaceId + "/projects"};
+    return {apiBaseUrl() + "/workspaces/" + workspaceId + "/projects"};
 }
 
 const QFlags<AbstractTimeServiceManager::Pagination> ClockifyManager::supportedPagination() const

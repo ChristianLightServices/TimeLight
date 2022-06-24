@@ -13,13 +13,13 @@ public:
     virtual QString serviceIdentifier() const final { return QStringLiteral("com.clockify"); }
     virtual QString serviceName() const final { return QStringLiteral("Clockify"); }
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://clockify.me/tracker")}; }
+    virtual const QString apiBaseUrl() const final { return QStringLiteral("https://api.clockify.me/api/v1"); }
     virtual const QFlags<Pagination> supportedPagination() const final;
     virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTimeUtc(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("X-Api-Key"); }
 
-    virtual const QString baseUrl() const final { return QStringLiteral("https://api.clockify.me/api/v1"); }
     virtual QUrl runningTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl startTimeEntryUrl(const QString &userId, const QString &workspaceId) final;
     virtual QUrl stopTimeEntryUrl(const QString &userId, const QString &workspaceId) final;

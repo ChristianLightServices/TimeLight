@@ -29,6 +29,15 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
 
     auto layout = new QVBoxLayout{this};
 
+    auto timeServiceGroup = new QGroupBox{manager->serviceName(), this};
+    auto timeServiceLayout = new QGridLayout{timeServiceGroup};
+
+    auto apiBaseUrl = new QLineEdit{manager->apiBaseUrl(), timeServiceGroup};
+    apiBaseUrl->setReadOnly(true);
+
+    timeServiceLayout->addWidget(new QLabel{tr("API base URL:"), timeServiceGroup}, 0, 0);
+    timeServiceLayout->addWidget(apiBaseUrl, 0, 1);
+
     auto userGroup = new QGroupBox{tr("User"), this};
     auto userGroupLayout = new QGridLayout{userGroup};
 
@@ -110,6 +119,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
             });
     buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
 
+    layout->addWidget(timeServiceGroup);
     layout->addWidget(userGroup);
     layout->addWidget(workspaceGroup);
     layout->addWidget(projectGroup);
