@@ -47,8 +47,7 @@ void Settings::load()
     auto l = new QEventLoop{this};
     connect(job, &QKeychain::ReadPasswordJob::finished, this, [this, l, job](QKeychain::Job *) {
         if (job->error())
-            std::cout << "Could not load API key from secret storage: " << job->errorString().toStdString() << std::endl
-                      << job->key().toStdString() << std::endl;
+            std::cout << "Could not load API key from secret storage: " << job->errorString().toStdString() << std::endl;
         else
             m_apiKey = job->textData();
 
