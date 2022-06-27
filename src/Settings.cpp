@@ -5,7 +5,11 @@
 
 #include <iostream>
 
-#include <qt6keychain/keychain.h>
+#if __has_include(<keychain.h>)
+    #include <keychain.h>
+#else
+    #include <qt6keychain/keychain.h>
+#endif
 
 Settings::Settings(QObject *parent)
     : QObject{parent}

@@ -50,6 +50,7 @@ if (NOT Qt6Keychain_FOUND)
       GIT_TAG v0.13.2
     )
     set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
+    set(BUILD_WITH_QT6 ON CACHE INTERNAL "")
     FetchContent_MakeAvailable(qt6keychain)
 endif()
 
@@ -116,7 +117,7 @@ set(SRC
 )
 
 set(TRANSLATIONS
-	lang/TimeLight_en_US.ts
+    lang/TimeLight_en_US.ts
 )
 
 set(LIBRARIES
@@ -127,13 +128,6 @@ set(LIBRARIES
     nlohmann_json::nlohmann_json
 )
 
-# also stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
-# supposedly needed to make qtkeychain bundling work
-if (USED_GITHUB_QTKEYCHAIN)
-    target_include_directories(nheko PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
-endif()
-
-
 qt_add_executable(TimeLight ${OS_HACKS}
     ${SRC}
     ${APP_ICON_RESOURCE}
@@ -141,6 +135,12 @@ qt_add_executable(TimeLight ${OS_HACKS}
     res.qrc
 )
 qt_add_translations(TimeLight TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
+
+# also stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
+# supposedly needed to make qtkeychain bundling work
+#if (USED_GITHUB_QTKEYCHAIN)
+    target_include_directories(TimeLight PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
+#endif()
 
 if(APPLE)
     set_target_properties(TimeLight PROPERTIES
