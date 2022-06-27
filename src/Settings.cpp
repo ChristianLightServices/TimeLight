@@ -26,6 +26,8 @@ Settings::Settings(QObject *parent)
         }
     });
     m_saveTimer.start();
+
+    connect(qApp, &QCoreApplication::aboutToQuit, this, [this] { save(false); });
 }
 
 Settings::~Settings()
