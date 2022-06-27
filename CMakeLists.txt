@@ -55,7 +55,11 @@ if (NOT Qt6Keychain_FOUND)
       GIT_TAG v0.13.2
     )
 
-    FetchContent_MakeAvailable(qt6keychain)
+    FetchContent_GetProperties(qt6keychain)
+    if(NOT qt6keychain_POPULATED)
+      FetchContent_Populate(qt6keychain)
+      add_subdirectory(${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
 endif()
 
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
