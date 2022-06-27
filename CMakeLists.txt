@@ -37,6 +37,31 @@ if(NOT nlohmann_json_FOUND)
     endif()
 endif()
 
+find_package(Qt6Keychain 0.13.2)
+
+# sorta stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
+if (NOT Qt6Keychain_FOUND)
+    message("Fetching qtkeychain from GitHub...")
+
+    set(USED_GITHUB_QTKEYCHAIN ON)
+    set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
+    set(BUILD_WITH_QT6 ON CACHE INTERNAL "")
+    # build qtkeychain statically to avoid Qt deployment issues
+    set(QTKEYCHAIN_STATIC ON CACHE INTERNAL "")
+
+    include(FetchContent)
+    FetchContent_Declare(qt6keychain
+      GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
+      GIT_TAG v0.13.2
+    )
+
+    FetchContent_GetProperties(qt6keychain)
+    if(NOT qt6keychain_POPULATED)
+      FetchContent_Populate(qt6keychain)
+      add_subdirectory(${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endif()
+
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
@@ -100,12 +125,13 @@ set(SRC
 )
 
 set(TRANSLATIONS
-	lang/TimeLight_en_US.ts
+    lang/TimeLight_en_US.ts
 )
 
 set(LIBRARIES
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Widgets
+    qt6keychain
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
 )
@@ -117,6 +143,12 @@ qt_add_executable(TimeLight ${OS_HACKS}
     res.qrc
 )
 qt_add_translations(TimeLight TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
+
+# also stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
+# supposedly needed to make qtkeychain bundling work
+if (USED_GITHUB_QTKEYCHAIN)
+    target_include_directories(TimeLight PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
+endif()
 
 if(APPLE)
     set_target_properties(TimeLight PROPERTIES
@@ -136,7 +168,7 @@ target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
 install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
 if(WIN32)
-	include(InstallRequiredSystemLibraries)
+    include(InstallRequiredSystemLibraries)
 endif()
 if(UNIX AND NOT APPLE)
     install(FILES "TimeLight.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "${PROJECT_NAME}")

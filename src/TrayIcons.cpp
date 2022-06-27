@@ -148,7 +148,7 @@ TrayIcons::TrayIcons(QObject *parent)
         return;
     }
 
-    while (!Settings::instance()->useLastProject() && (Settings::instance()->projectId().isEmpty()) ||
+    while ((!Settings::instance()->useLastProject() && Settings::instance()->projectId().isEmpty()) ||
            (Settings::instance()->useSeparateBreakTime() && Settings::instance()->breakTimeId().isEmpty()))
     {
         QMessageBox::information(

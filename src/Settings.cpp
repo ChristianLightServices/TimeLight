@@ -1,6 +1,15 @@
 #include "Settings.h"
 
+#include <QCoreApplication>
 #include <QSettings>
+
+#include <iostream>
+
+#if __has_include(<keychain.h>)
+    #include <keychain.h>
+#else
+    #include <qt6keychain/keychain.h>
+#endif
 
 Settings::Settings(QObject *parent)
     : QObject{parent}
@@ -17,11 +26,13 @@ Settings::Settings(QObject *parent)
         }
     });
     m_saveTimer.start();
+
+    connect(qApp, &QCoreApplication::aboutToQuit, this, [this] { save(false); });
 }
 
 Settings::~Settings()
 {
-    save();
+    save(false);
 }
 
 void Settings::load()
@@ -30,8 +41,32 @@ void Settings::load()
 
     m_timeService = settings.value(QStringLiteral("timeService")).toString();
 
+    auto job = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
+    job->setAutoDelete(true);
+    job->setInsecureFallback(true);
+    job->setKey(m_timeService + "/apiKey");
+
+    auto l = new QEventLoop{this};
+    connect(job, &QKeychain::ReadPasswordJob::finished, this, [this, l, job](QKeychain::Job *) {
+        if (job->error())
+        {
+            std::cout << "Could not load API key from secret storage: " << job->errorString().toStdString() << std::endl;
+
+            // TODO: delete this migration after a while
+            QSettings settings;
+            if (settings.contains(job->key()))
+                m_apiKey = settings.value(job->key()).toString();
+        }
+        else
+            m_apiKey = job->textData();
+
+        l->quit();
+        l->deleteLater();
+    });
+    job->start();
+    l->exec();
+
     settings.beginGroup(m_timeService);
-    m_apiKey = settings.value(QStringLiteral("apiKey")).toString();
     m_breakTimeId = settings.value(QStringLiteral("breakTimeId")).toString();
     m_description = settings.value(QStringLiteral("description")).toString();
     m_disableDescription = settings.value(QStringLiteral("disableDescription"), false).toBool();
@@ -215,14 +250,35 @@ void Settings::setDeveloperMode(const bool state)
     m_settingsDirty = true;
 }
 
-void Settings::save()
+void Settings::save(bool async)
 {
+    auto job = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
+    job->setAutoDelete(true);
+    job->setInsecureFallback(true);
+    job->setKey(m_timeService + "/apiKey");
+    job->setTextData(m_apiKey);
+
+    auto l = new QEventLoop{this};
+    connect(job, &QKeychain::WritePasswordJob::finished, job, [l](QKeychain::Job *job) {
+        if (job->error())
+            std::cerr << "Failed to save API key to secret storage: " << job->errorString().toStdString() << std::endl;
+        l->quit();
+        l->deleteLater();
+    });
+    job->start();
+    if (!async)
+        l->exec();
+
     QSettings settings;
 
     settings.setValue(QStringLiteral("timeService"), m_timeService);
 
     settings.beginGroup(m_timeService);
-    settings.setValue(QStringLiteral("apiKey"), m_apiKey);
+
+    // Since the API key is now handled by qtkeychain, we'll delete the old copy.
+    settings.remove(QStringLiteral("apiKey"));
+    // TODO: Delete the above migration after an appropriate amount of time.
+
     settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
     settings.setValue(QStringLiteral("description"), m_description);
     settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);

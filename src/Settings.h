@@ -79,7 +79,7 @@ private:
     ~Settings() override;
 
     void load();
-    void save();
+    void save(bool async = true);
 
     QTimer m_saveTimer;
     bool m_settingsDirty{false};

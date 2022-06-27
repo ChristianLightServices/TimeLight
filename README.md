@@ -22,7 +22,10 @@ This project depends on the following libraries:
 
 - [Qt](https://qt.io) 6.2 or higher
 - [nlohmann/json](https://github.com/nlohmann/json) 3.10.5 or higher
+- [qtkeychain](https://github.com/frankosterfeld/qtkeychain) 0.13.2 or higher
 - [SingleApplication](https://github.com/itay-grudev/SingleApplication) (bundled as a submodule)
+
+`nlohmann/json` and `qtkeychain` will automatically be fetched from GitHub by CMake if you do not provide them in your build environment.
 
 Additionally, building the application requires the following:
 
