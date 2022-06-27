@@ -37,6 +37,22 @@ if(NOT nlohmann_json_FOUND)
     endif()
 endif()
 
+find_package(Qt6Keychain 0.13.2)
+
+# sorta stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
+if (NOT Qt6Keychain_FOUND)
+    message("Fetching qtkeychain from GitHub...")
+    set(USED_GITHUB_QTKEYCHAIN ON)
+
+    include(FetchContent)
+    FetchContent_Declare(qt6keychain
+      GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
+      GIT_TAG v0.13.2
+    )
+    set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
+    FetchContent_MakeAvailable(qt6keychain)
+endif()
+
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
@@ -106,9 +122,17 @@ set(TRANSLATIONS
 set(LIBRARIES
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Widgets
+    qt6keychain
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
 )
+
+# also stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
+# supposedly needed to make qtkeychain bundling work
+if (USED_GITHUB_QTKEYCHAIN)
+    target_include_directories(nheko PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
+endif()
+
 
 qt_add_executable(TimeLight ${OS_HACKS}
     ${SRC}
