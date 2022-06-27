@@ -257,7 +257,7 @@ void Settings::save(bool async)
     job->setTextData(m_apiKey);
 
     auto l = new QEventLoop{this};
-    connect(job, &QKeychain::WritePasswordJob::finished, job, [this, l](QKeychain::Job *job) {
+    connect(job, &QKeychain::WritePasswordJob::finished, job, [l](QKeychain::Job *job) {
         if (job->error())
             std::cerr << "Failed to save API key to secret storage: " << job->errorString().toStdString() << std::endl;
         l->quit();
