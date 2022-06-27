@@ -47,7 +47,14 @@ void Settings::load()
     auto l = new QEventLoop{this};
     connect(job, &QKeychain::ReadPasswordJob::finished, this, [this, l, job](QKeychain::Job *) {
         if (job->error())
+        {
             std::cout << "Could not load API key from secret storage: " << job->errorString().toStdString() << std::endl;
+
+            // TODO: delete this migration after a while
+            QSettings settings;
+            if (settings.contains(job->key()))
+                m_apiKey = settings.value(job->key()).toString();
+        }
         else
             m_apiKey = job->textData();
 
