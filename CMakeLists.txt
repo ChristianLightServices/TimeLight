@@ -42,15 +42,19 @@ find_package(Qt6Keychain 0.13.2)
 # sorta stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
 if (NOT Qt6Keychain_FOUND)
     message("Fetching qtkeychain from GitHub...")
+
     set(USED_GITHUB_QTKEYCHAIN ON)
+    set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
+    set(BUILD_WITH_QT6 ON CACHE INTERNAL "")
+    # build qtkeychain statically to avoid Qt deployment issues
+    set(QTKEYCHAIN_STATIC ON CACHE INTERNAL "")
 
     include(FetchContent)
     FetchContent_Declare(qt6keychain
       GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
       GIT_TAG v0.13.2
     )
-    set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
-    set(BUILD_WITH_QT6 ON CACHE INTERNAL "")
+
     FetchContent_MakeAvailable(qt6keychain)
 endif()
 
@@ -138,9 +142,9 @@ qt_add_translations(TimeLight TS_FILES ${TRANSLATIONS} SOURCES ${SRC})
 
 # also stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
 # supposedly needed to make qtkeychain bundling work
-#if (USED_GITHUB_QTKEYCHAIN)
+if (USED_GITHUB_QTKEYCHAIN)
     target_include_directories(TimeLight PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
-#endif()
+endif()
 
 if(APPLE)
     set_target_properties(TimeLight PROPERTIES
@@ -160,7 +164,7 @@ target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
 install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
 if(WIN32)
-	include(InstallRequiredSystemLibraries)
+    include(InstallRequiredSystemLibraries)
 endif()
 if(UNIX AND NOT APPLE)
     install(FILES "TimeLight.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" COMPONENT "${PROJECT_NAME}")
