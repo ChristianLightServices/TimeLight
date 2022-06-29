@@ -613,7 +613,7 @@ void TrayIcons::setUpTrayIcons()
         });
     }
 
-    connect(m_manager, &ClockifyManager::internetConnectionChanged, this, [this](bool) { updateTrayIcons(); });
+    connect(m_manager, &ClockifyManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
 
     connect(
         this,
