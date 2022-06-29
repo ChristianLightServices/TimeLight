@@ -219,11 +219,14 @@ Project TrayIcons::defaultProject()
         projectId = Settings::instance()->projectId();
     else
     {
-        bool projectIdLoaded{false};
-        entries = m_user.getTimeEntries(pageNum);
-
         do
         {
+            auto newEntries = m_user.getTimeEntries(pageNum++);
+            if (newEntries.empty())
+                itemsLeftToLoad = false;
+            else
+                entries.append(newEntries);
+
             for (const auto &entry : entries)
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
@@ -235,22 +238,15 @@ Project TrayIcons::defaultProject()
                          entry.project().id() != Settings::instance()->breakTimeId())
                 {
                     projectId = entry.project().id();
-                    projectIdLoaded = true;
                     break;
                 }
             }
             if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
                 break;
-
-            auto newEntries = m_user.getTimeEntries(++pageNum);
-            if (newEntries.empty())
-                itemsLeftToLoad = false;
-            else
-                entries.append(newEntries);
-        } while (itemsLeftToLoad || !projectIdLoaded);
+        } while (itemsLeftToLoad && projectId.isEmpty());
 
         // when all else fails, use the first extant project
-        if (!projectIdLoaded) [[unlikely]]
+        if (projectId.isEmpty()) [[unlikely]]
             projectId = m_manager->projects().first().id();
     }
 
@@ -282,7 +278,7 @@ Project TrayIcons::defaultProject()
                 itemsLeftToLoad = false;
             else
                 entries.append(newEntries);
-        } while (itemsLeftToLoad || !descriptionLoaded);
+        } while (itemsLeftToLoad && !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
             description = m_manager->projects().first().description();
