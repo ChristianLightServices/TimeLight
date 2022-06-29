@@ -354,7 +354,6 @@ private:
     QTimer m_expireProjectsTimer;
     QTimer m_expireWorkspacesTimer;
     QTimer m_expireUsersTimer;
-    QTimer m_checkConnectionTimer;
 
     static const NetworkReplyCallback s_defaultSuccessCb;
     static const NetworkReplyCallback s_defaultFailureCb;

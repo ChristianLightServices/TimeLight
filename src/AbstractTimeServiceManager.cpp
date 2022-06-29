@@ -311,32 +311,6 @@ void AbstractTimeServiceManager::callInitVirtualMethods()
     // request currently logged in user (the one whose API key we're using) as a validity test
     // and also in order to cache API key info
     updateCurrentUser();
-
-    auto checkInternet = [this] {
-        // TODO: possibly abstract this URL?
-        head(
-            QUrl{"https://clockify.me"},
-            [this](QNetworkReply *) {
-                // a changed internet connection is rather unlikely
-                if (!m_isConnectedToInternet) [[unlikely]]
-                {
-                    m_isConnectedToInternet = true;
-                    emit internetConnectionChanged(m_isConnectedToInternet);
-                }
-            },
-            [this](QNetworkReply *) {
-                if (m_isConnectedToInternet) [[unlikely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(m_isConnectedToInternet);
-                }
-            });
-    };
-    checkInternet();
-    m_checkConnectionTimer.setInterval(5000); // check connection every 5s, since it's not that likely to change a lot
-    m_checkConnectionTimer.callOnTimeout(checkInternet);
-    m_checkConnectionTimer.setSingleShot(false);
-    m_checkConnectionTimer.start();
 }
 
 void AbstractTimeServiceManager::updateCurrentUser()
