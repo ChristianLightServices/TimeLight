@@ -129,8 +129,8 @@ set(TRANSLATIONS
 )
 
 set(LIBRARIES
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt6::Network
+    Qt6::Widgets
     qt6keychain
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
