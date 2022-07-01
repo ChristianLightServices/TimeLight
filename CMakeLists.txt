@@ -205,7 +205,7 @@ if(GENERATE_INSTALLER)
     else()
         set(CPACK_IFW_PACKAGE_RUN_PROGRAM "@TargetDir@/bin/TimeLight")
     endif()
-    set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT "${CMAKE_SOURCE_DIR}/installer/installscript.qs")
+    set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT "${CMAKE_SOURCE_DIR}/installer/controller.qs")
 
     if(WIN32)
         # set up windeployqt
@@ -227,7 +227,7 @@ if(GENERATE_INSTALLER)
     cpack_ifw_configure_component(TimeLight
         FORCED_INSTALLATION
         LICENSES "License" LICENSE
-        SCRIPT "${CMAKE_SOURCE_DIR}/installer/shortcuts.qs"
+        SCRIPT "${CMAKE_SOURCE_DIR}/installer/components.qs"
         USER_INTERFACES "${CMAKE_SOURCE_DIR}/installer/pages/InstallType.ui"
     )
 endif()
