@@ -47,7 +47,7 @@ if (NOT Qt6Keychain_FOUND)
     set(BUILD_TEST_APPLICATION OFF CACHE INTERNAL "")
     set(BUILD_WITH_QT6 ON CACHE INTERNAL "")
     # build qtkeychain statically to avoid Qt deployment issues
-    set(QTKEYCHAIN_STATIC ON CACHE INTERNAL "")
+    set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 
     include(FetchContent)
     FetchContent_Declare(qt6keychain
