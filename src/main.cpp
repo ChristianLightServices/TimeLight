@@ -1,13 +1,3 @@
-#include <QApplication>
-#include <QCommandLineOption>
-#include <QCommandLineParser>
-#include <QDesktopServices>
-#include <QInputDialog>
-#include <QMenu>
-#include <QMessageBox>
-#include <QSettings>
-#include <QSystemTrayIcon>
-#include <QTimer>
 #include <QTranslator>
 
 #include <SingleApplication>
