@@ -28,36 +28,7 @@ function Controller()
     }
 }
 
-Controller.prototype.TargetDirectoryPageCallback = function()
-{
-    var page = gui.currentPageWidget();
-    page.TargetDirectoryLineEdit.textChanged.connect(this, Controller.prototype.checkForExistingInstall);
-    Controller.prototype.checkForExistingInstall(page.TargetDirectoryLineEdit.text);
-}
-
-Controller.prototype.checkForExistingInstall = function(text)
-{
-    let oldInstaller = text + "/maintenancetool.exe";
-    if (text != "" && installer.fileExists(oldInstaller))
-        if (QMessageBox.question("uninstallprevious.question",
-                                 "Remove previous installation",
-                                 "Do you want to remove the previous installation of TimeLight before installing this version?",
-                                 QMessageBox.Yes | QMessageBox.No)
-                === QMessageBox.Yes)
-            installer.execute(oldInstaller, ["PleaseDeleteMeWithNaryAWordOfProtest=AbsolutelyGoRightAhead"]);
-}
-
 Controller.prototype.PerformInstallationPageCallback = function()
 {
     installer.killProcess("@TargetDir@/bin/" + (systemInfo.productType === "windows" ? "TimeLight.exe" : "TimeLight"));
-}
-
-Controller.prototype.FinishedPageCallback = function()
-{
-    var page = gui.currentPageWidget();
-    if (page != null)
-    {
-        if (systemInfo.productType === "windows" && !installer.isUninstaller())
-            page.MessageLabel.setText("If you want TimeLight to automatically start when you start your computer, hold down the Windows key and press the R key. The Run dialog will appear. Type 'shell:startup' into the Run dialog (without the quotes) and press Enter. Windows Explorer will open. Now copy the TimeLight shortcut from your desktop into that Explorer window.\n\nClick Finish to exit the installer.");
-    }
 }

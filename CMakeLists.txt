@@ -228,5 +228,6 @@ if(GENERATE_INSTALLER)
         FORCED_INSTALLATION
         LICENSES "License" LICENSE
         SCRIPT "${CMAKE_SOURCE_DIR}/installer/shortcuts.qs"
+        USER_INTERFACES "${CMAKE_SOURCE_DIR}/installer/pages/InstallType.ui"
     )
 endif()
