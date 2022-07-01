@@ -56,9 +56,26 @@ Component.prototype.createOperations = function()
     component.createOperations();
     if (systemInfo.productType === "windows")
     {
-        component.addOperation("CreateShortcut", "@TargetDir@/bin/TimeLight.exe", "@StartMenuDir@/TimeLight.lnk");
-        component.addOperation("CreateShortcut", "@TargetDir@/bin/TimeLight.exe", "@DesktopDir@/TimeLight.lnk");
-        // TODO: figure out how to do this (probably conditionally)
-        // component.addOperation("CreateShortcut", "@TargetDir@/bin/TimeLight.exe", "@StartupDir@/TimeLight.lnk");
+        let appPath = installer.toNativeSeparators("@TargetDir@\\bin\\TimeLight.exe");
+        component.addOperation("CreateShortcut", appPath, "@StartMenuDir@\\TimeLight.lnk");
+        component.addOperation("CreateShortcut", appPath, "@DesktopDir@\\TimeLight.lnk");
+        component.addOperation("Execute",
+                               installer.environmentVariable("systemroot") + "\\System32\\reg.exe",
+                               "ADD",
+                               "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                               "/v",
+                               "TimeLight",
+                               "/t",
+                               "REG_SZ",
+                               "/d",
+                               appPath,
+                               "/f",
+                               "UNDOEXECUTE",
+                               installer.environmentVariable("systemroot") + "\\System32\\reg.exe",
+                               "DELETE",
+                               "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                               "/v",
+                               "TimeLight",
+                               "/f");
     }
 }
