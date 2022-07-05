@@ -56,7 +56,7 @@ Component.prototype.createOperations = function()
     component.createOperations();
     if (systemInfo.productType === "windows")
     {
-        let appPath = installer.toNativeSeparators("@TargetDir@\\bin\\TimeLight.exe");
+        let appPath = installer.toNativeSeparators(installer.value("TargetDir") + "\\bin\\TimeLight.exe");
         component.addOperation("CreateShortcut", appPath, "@StartMenuDir@\\TimeLight.lnk");
         component.addOperation("CreateShortcut", appPath, "@DesktopDir@\\TimeLight.lnk");
         component.addOperation("Execute",
