@@ -45,6 +45,10 @@ TrayIcons::TrayIcons(QObject *parent)
         m_teamsClient->setRefreshToken(Settings::instance()->graphRefreshToken());
         m_teamsClient->authenticate();
     }
+    connect(Settings::instance(), &Settings::useTeamsIntegrationChanged, this, [this] {
+        if (!m_teamsClient->authenticated())
+            m_teamsClient->authenticate();
+    });
 
     while (Settings::instance()->timeService().isEmpty())
     {
