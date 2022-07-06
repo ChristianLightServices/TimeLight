@@ -91,6 +91,9 @@ void Settings::load()
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
     m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
     m_developerMode = settings.value(QStringLiteral("developerMode"), false).toBool();
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("teams"));
     m_useTeamsIntegration = settings.value(QStringLiteral("useTeamsIntegration"), false).toBool();
     m_presenceWhileWorking =
         settings.value(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(TeamsClient::Presence::Available))
@@ -134,7 +137,6 @@ void Settings::load()
     });
     refreshTokenJob->start();
     l->exec();
-
     settings.endGroup();
 }
 
@@ -393,6 +395,9 @@ void Settings::save(bool async)
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);
     settings.setValue(QStringLiteral("weekHours"), m_weekHours);
     settings.setValue(QStringLiteral("developerMode"), m_developerMode);
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("teams"));
     settings.setValue(QStringLiteral("useTeamsIntegration"), m_useTeamsIntegration);
     settings.setValue(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(m_presenceWhileWorking));
     settings.setValue(QStringLiteral("presenceWhileOnBreak"), static_cast<unsigned int>(m_presenceWhileOnBreak));
@@ -428,6 +433,5 @@ void Settings::save(bool async)
     refreshTokenJob->start();
     if (!async)
         l->exec();
-
     settings.endGroup();
 }
