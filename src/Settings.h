@@ -34,6 +34,9 @@ public:
     bool alertOnTimeUp() const { return m_alertOnTimeUp; }
     double weekHours() const { return m_weekHours; }
     bool developerMode() const { return m_developerMode; }
+    bool useTeamsIntegration() const { return m_useTeamsIntegration; }
+    const QString &graphAccessToken() const { return m_graphAccessToken; }
+    const QString &graphRefreshToken() const { return m_graphRefreshToken; }
 
     static void init();
     static Settings *instance() { return s_instance; }
@@ -55,6 +58,9 @@ public slots:
     void setAlertOnTimeUp(const bool alert);
     void setWeekHours(const double hours);
     void setDeveloperMode(const bool state);
+    void setUseTeamsIntegration(const bool state);
+    void setGraphAccessToken(const QString &token);
+    void setGraphRefreshToken(const QString &token);
 
 signals:
     void timeServiceChanged();
@@ -73,6 +79,9 @@ signals:
     void alertOnTimeUpChanged();
     void weekHoursChanged();
     void developerModeChanged();
+    void useTeamsIntegrationChanged();
+    void graphAccessTokenChanged();
+    void graphRefreshTokenChanged();
 
 private:
     explicit Settings(QObject *parent = nullptr);
@@ -105,6 +114,10 @@ private:
     int m_eventLoopInterval;
 
     bool m_developerMode;
+
+    bool m_useTeamsIntegration;
+    QString m_graphAccessToken;
+    QString m_graphRefreshToken;
 };
 
 #endif // SETTINGS_H

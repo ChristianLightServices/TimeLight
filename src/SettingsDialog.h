@@ -20,6 +20,7 @@ public:
         BackendPage,
         ProjectPage,
         AppPage,
+        TeamsPage,
     };
 
     void switchToPage(Pages page);
@@ -28,6 +29,7 @@ private:
     QWidget *createBackendPage();
     QWidget *createProjectPage();
     QWidget *createAppPage();
+    QWidget *createTeamsPage();
 
     AbstractTimeServiceManager *m_manager;
     // ordered as {name, id}
@@ -37,6 +39,7 @@ private:
     QWidget *m_backendPage;
     QWidget *m_projectPage;
     QWidget *m_appPage;
+    QWidget *m_teamsPage;
 
     QPair<QStringList, QStringList> m_availableProjects;
 

@@ -40,9 +40,11 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
     m_backendPage = createBackendPage();
     m_projectPage = createProjectPage();
     m_appPage = createAppPage();
+    m_teamsPage = createTeamsPage();
     m_tabWidget->addTab(m_backendPage, tr("Backend settings"));
     m_tabWidget->addTab(m_projectPage, tr("Default project"));
     m_tabWidget->addTab(m_appPage, tr("App settings"));
+    m_tabWidget->addTab(m_teamsPage, tr("Microsoft Teams"));
 
     auto mainWidgetLayout = new QVBoxLayout{this};
     mainWidgetLayout->addWidget(m_tabWidget);
@@ -74,6 +76,9 @@ void SettingsDialog::switchToPage(Pages page)
         break;
     case Pages::AppPage:
         m_tabWidget->setCurrentWidget(m_appPage);
+        break;
+    case Pages::TeamsPage:
+        m_tabWidget->setCurrentWidget(m_teamsPage);
         break;
     }
 }
@@ -445,4 +450,21 @@ QWidget *SettingsDialog::createAppPage()
     });
 
     return appPage;
+}
+
+QWidget *SettingsDialog::createTeamsPage()
+{
+    auto teamsPage{new QWidget{this}};
+    auto layout{new QGridLayout{teamsPage}};
+
+    auto useTeams = new QCheckBox{tr("Set presence in Microsoft Teams to match work status"), teamsPage};
+    useTeams->setChecked(Settings::instance()->useTeamsIntegration());
+
+    layout->addWidget(useTeams, 0, 0);
+
+    TimeLight::addVerticalStretchToQGridLayout(layout);
+
+    connect(useTeams, &QCheckBox::clicked, this, [](bool state) { Settings::instance()->setUseTeamsIntegration(state); });
+
+    return teamsPage;
 }

@@ -25,12 +25,27 @@
 #include "SettingsDialog.h"
 #include "TimeCampManager.h"
 #include "User.h"
+#include "Utils.h"
 #include "version.h"
 
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
-      m_timerRunning{new QSystemTrayIcon}
+      m_timerRunning{new QSystemTrayIcon},
+      m_teamsClient{new TeamsClient{TimeLight::teamsAppId, 6942, this}}
 {
+    connect(m_teamsClient, &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
+        Settings::instance()->setGraphAccessToken(m_teamsClient->accessToken());
+    });
+    connect(m_teamsClient, &TeamsClient::refreshTokenChanged, Settings::instance(), [this] {
+        Settings::instance()->setGraphRefreshToken(m_teamsClient->refreshToken());
+    });
+    if (Settings::instance()->useTeamsIntegration())
+    {
+        m_teamsClient->setAccessToken(Settings::instance()->graphAccessToken());
+        m_teamsClient->setRefreshToken(Settings::instance()->graphRefreshToken());
+        m_teamsClient->authenticate();
+    }
+
     while (Settings::instance()->timeService().isEmpty())
     {
         bool ok{false};
@@ -675,6 +690,9 @@ void TrayIcons::setTimerState(TimerState state)
             emit jobEnded();
         if (m_timerState != TimerState::Running)
             emit jobStarted();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(TeamsClient::Presence::Available);
         break;
     case TimerState::OnBreak:
         m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
@@ -690,6 +708,9 @@ void TrayIcons::setTimerState(TimerState state)
             emit jobEnded();
         if (m_timerState != TimerState::OnBreak)
             emit jobStarted();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(TeamsClient::Presence::Away);
         break;
     case TimerState::NotRunning:
         m_timerRunning->setToolTip(tr("%1 is not running").arg(m_manager->serviceName()));
@@ -703,6 +724,9 @@ void TrayIcons::setTimerState(TimerState state)
 
         if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
             emit jobEnded();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(TeamsClient::Presence::Away);
         break;
     case TimerState::Offline:
         m_timerRunning->setToolTip(tr("You are offline"));

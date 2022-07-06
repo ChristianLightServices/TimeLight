@@ -31,6 +31,7 @@ jobs:
         with:
           version: ${{ matrix.qt-version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          modules: 'qtnetworkauth'
 
       - name: Checkout code
         uses: actions/checkout@v2
