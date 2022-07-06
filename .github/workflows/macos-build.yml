@@ -32,6 +32,7 @@ jobs:
           version: ${{ matrix.qt-version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           modules: 'qtnetworkauth'
+          aqtversion: "==2.1.*"
           # work around https://github.com/jurplel/install-qt-action/issues/142 as per https://github.com/jurplel/install-qt-action/issues/130
           setup-python: false
 

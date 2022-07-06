@@ -32,6 +32,7 @@ jobs:
           version: ${{ matrix.qt-version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           modules: 'qtnetworkauth'
+          aqtversion: "==2.1.*"
 
       - name: Install Qt IFW
         uses: jmarrec/setup-qtifw@v1.0.3
