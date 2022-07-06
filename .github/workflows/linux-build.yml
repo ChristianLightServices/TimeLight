@@ -24,13 +24,15 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: qt-cache-${{ matrix.qt-version }}-${{ runner.os }}
+          key: qt-cache-${{ matrix.qt-version }}-${{ runner.os }}-version-2
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt-version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          modules: 'qtnetworkauth'
+          aqtversion: "==2.1.*"
 
       - name: Checkout code
         uses: actions/checkout@v2

@@ -1,5 +1,6 @@
 #include "Utils.h"
 
+#include <QApplication>
 #include <QWidget>
 
 void TimeLight::restartApp()

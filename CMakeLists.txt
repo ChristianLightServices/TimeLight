@@ -14,7 +14,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.2 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
 # (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
@@ -112,6 +112,8 @@ set(SRC
     src/Settings.h
     src/SettingsDialog.cpp
     src/SettingsDialog.h
+    src/TeamsClient.cpp
+    src/TeamsClient.h
     src/TimeEntry.cpp
     src/TimeEntry.h
     src/TrayIcons.cpp
@@ -130,6 +132,7 @@ set(TRANSLATIONS
 
 set(LIBRARIES
     Qt6::Network
+    Qt6::NetworkAuth
     Qt6::Widgets
     qt6keychain
     SingleApplication::SingleApplication

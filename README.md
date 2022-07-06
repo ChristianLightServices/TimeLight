@@ -2,7 +2,7 @@
 
 [![Linux build](https://github.com/ChristianLightServices/TimeLight/actions/workflows/linux-build.yml/badge.svg)](https://github.com/ChristianLightServices/TimeLight/actions/workflows/linux-build.yml) [![Windows build](https://github.com/ChristianLightServices/TimeLight/actions/workflows/windows-build.yml/badge.svg)](https://github.com/ChristianLightServices/TimeLight/actions/workflows/windows-build.yml) [![macOS build](https://github.com/ChristianLightServices/TimeLight/actions/workflows/macos-build.yml/badge.svg)](https://github.com/ChristianLightServices/TimeLight/actions/workflows/macos-build.yml)
 
-Ever fancy a simpler way to use your favorite time tracking service? Here it is: a button that sits in your system tray and, when clicked, switches your timer on and off. It supports both Clockify and TimeCamp; furthermore, its code is designed to make it trivial to add support for other time services.
+Ever fancy a simpler way to use your favorite time tracking service? Here it is: a button that sits in your system tray and, when clicked, switches your timer on and off. It supports both Clockify and TimeCamp; furthermore, its code is designed to make it trivial to add support for other time services. As if that weren't cool enough, it can automatically set your presence in Microsoft Teams to indicate to others whether you are working or not.
 
 ## Usage
 
@@ -15,6 +15,8 @@ Right-clicking the button will provide you with several options. The most import
 A few settings deserve a bit of explanation. On the "Default project" page, there is setting that is labeled "Use a separate break time project". If enabled, this setting will cause TimeLight to display two buttons. The first button will allow you to turn your time service on or off, while the second button is designed to allow you to switch from your normal project to a specific project designated as a break time project. Of course, this setting could be used for other projects as well.
 
 The "Interval between updates of data" setting on the "App settings" tab allows you to configure how often TimeLight checks the status of your time entries on the web server. If you are using TimeCamp, it is recommended to set this to a large value, as checking too often will result in TimeLight being temporarily blocked; Clockify users should not have to worry about this, because Clockify allows apps to perform 10 checks per second.
+
+## Teams integration
 
 ## Requirements
 

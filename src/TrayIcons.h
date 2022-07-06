@@ -7,6 +7,7 @@
 
 #include "AbstractTimeServiceManager.h"
 #include "Project.h"
+#include "TeamsClient.h"
 #include "User.h"
 
 class TrayIcons : public QObject
@@ -65,6 +66,7 @@ private:
     void checkForFinishedWeek();
 
     AbstractTimeServiceManager *m_manager;
+    TeamsClient *m_teamsClient;
 
     QSystemTrayIcon *m_timerRunning{nullptr};
     QSystemTrayIcon *m_runningJob{nullptr};

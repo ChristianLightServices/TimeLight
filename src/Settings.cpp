@@ -41,29 +41,29 @@ void Settings::load()
 
     m_timeService = settings.value(QStringLiteral("timeService")).toString();
 
-    auto job = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
-    job->setAutoDelete(true);
-    job->setInsecureFallback(true);
-    job->setKey(m_timeService + "/apiKey");
+    auto apiKeyJob = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
+    apiKeyJob->setAutoDelete(true);
+    apiKeyJob->setInsecureFallback(true);
+    apiKeyJob->setKey(m_timeService + "/apiKey");
 
     auto l = new QEventLoop{this};
-    connect(job, &QKeychain::ReadPasswordJob::finished, this, [this, l, job](QKeychain::Job *) {
-        if (job->error())
+    connect(apiKeyJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, apiKeyJob](QKeychain::Job *) {
+        if (const auto e = apiKeyJob->error(); e && e != QKeychain::Error::EntryNotFound)
         {
-            std::cout << "Could not load API key from secret storage: " << job->errorString().toStdString() << std::endl;
+            std::cout << "Could not load API key from secret storage: " << apiKeyJob->errorString().toStdString()
+                      << std::endl;
 
             // TODO: delete this migration after a while
             QSettings settings;
-            if (settings.contains(job->key()))
-                m_apiKey = settings.value(job->key()).toString();
+            if (settings.contains(apiKeyJob->key()))
+                m_apiKey = settings.value(apiKeyJob->key()).toString();
         }
         else
-            m_apiKey = job->textData();
+            m_apiKey = apiKeyJob->textData();
 
         l->quit();
-        l->deleteLater();
     });
-    job->start();
+    apiKeyJob->start();
     l->exec();
 
     settings.beginGroup(m_timeService);
@@ -91,6 +91,52 @@ void Settings::load()
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
     m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
     m_developerMode = settings.value(QStringLiteral("developerMode"), false).toBool();
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("teams"));
+    m_useTeamsIntegration = settings.value(QStringLiteral("useTeamsIntegration"), false).toBool();
+    m_presenceWhileWorking =
+        settings.value(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(TeamsClient::Presence::Available))
+            .value<TeamsClient::Presence>();
+    m_presenceWhileOnBreak =
+        settings.value(QStringLiteral("presenceWhileOnBreak"), static_cast<unsigned int>(TeamsClient::Presence::Away))
+            .value<TeamsClient::Presence>();
+    m_presenceWhileNotWorking =
+        settings.value(QStringLiteral("presenceWhileNotWorking"), static_cast<unsigned int>(TeamsClient::Presence::Away))
+            .value<TeamsClient::Presence>();
+
+    auto accessTokenJob = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
+    accessTokenJob->setAutoDelete(true);
+    accessTokenJob->setInsecureFallback(true);
+    accessTokenJob->setKey("microsoft-graph-access-token");
+    connect(accessTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, accessTokenJob](QKeychain::Job *) {
+        if (const auto e = accessTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
+            std::cout << "Could not load Graph access token from secret storage: "
+                      << accessTokenJob->errorString().toStdString() << std::endl;
+        else
+            m_graphAccessToken = accessTokenJob->textData();
+
+        l->quit();
+    });
+    accessTokenJob->start();
+    l->exec();
+
+    auto refreshTokenJob = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
+    refreshTokenJob->setAutoDelete(true);
+    refreshTokenJob->setInsecureFallback(true);
+    refreshTokenJob->setKey("microsoft-graph-refresh-token");
+    connect(refreshTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, refreshTokenJob](QKeychain::Job *) {
+        if (const auto e = refreshTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
+            std::cout << "Could not load Graph refresh token from secret storage: "
+                      << refreshTokenJob->errorString().toStdString() << std::endl;
+        else
+            m_graphRefreshToken = refreshTokenJob->textData();
+
+        l->quit();
+        l->deleteLater();
+    });
+    refreshTokenJob->start();
+    l->exec();
     settings.endGroup();
 }
 
@@ -250,22 +296,75 @@ void Settings::setDeveloperMode(const bool state)
     m_settingsDirty = true;
 }
 
+void Settings::setUseTeamsIntegration(const bool state)
+{
+    if (state == m_useTeamsIntegration)
+        return;
+    m_useTeamsIntegration = state;
+    emit useTeamsIntegrationChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setGraphAccessToken(const QString &token)
+{
+    if (token == m_graphAccessToken)
+        return;
+    m_graphAccessToken = token;
+    emit graphAccessTokenChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setGraphRefreshToken(const QString &token)
+{
+    if (token == m_graphRefreshToken)
+        return;
+    m_graphRefreshToken = token;
+    emit graphRefreshTokenChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setPresenceWhileWorking(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileWorking)
+        return;
+    m_presenceWhileWorking = presence;
+    emit presenceWhileWorkingChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setPresenceWhileOnBreak(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileOnBreak)
+        return;
+    m_presenceWhileOnBreak = presence;
+    emit presenceWhileOnBreakChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setPresenceWhileNotWorking(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileNotWorking)
+        return;
+    m_presenceWhileNotWorking = presence;
+    emit presenceWhileNotWorkingChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::save(bool async)
 {
-    auto job = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
-    job->setAutoDelete(true);
-    job->setInsecureFallback(true);
-    job->setKey(m_timeService + "/apiKey");
-    job->setTextData(m_apiKey);
+    auto apiKeyJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
+    apiKeyJob->setAutoDelete(true);
+    apiKeyJob->setInsecureFallback(true);
+    apiKeyJob->setKey(m_timeService + "/apiKey");
+    apiKeyJob->setTextData(m_apiKey);
 
     auto l = new QEventLoop{this};
-    connect(job, &QKeychain::WritePasswordJob::finished, job, [l](QKeychain::Job *job) {
+    connect(apiKeyJob, &QKeychain::WritePasswordJob::finished, apiKeyJob, [l](QKeychain::Job *job) {
         if (job->error())
             std::cerr << "Failed to save API key to secret storage: " << job->errorString().toStdString() << std::endl;
         l->quit();
-        l->deleteLater();
     });
-    job->start();
+    apiKeyJob->start();
     if (!async)
         l->exec();
 
@@ -296,5 +395,43 @@ void Settings::save(bool async)
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);
     settings.setValue(QStringLiteral("weekHours"), m_weekHours);
     settings.setValue(QStringLiteral("developerMode"), m_developerMode);
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("teams"));
+    settings.setValue(QStringLiteral("useTeamsIntegration"), m_useTeamsIntegration);
+    settings.setValue(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(m_presenceWhileWorking));
+    settings.setValue(QStringLiteral("presenceWhileOnBreak"), static_cast<unsigned int>(m_presenceWhileOnBreak));
+    settings.setValue(QStringLiteral("presenceWhileNotWorking"), static_cast<unsigned int>(m_presenceWhileNotWorking));
+
+    auto accessTokenJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
+    accessTokenJob->setAutoDelete(true);
+    accessTokenJob->setInsecureFallback(true);
+    accessTokenJob->setKey("microsoft-graph-access-token");
+    accessTokenJob->setTextData(m_graphAccessToken);
+    connect(accessTokenJob, &QKeychain::WritePasswordJob::finished, accessTokenJob, [l](QKeychain::Job *job) {
+        if (job->error())
+            std::cerr << "Failed to save Graph access token to secret storage: " << job->errorString().toStdString()
+                      << std::endl;
+        l->quit();
+    });
+    accessTokenJob->start();
+    if (!async)
+        l->exec();
+
+    auto refreshTokenJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
+    refreshTokenJob->setAutoDelete(true);
+    refreshTokenJob->setInsecureFallback(true);
+    refreshTokenJob->setKey("microsoft-graph-refresh-token");
+    refreshTokenJob->setTextData(m_graphRefreshToken);
+    connect(refreshTokenJob, &QKeychain::WritePasswordJob::finished, refreshTokenJob, [l, this](QKeychain::Job *job) {
+        if (job->error())
+            std::cerr << "Failed to save Graph refresh token to secret storage: " << job->errorString().toStdString()
+                      << std::endl;
+        l->quit();
+        l->deleteLater();
+    });
+    refreshTokenJob->start();
+    if (!async)
+        l->exec();
     settings.endGroup();
 }
