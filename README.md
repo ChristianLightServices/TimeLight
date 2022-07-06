@@ -18,6 +18,13 @@ The "Interval between updates of data" setting on the "App settings" tab allows 
 
 ## Teams integration
 
+In order to use the Teams integration, go to the "Microsoft Teams" page in the settings dialog and enable the integration. You will be taken to your web browser in order to authenticate TimeLight.
+
+In order to allow TimeLight to set your Teams status, close the Teams app or reset your Teams status. Please note that the Away status may not work correctly due to the way Microsoft handles custom statuses.
+
+### ⚠ Warning ⚠
+The Teams integration has not been fully tested and may stop working several months after authentication. Any bugs will be fixed as soon as they are discovered.
+
 ## Requirements
 
 This project depends on the following libraries:
