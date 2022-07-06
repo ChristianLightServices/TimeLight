@@ -692,7 +692,7 @@ void TrayIcons::setTimerState(TimerState state)
             emit jobStarted();
 
         if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(TeamsClient::Presence::Available);
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileWorking());
         break;
     case TimerState::OnBreak:
         m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
@@ -710,7 +710,7 @@ void TrayIcons::setTimerState(TimerState state)
             emit jobStarted();
 
         if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(TeamsClient::Presence::Away);
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileOnBreak());
         break;
     case TimerState::NotRunning:
         m_timerRunning->setToolTip(tr("%1 is not running").arg(m_manager->serviceName()));
@@ -726,7 +726,7 @@ void TrayIcons::setTimerState(TimerState state)
             emit jobEnded();
 
         if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(TeamsClient::Presence::Away);
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileNotWorking());
         break;
     case TimerState::Offline:
         m_timerRunning->setToolTip(tr("You are offline"));

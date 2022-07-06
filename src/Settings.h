@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTimer>
 
+#include "TeamsClient.h"
+
 class Settings : public QObject
 {
     Q_OBJECT
@@ -37,6 +39,9 @@ public:
     bool useTeamsIntegration() const { return m_useTeamsIntegration; }
     const QString &graphAccessToken() const { return m_graphAccessToken; }
     const QString &graphRefreshToken() const { return m_graphRefreshToken; }
+    TeamsClient::Presence presenceWhileWorking() const { return m_presenceWhileWorking; }
+    TeamsClient::Presence presenceWhileOnBreak() const { return m_presenceWhileOnBreak; }
+    TeamsClient::Presence presenceWhileNotWorking() const { return m_presenceWhileNotWorking; }
 
     static void init();
     static Settings *instance() { return s_instance; }
@@ -61,6 +66,9 @@ public slots:
     void setUseTeamsIntegration(const bool state);
     void setGraphAccessToken(const QString &token);
     void setGraphRefreshToken(const QString &token);
+    void setPresenceWhileWorking(const TeamsClient::Presence &presence);
+    void setPresenceWhileOnBreak(const TeamsClient::Presence &presence);
+    void setPresenceWhileNotWorking(const TeamsClient::Presence &presence);
 
 signals:
     void timeServiceChanged();
@@ -82,6 +90,9 @@ signals:
     void useTeamsIntegrationChanged();
     void graphAccessTokenChanged();
     void graphRefreshTokenChanged();
+    void presenceWhileWorkingChanged();
+    void presenceWhileOnBreakChanged();
+    void presenceWhileNotWorkingChanged();
 
 private:
     explicit Settings(QObject *parent = nullptr);
@@ -118,6 +129,7 @@ private:
     bool m_useTeamsIntegration;
     QString m_graphAccessToken;
     QString m_graphRefreshToken;
+    TeamsClient::Presence m_presenceWhileWorking, m_presenceWhileOnBreak, m_presenceWhileNotWorking;
 };
 
 #endif // SETTINGS_H

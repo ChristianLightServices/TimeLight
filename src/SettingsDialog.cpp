@@ -17,6 +17,7 @@
 #include <QVBoxLayout>
 
 #include "Settings.h"
+#include "TeamsClient.h"
 #include "User.h"
 #include "Utils.h"
 
@@ -460,11 +461,56 @@ QWidget *SettingsDialog::createTeamsPage()
     auto useTeams = new QCheckBox{tr("Set presence in Microsoft Teams to match work status"), teamsPage};
     useTeams->setChecked(Settings::instance()->useTeamsIntegration());
 
-    layout->addWidget(useTeams, 0, 0);
+    auto presenceWhenWorking = new QComboBox{teamsPage};
+    auto presenceWhenOnBreak = new QComboBox{teamsPage};
+    auto presenceWhenNotWorking = new QComboBox{teamsPage};
+    for (auto &combo : {presenceWhenWorking, presenceWhenOnBreak, presenceWhenNotWorking})
+    {
+        combo->addItem(tr("Available"), QVariant::fromValue(TeamsClient::Presence::Available));
+        combo->addItem(tr("In a call"), QVariant::fromValue(TeamsClient::Presence::InACall));
+        combo->addItem(tr("In a conference call"), QVariant::fromValue(TeamsClient::Presence::InAConferenceCall));
+        combo->addItem(tr("Away"), QVariant::fromValue(TeamsClient::Presence::Away));
+
+        combo->setEnabled(Settings::instance()->useTeamsIntegration());
+        connect(Settings::instance(), &Settings::useTeamsIntegrationChanged, combo, [combo] {
+            combo->setEnabled(Settings::instance()->useTeamsIntegration());
+        });
+    }
+    presenceWhenWorking->setCurrentIndex(static_cast<int>(Settings::instance()->presenceWhileWorking()));
+    presenceWhenOnBreak->setCurrentIndex(static_cast<int>(Settings::instance()->presenceWhileOnBreak()));
+    presenceWhenNotWorking->setCurrentIndex(static_cast<int>(Settings::instance()->presenceWhileNotWorking()));
+
+    auto breakLabel = new QLabel{tr("Teams presence while on break"), teamsPage};
+    presenceWhenOnBreak->setVisible(Settings::instance()->useSeparateBreakTime());
+    breakLabel->setVisible(Settings::instance()->useSeparateBreakTime());
+    connect(Settings::instance(),
+            &Settings::useSeparateBreakTimeChanged,
+            presenceWhenOnBreak,
+            [presenceWhenOnBreak, breakLabel] {
+                presenceWhenOnBreak->setVisible(Settings::instance()->useSeparateBreakTime());
+                breakLabel->setVisible(Settings::instance()->useSeparateBreakTime());
+            });
+
+    layout->addWidget(useTeams, 0, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Teams presence while working"), teamsPage}, 1, 0);
+    layout->addWidget(breakLabel, 2, 0);
+    layout->addWidget(new QLabel{tr("Teams presence while not working"), teamsPage}, 3, 0);
+    layout->addWidget(presenceWhenWorking, 1, 1);
+    layout->addWidget(presenceWhenOnBreak, 2, 1);
+    layout->addWidget(presenceWhenNotWorking, 3, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(useTeams, &QCheckBox::clicked, this, [](bool state) { Settings::instance()->setUseTeamsIntegration(state); });
+    connect(presenceWhenWorking, &QComboBox::currentIndexChanged, this, [presenceWhenWorking](int) {
+        Settings::instance()->setPresenceWhileWorking(presenceWhenWorking->currentData().value<TeamsClient::Presence>());
+    });
+    connect(presenceWhenOnBreak, &QComboBox::currentIndexChanged, this, [presenceWhenOnBreak](int) {
+        Settings::instance()->setPresenceWhileOnBreak(presenceWhenOnBreak->currentData().value<TeamsClient::Presence>());
+    });
+    connect(presenceWhenNotWorking, &QComboBox::currentIndexChanged, this, [presenceWhenNotWorking](int) {
+        Settings::instance()->setPresenceWhileNotWorking(presenceWhenNotWorking->currentData().value<TeamsClient::Presence>());
+    });
 
     return teamsPage;
 }

@@ -92,6 +92,15 @@ void Settings::load()
     m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
     m_developerMode = settings.value(QStringLiteral("developerMode"), false).toBool();
     m_useTeamsIntegration = settings.value(QStringLiteral("useTeamsIntegration"), false).toBool();
+    m_presenceWhileWorking =
+        settings.value(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(TeamsClient::Presence::Available))
+            .value<TeamsClient::Presence>();
+    m_presenceWhileOnBreak =
+        settings.value(QStringLiteral("presenceWhileOnBreak"), static_cast<unsigned int>(TeamsClient::Presence::Away))
+            .value<TeamsClient::Presence>();
+    m_presenceWhileNotWorking =
+        settings.value(QStringLiteral("presenceWhileNotWorking"), static_cast<unsigned int>(TeamsClient::Presence::Away))
+            .value<TeamsClient::Presence>();
 
     auto accessTokenJob = new QKeychain::ReadPasswordJob{QCoreApplication::applicationName(), this};
     accessTokenJob->setAutoDelete(true);
@@ -312,6 +321,33 @@ void Settings::setGraphRefreshToken(const QString &token)
     m_settingsDirty = true;
 }
 
+void Settings::setPresenceWhileWorking(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileWorking)
+        return;
+    m_presenceWhileWorking = presence;
+    emit presenceWhileWorkingChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setPresenceWhileOnBreak(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileOnBreak)
+        return;
+    m_presenceWhileOnBreak = presence;
+    emit presenceWhileOnBreakChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setPresenceWhileNotWorking(const TeamsClient::Presence &presence)
+{
+    if (presence == m_presenceWhileNotWorking)
+        return;
+    m_presenceWhileNotWorking = presence;
+    emit presenceWhileNotWorkingChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::save(bool async)
 {
     auto apiKeyJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
@@ -358,6 +394,9 @@ void Settings::save(bool async)
     settings.setValue(QStringLiteral("weekHours"), m_weekHours);
     settings.setValue(QStringLiteral("developerMode"), m_developerMode);
     settings.setValue(QStringLiteral("useTeamsIntegration"), m_useTeamsIntegration);
+    settings.setValue(QStringLiteral("presenceWhileWorking"), static_cast<unsigned int>(m_presenceWhileWorking));
+    settings.setValue(QStringLiteral("presenceWhileOnBreak"), static_cast<unsigned int>(m_presenceWhileOnBreak));
+    settings.setValue(QStringLiteral("presenceWhileNotWorking"), static_cast<unsigned int>(m_presenceWhileNotWorking));
 
     auto accessTokenJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
     accessTokenJob->setAutoDelete(true);

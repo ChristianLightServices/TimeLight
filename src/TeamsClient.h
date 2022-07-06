@@ -18,6 +18,7 @@ public:
         InAConferenceCall,
         Away,
     };
+    Q_ENUM(Presence)
 
     explicit TeamsClient(const QString &appId, int port = 6942, QObject *parent = nullptr);
 
