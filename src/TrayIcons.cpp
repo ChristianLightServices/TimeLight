@@ -615,39 +615,34 @@ void TrayIcons::setUpTrayIcons()
 
     connect(m_manager, &ClockifyManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
 
-    connect(
-        this,
-        &TrayIcons::jobEnded,
-        this,
-        [this] {
-            if (!Settings::instance()->showDurationNotifications())
-                return;
+    connect(this, &TrayIcons::jobEnded, this, [this] {
+        if (!Settings::instance()->showDurationNotifications())
+            return;
 
-            // This will either return the job that just ended, plus the job before, or the job that just started and the job
-            // that just ended. Either way, we can get enough info to run the notifications.
-            auto jobs = m_user.getTimeEntries(1, 2);
-            if (jobs.isEmpty())
-                return;
-            auto job =
-                std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
-            if (job == jobs.end() || job->running().value_or(false))
-                return;
+        // This will either return the job that just ended, plus the job before, or the job that just started and the job
+        // that just ended. Either way, we can get enough info to run the notifications.
+        auto jobs = m_user.getTimeEntries(1, 2);
+        if (jobs.isEmpty())
+            return;
+        auto job =
+            std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
+        if (job == jobs.end() || job->running().value_or(false))
+            return;
 
-            QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
-            QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
-            if (duration.hour() > 0)
-                timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
-            else
-                timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
-            auto message = (Settings::instance()->useSeparateBreakTime() &&
-                            job->project().id() == Settings::instance()->breakTimeId()) ?
-                               tr("You were on break for %1") :
-                               tr("You worked %2 on %1").arg(job->project().name());
-            m_timerRunning->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
+        QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
+        QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
+        if (duration.hour() > 0)
+            timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
+        else
+            timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
+        auto message =
+            (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
+                tr("You were on break for %1") :
+                tr("You worked %2 on %1").arg(job->project().name());
+        m_timerRunning->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
 
-            updateQuickStartList();
-        },
-        Qt::QueuedConnection);
+        updateQuickStartList();
+    });
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateQuickStartList, Qt::QueuedConnection);
 
     updateTrayIcons();
