@@ -47,7 +47,7 @@ jobs:
 
       - name: Build
         env:
-          CREATE_RELEASE_PACKAGE: ${{ (github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v')) && "ON" || "OFF" }}
+          CREATE_RELEASE_PACKAGE: ${{ (github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v')) && 'ON' || 'OFF' }}
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DGENERATE_INSTALLER=$Env:CREATE_RELEASE_PACKAGE ..
