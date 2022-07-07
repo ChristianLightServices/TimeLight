@@ -509,7 +509,8 @@ QWidget *SettingsDialog::createTeamsPage()
         Settings::instance()->setPresenceWhileOnBreak(presenceWhenOnBreak->currentData().value<TeamsClient::Presence>());
     });
     connect(presenceWhenNotWorking, &QComboBox::currentIndexChanged, this, [presenceWhenNotWorking](int) {
-        Settings::instance()->setPresenceWhileNotWorking(presenceWhenNotWorking->currentData().value<TeamsClient::Presence>());
+        Settings::instance()->setPresenceWhileNotWorking(
+            presenceWhenNotWorking->currentData().value<TeamsClient::Presence>());
     });
 
     return teamsPage;
