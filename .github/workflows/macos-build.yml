@@ -7,7 +7,7 @@ on:
       packageRelease:
         description: 'Package binaries for release and upload them'
         required: false
-        default: ${{ startsWith(github.ref, "refs/tags/v") }}
+        default: false
 
 jobs:
   macos:
@@ -64,7 +64,7 @@ jobs:
           retention-days: 7
 
       - name: Build release package
-        if: ${{ github.event.inputs.packageRelease }}
+        if: ${{ github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v') }}
         run: |
           mkdir release_dir
           cd release_dir
@@ -73,7 +73,7 @@ jobs:
           cd ..
 
       - name: Upload release package
-        if: ${{ github.event.inputs.packageRelease }}
+        if: ${{ github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/upload-artifact@v2
         with:
           name: macOS package (64-bit, Qt ${{ matrix.qt-version }})
