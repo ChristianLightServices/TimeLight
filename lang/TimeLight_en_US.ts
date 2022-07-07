@@ -66,8 +66,8 @@
     </message>
     <message>
         <location filename="../src/DeveloperTools.cpp" line="120"/>
-        <source>Done</source>
-        <translation>Done</translation>
+        <source>Close</source>
+        <translation>Close</translation>
     </message>
 </context>
 <context>

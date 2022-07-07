@@ -117,7 +117,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
                 Settings::instance()->setDeveloperMode(false);
                 close();
             });
-    buttons->addButton(tr("Done"), QDialogButtonBox::AcceptRole);
+    buttons->addButton(tr("Close"), QDialogButtonBox::AcceptRole);
 
     layout->addWidget(timeServiceGroup);
     layout->addWidget(userGroup);
