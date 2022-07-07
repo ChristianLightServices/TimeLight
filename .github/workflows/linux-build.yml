@@ -7,7 +7,7 @@ on:
       packageRelease:
         description: 'Package binaries for release and upload them'
         required: false
-        default: false
+        default: ${{ startsWith(github.ref, "refs/tags/v") }}
 
 jobs:
   linux:
