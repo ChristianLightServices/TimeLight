@@ -185,6 +185,10 @@ TrayIcons::TrayIcons(QObject *parent)
     m_eventLoop.callOnTimeout(this, &TrayIcons::updateTrayIcons);
     m_eventLoop.start();
 
+    m_updateRunningEntryTooltipTimer.setInterval(1000);
+    m_updateRunningEntryTooltipTimer.setSingleShot(false);
+    m_updateRunningEntryTooltipTimer.callOnTimeout(this, &TrayIcons::updateRunningEntryTooltip);
+
     // check for completed work time every hour
     m_alertOnTimeUpTimer.setInterval(1000 * 60 * 60);
     m_alertOnTimeUpTimer.setSingleShot(false);
@@ -339,6 +343,18 @@ void TrayIcons::updateTrayIcons()
     }
     else
         setTimerState(TimerState::NotRunning);
+}
+
+void TrayIcons::updateRunningEntryTooltip()
+{
+    QString tooltip = m_runningEntryTooltipBase;
+    if (m_currentRunningJob.isValid())
+    {
+        auto [h, m, s] =
+            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob.start().msecsTo(QDateTime::currentDateTime()));
+        tooltip += QStringLiteral(" (%1:%2:%3)").arg(h).arg(m, 2, 10, QLatin1Char{'0'}).arg(s, 2, 10, QLatin1Char{'0'});
+    }
+    (m_runningJob ? m_runningJob : m_timerRunning)->setToolTip(tooltip);
 }
 
 void TrayIcons::getNewProjectId()
@@ -679,16 +695,18 @@ void TrayIcons::setTimerState(TimerState state)
     switch (state)
     {
     case TimerState::Running:
+    {
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
         if (m_runningJob)
         {
             m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
-            m_runningJob->setToolTip(tr("Working on %1").arg(m_currentRunningJob.project().name()));
             m_runningJob->setIcon(QIcon{":/icons/greenlight.png"});
         }
-        else
-            m_timerRunning->setToolTip(tr("Working on %1").arg(m_currentRunningJob.project().name()));
+
+        m_runningEntryTooltipBase = tr("Working on %1").arg(m_currentRunningJob.project().name());
+        updateRunningEntryTooltip();
+        m_updateRunningEntryTooltipTimer.start();
 
         if (m_timerState == TimerState::OnBreak)
             emit jobEnded();
@@ -698,15 +716,17 @@ void TrayIcons::setTimerState(TimerState state)
         if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
             m_teamsClient->setPresence(Settings::instance()->presenceWhileWorking());
         break;
+    }
     case TimerState::OnBreak:
         m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
         if (m_runningJob) // this *should* always be true, but just in case...
-        {
-            m_runningJob->setToolTip(tr("You are on break"));
             m_runningJob->setIcon(QIcon{":/icons/yellowlight.png"});
-        }
+
+        m_runningEntryTooltipBase = tr("You are on break");
+        updateRunningEntryTooltip();
+        m_updateRunningEntryTooltipTimer.start();
 
         if (m_timerState == TimerState::Running)
             emit jobEnded();
@@ -717,6 +737,8 @@ void TrayIcons::setTimerState(TimerState state)
             m_teamsClient->setPresence(Settings::instance()->presenceWhileOnBreak());
         break;
     case TimerState::NotRunning:
+        m_updateRunningEntryTooltipTimer.stop();
+
         m_timerRunning->setToolTip(tr("%1 is not running").arg(m_manager->serviceName()));
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/redpower.png") : QStringLiteral(":/icons/redlight.png")});
@@ -733,6 +755,8 @@ void TrayIcons::setTimerState(TimerState state)
             m_teamsClient->setPresence(Settings::instance()->presenceWhileNotWorking());
         break;
     case TimerState::Offline:
+        m_updateRunningEntryTooltipTimer.stop();
+
         m_timerRunning->setToolTip(tr("You are offline"));
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/graypower.png") : QStringLiteral(":/icons/graylight.png")});
@@ -743,6 +767,8 @@ void TrayIcons::setTimerState(TimerState state)
         }
         break;
     case TimerState::Ratelimited:
+        m_updateRunningEntryTooltipTimer.stop();
+
         m_timerRunning->setToolTip(tr("You have been ratelimited"));
         m_timerRunning->setIcon(
             QIcon{m_runningJob ? QStringLiteral(":/icons/graypower.png") : QStringLiteral(":/icons/graylight.png")});
@@ -849,7 +875,7 @@ void TrayIcons::checkForFinishedWeek()
                 b.setEnd(QDateTime::currentDateTime());
             return a + b.start().msecsTo(b.end());
         });
-        double hoursThisWeek = msecsThisWeek / (1000 * 60 * 60);
+        double hoursThisWeek = std::get<0>(TimeLight::msecsToHoursMinutesSeconds(msecsThisWeek));
         if (hoursThisWeek >= Settings::instance()->weekHours())
         {
             m_timerRunning->showMessage(

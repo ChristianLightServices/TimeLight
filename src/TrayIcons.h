@@ -35,6 +35,7 @@ public slots:
 
 private slots:
     void updateTrayIcons();
+    void updateRunningEntryTooltip();
     void getNewProjectId();
 
     void showAboutDialog();
@@ -71,6 +72,9 @@ private:
     QSystemTrayIcon *m_timerRunning{nullptr};
     QSystemTrayIcon *m_runningJob{nullptr};
     QMenu *m_quickStartMenu{nullptr};
+
+    QString m_runningEntryTooltipBase;
+    QTimer m_updateRunningEntryTooltipTimer;
 
     User m_user;
     TimerState m_timerState{TimerState::StateUnset};
