@@ -310,11 +310,6 @@ Project TrayIcons::defaultProject()
     return Project{projectId, m_manager->projectName(projectId), description};
 }
 
-void TrayIcons::setUser(const User &user)
-{
-    m_user = user;
-}
-
 void TrayIcons::updateTrayIcons()
 {
     if (!m_manager->isConnectedToInternet()) [[unlikely]]
@@ -802,11 +797,9 @@ void TrayIcons::updateQuickStartList()
                 return;
             }
 
-            bool hadRunningJob{false};
             QDateTime now{m_manager->currentDateTime()};
             if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
             {
-                hadRunningJob = true;
                 if (runningEntry->project().id() == projectId)
                 {
                     m_eventLoop.start();

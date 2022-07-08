@@ -25,17 +25,10 @@ const NetworkReplyCallback AbstractTimeServiceManager::s_defaultFailureCb = [](Q
         std::cerr << "Request " << reply->url().toString().toStdString() << " failed with code " << code << std::endl;
 };
 
-class NoCookies : public QNetworkCookieJar
-{
-    virtual QList<QNetworkCookie> cookiesForUrl(const QUrl &) const override { return {}; }
-    virtual bool setCookiesFromUrl(const QList<QNetworkCookie> &, const QUrl &) override { return false; }
-};
-
 AbstractTimeServiceManager::AbstractTimeServiceManager(const QByteArray &apiKey, QObject *parent)
     : QObject{parent},
       m_apiKey{apiKey}
 {
-    m_manager.setCookieJar(new NoCookies);
     m_manager.setAutoDeleteReplies(true);
 
     m_expireProjectsTimer.setInterval(15 * 60 * 1000);
