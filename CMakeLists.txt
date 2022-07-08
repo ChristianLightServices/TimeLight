@@ -21,19 +21,19 @@ find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools R
 find_package(nlohmann_json 3.10.5)
 
 if(NOT nlohmann_json_FOUND)
-	message("Fetching nlohmann/json from GitHub...")
+    message("Fetching nlohmann/json from GitHub...")
 
     include(FetchContent)
 
     FetchContent_Declare(json
-      GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-	  GIT_TAG v3.10.5
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+        GIT_TAG v3.10.5
     )
 
     FetchContent_GetProperties(json)
     if(NOT json_POPULATED)
-      FetchContent_Populate(json)
-      add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+        FetchContent_Populate(json)
+        add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 endif()
 
@@ -51,14 +51,14 @@ if (NOT Qt6Keychain_FOUND)
 
     include(FetchContent)
     FetchContent_Declare(qt6keychain
-      GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
-      GIT_TAG v0.13.2
+        GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
+        GIT_TAG v0.13.2
     )
 
     FetchContent_GetProperties(qt6keychain)
     if(NOT qt6keychain_POPULATED)
-      FetchContent_Populate(qt6keychain)
-      add_subdirectory(${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR} EXCLUDE_FROM_ALL)
+        FetchContent_Populate(qt6keychain)
+        add_subdirectory(${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 endif()
 
@@ -81,17 +81,17 @@ set(SRC_TIMECAMP
 if(WIN32)
     set(OS_HACKS "WIN32")
     set(APP_ICON_RESOURCE "winres.rc")
-	set(INSTALL_TYPE "RUNTIME")
+    set(INSTALL_TYPE "RUNTIME")
 elseif(APPLE)
     set(OS_HACKS "MACOSX_BUNDLE")
     set(APP_ICON_RESOURCE "icons/macicon.icns")
-	set(INSTALL_TYPE "BUNDLE")
-	# Apparently this is not always set on macOS: https://github.com/ChristianLightServices/TimeLight/runs/6763058520
-	set(CMAKE_INSTALL_BINDIR "/bin")
+    set(INSTALL_TYPE "BUNDLE")
+    # Apparently this is not always set on macOS: https://github.com/ChristianLightServices/TimeLight/runs/6763058520
+    set(CMAKE_INSTALL_BINDIR "/bin")
 else()
     set(OS_HACKS "")
     set(APP_ICON_RESOURCE "")
-	set(INSTALL_TYPE "RUNTIME")
+    set(INSTALL_TYPE "RUNTIME")
 endif()
 
 set(SRC
