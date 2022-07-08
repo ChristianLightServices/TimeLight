@@ -815,9 +815,6 @@ void TrayIcons::updateQuickStartList()
                 now = m_user.stopCurrentTimeEntry();
             }
             m_user.startTimeEntry(projectId, defaultProject().description(), now, true);
-            if (hadRunningJob)
-                emit jobEnded();
-            emit jobStarted();
             m_eventLoop.start();
         });
     };
