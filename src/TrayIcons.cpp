@@ -372,33 +372,33 @@ void TrayIcons::showAboutDialog()
                         "(power icon, licensed [MIT](https://mit-license.org)).")
                          .arg(VERSION_STR);
 
-    QDialog dialog;
+    auto dialog = new QDialog;
+    auto layout = new QVBoxLayout{dialog};
 
-    auto layout = new QVBoxLayout{&dialog};
-
-    auto infoLabel = new QLabel{aboutText, &dialog};
+    auto infoLabel = new QLabel{aboutText, dialog};
     infoLabel->setTextFormat(Qt::MarkdownText);
     infoLabel->setWordWrap(true);
     infoLabel->setOpenExternalLinks(true);
     layout->addWidget(infoLabel);
 
-    auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, &dialog};
-    connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, &dialog] {
-        showLicenseDialog(&dialog);
+    auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, dialog};
+    connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, dialog] {
+        showLicenseDialog(dialog);
     });
     connect(bb->addButton(tr("Show source code"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [] {
         QDesktopServices::openUrl(QUrl{QStringLiteral("https://github.com/ChristianLightServices/TimeLight")});
     });
-    connect(bb, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(bb, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
 
     layout->addWidget(bb);
 
-    dialog.setLayout(layout);
-    dialog.setWindowTitle(tr("About ") + qApp->applicationName());
-    dialog.resize(500, dialog.heightForWidth(500));
-    dialog.move(dialog.screen()->geometry().width() / 2 - dialog.width() / 2,
-                dialog.screen()->geometry().height() / 2 - dialog.height() / 2);
-    dialog.exec();
+    dialog->setLayout(layout);
+    dialog->setWindowTitle(tr("About ") + qApp->applicationName());
+    dialog->resize(500, dialog->heightForWidth(500));
+    dialog->move(dialog->screen()->geometry().width() / 2 - dialog->width() / 2,
+                 dialog->screen()->geometry().height() / 2 - dialog->height() / 2);
+    dialog->exec();
 }
 
 void TrayIcons::showLicenseDialog(QWidget *parent)
