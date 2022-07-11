@@ -161,7 +161,7 @@ QWidget *SettingsDialog::createBackendPage()
     connect(apiKeyInput, &QLineEdit::textChanged, this, [apiKeyInput, useNewApiKey] {
         useNewApiKey->setEnabled(Settings::instance()->apiKey() != apiKeyInput->text());
     });
-    connect(useNewApiKey, &QPushButton::clicked, this, [this, apiKeyInput](int) {
+    connect(useNewApiKey, &QPushButton::clicked, this, [this, apiKeyInput] {
         if (QMessageBox::warning(this,
                                  tr("Restart required"),
                                  tr("To continue changing the API key, the program will restart."),
@@ -173,7 +173,7 @@ QWidget *SettingsDialog::createBackendPage()
         }
     });
 
-    connect(workspaces, &QComboBox::currentIndexChanged, workspaces, [this, workspaces](int) {
+    connect(workspaces, &QComboBox::currentIndexChanged, workspaces, [this, workspaces] {
         Settings::instance()->setWorkspaceId(workspaces->currentData().toString());
         m_manager->setWorkspaceId(workspaces->currentData().toString());
     });
@@ -445,7 +445,7 @@ QWidget *SettingsDialog::createAppPage()
         }
     });
     connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
-    connect(quickStartOptions, &QComboBox::currentIndexChanged, this, [quickStartOptions](int) {
+    connect(quickStartOptions, &QComboBox::currentIndexChanged, this, [quickStartOptions] {
         Settings::instance()->setQuickStartProjectsLoading(
             quickStartOptions->currentData().value<Settings::QuickStartProjectOptions>());
     });
@@ -502,13 +502,13 @@ QWidget *SettingsDialog::createTeamsPage()
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(useTeams, &QCheckBox::clicked, this, [](bool state) { Settings::instance()->setUseTeamsIntegration(state); });
-    connect(presenceWhenWorking, &QComboBox::currentIndexChanged, this, [presenceWhenWorking](int) {
+    connect(presenceWhenWorking, &QComboBox::currentIndexChanged, this, [presenceWhenWorking] {
         Settings::instance()->setPresenceWhileWorking(presenceWhenWorking->currentData().value<TeamsClient::Presence>());
     });
-    connect(presenceWhenOnBreak, &QComboBox::currentIndexChanged, this, [presenceWhenOnBreak](int) {
+    connect(presenceWhenOnBreak, &QComboBox::currentIndexChanged, this, [presenceWhenOnBreak] {
         Settings::instance()->setPresenceWhileOnBreak(presenceWhenOnBreak->currentData().value<TeamsClient::Presence>());
     });
-    connect(presenceWhenNotWorking, &QComboBox::currentIndexChanged, this, [presenceWhenNotWorking](int) {
+    connect(presenceWhenNotWorking, &QComboBox::currentIndexChanged, this, [presenceWhenNotWorking] {
         Settings::instance()->setPresenceWhileNotWorking(
             presenceWhenNotWorking->currentData().value<TeamsClient::Presence>());
     });
