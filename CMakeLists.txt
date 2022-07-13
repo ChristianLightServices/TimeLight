@@ -130,15 +130,6 @@ set(TRANSLATIONS
     lang/TimeLight_en_US.ts
 )
 
-set(LIBRARIES
-    Qt6::Network
-    Qt6::NetworkAuth
-    Qt6::Widgets
-    qt6keychain
-    SingleApplication::SingleApplication
-    nlohmann_json::nlohmann_json
-)
-
 qt_add_executable(TimeLight ${OS_HACKS}
     ${SRC}
     ${APP_ICON_RESOURCE}
@@ -166,7 +157,14 @@ if(APPLE)
     )
 endif()
 
-target_link_libraries(TimeLight PRIVATE ${LIBRARIES})
+target_link_libraries(TimeLight PRIVATE
+    Qt6::Network
+    Qt6::NetworkAuth
+    Qt6::Widgets
+    qt6keychain
+    SingleApplication::SingleApplication
+    nlohmann_json::nlohmann_json
+)
 
 install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT "${PROJECT_NAME}")
