@@ -80,14 +80,6 @@ void Settings::load()
     settings.beginGroup(QStringLiteral("app"));
     m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 5000).toInt();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
-    m_quickStartProjectsLoading =
-        static_cast<QuickStartProjectOptions>(settings
-                                                  .value(QStringLiteral("quickStartProjectsLoading"),
-                                                         static_cast<unsigned int>(QuickStartProjectOptions::AllProjects))
-                                                  .toUInt());
-    if (m_quickStartProjectsLoading >= QuickStartProjectOptions::Undefined ||
-        m_quickStartProjectsLoading < static_cast<QuickStartProjectOptions>(0))
-        m_quickStartProjectsLoading = QuickStartProjectOptions::AllProjects;
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
     m_weekHours = settings.value(QStringLiteral("weekHours"), 40.).toDouble();
     m_developerMode = settings.value(QStringLiteral("developerMode"), false).toBool();
@@ -260,15 +252,6 @@ void Settings::setEventLoopInterval(const int interval)
     m_settingsDirty = true;
 }
 
-void Settings::setQuickStartProjectsLoading(const QuickStartProjectOptions &option)
-{
-    if (option == m_quickStartProjectsLoading)
-        return;
-    m_quickStartProjectsLoading = option;
-    emit quickStartProjectsLoadingChanged();
-    m_settingsDirty = true;
-}
-
 void Settings::setAlertOnTimeUp(const bool alert)
 {
     if (alert == m_alertOnTimeUp)
@@ -391,7 +374,6 @@ void Settings::save(bool async)
     settings.beginGroup(QStringLiteral("app"));
     settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
     settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
-    settings.setValue(QStringLiteral("quickStartProjectsLoading"), static_cast<unsigned int>(m_quickStartProjectsLoading));
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);
     settings.setValue(QStringLiteral("weekHours"), m_weekHours);
     settings.setValue(QStringLiteral("developerMode"), m_developerMode);

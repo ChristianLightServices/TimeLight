@@ -11,15 +11,6 @@ class Settings : public QObject
     Q_OBJECT
 
 public:
-    enum class QuickStartProjectOptions
-    {
-        AllProjects,
-        RecentProjects,
-
-        Undefined,
-    };
-    Q_ENUM(QuickStartProjectOptions)
-
     const QString &timeService() const { return m_timeService; }
     const QString &apiKey() const { return m_apiKey; }
     const QString &breakTimeId() const { return m_breakTimeId; }
@@ -32,7 +23,6 @@ public:
     bool useLastProject() const { return m_useLastProject; }
     bool showDurationNotifications() const { return m_showDurationNotifications; }
     int eventLoopInterval() const { return m_eventLoopInterval; }
-    QuickStartProjectOptions quickStartProjectsLoading() const { return m_quickStartProjectsLoading; }
     bool alertOnTimeUp() const { return m_alertOnTimeUp; }
     double weekHours() const { return m_weekHours; }
     bool developerMode() const { return m_developerMode; }
@@ -59,7 +49,6 @@ public slots:
     void setUseLastProject(const bool use);
     void setShowDurationNotifications(const bool show);
     void setEventLoopInterval(const int interval);
-    void setQuickStartProjectsLoading(const Settings::QuickStartProjectOptions &option);
     void setAlertOnTimeUp(const bool alert);
     void setWeekHours(const double hours);
     void setDeveloperMode(const bool state);
@@ -83,7 +72,6 @@ signals:
     void useLastProjectChanged();
     void showDurationNotificationsChanged();
     void eventLoopIntervalChanged();
-    void quickStartProjectsLoadingChanged();
     void alertOnTimeUpChanged();
     void weekHoursChanged();
     void developerModeChanged();
@@ -119,7 +107,6 @@ private:
     bool m_useLastProject;
     bool m_showDurationNotifications;
     bool m_alertOnTimeUp;
-    QuickStartProjectOptions m_quickStartProjectsLoading;
 
     double m_weekHours;
     int m_eventLoopInterval;

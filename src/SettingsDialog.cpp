@@ -394,20 +394,12 @@ QWidget *SettingsDialog::createAppPage()
     weekHours->setMaximum(100);
     weekHours->setEnabled(Settings::instance()->alertOnTimeUp());
 
-    auto quickStartOptions{new QComboBox{appPage}};
-    quickStartOptions->addItem(tr("All projects"), QVariant::fromValue(Settings::QuickStartProjectOptions::AllProjects));
-    quickStartOptions->addItem(tr("Recent projects"),
-                               QVariant::fromValue(Settings::QuickStartProjectOptions::RecentProjects));
-    quickStartOptions->setCurrentIndex(static_cast<int>(Settings::instance()->quickStartProjectsLoading()));
-
     layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 0, 0);
     layout->addWidget(eventLoopInterval, 0, 1);
     layout->addWidget(showNotifications, 1, 0, 1, 2);
     layout->addWidget(showTimeUpWarning, 2, 0, 1, 2);
     layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 3, 0);
     layout->addWidget(weekHours, 3, 1);
-    layout->addWidget(new QLabel{tr("Projects to display in quick start menu"), appPage}, 4, 0);
-    layout->addWidget(quickStartOptions, 4, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
@@ -445,10 +437,6 @@ QWidget *SettingsDialog::createAppPage()
         }
     });
     connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
-    connect(quickStartOptions, &QComboBox::currentIndexChanged, this, [quickStartOptions] {
-        Settings::instance()->setQuickStartProjectsLoading(
-            quickStartOptions->currentData().value<Settings::QuickStartProjectOptions>());
-    });
 
     return appPage;
 }

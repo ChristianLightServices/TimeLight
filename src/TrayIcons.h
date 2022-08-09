@@ -71,6 +71,7 @@ private:
     QSystemTrayIcon *m_timerRunning{nullptr};
     QSystemTrayIcon *m_runningJob{nullptr};
     QMenu *m_quickStartMenu{nullptr};
+    QMenu *m_quickStartAllProjects{nullptr};
 
     QString m_runningEntryTooltipBase;
     QTimer m_updateRunningEntryTooltipTimer;

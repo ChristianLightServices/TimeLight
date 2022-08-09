@@ -18,7 +18,6 @@
 
 #include "ClockifyManager.h"
 #include "DeveloperTools.h"
-#include "JsonHelper.h"
 #include "ModifyJobDialog.h"
 #include "Project.h"
 #include "Settings.h"
@@ -198,7 +197,6 @@ TrayIcons::TrayIcons(QObject *parent)
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     });
-    connect(Settings::instance(), &Settings::quickStartProjectsLoadingChanged, this, [this] { updateQuickStartList(); });
 
     connect(m_manager, &AbstractTimeServiceManager::ratelimited, this, [this](bool ratelimited) {
         m_ratelimited = ratelimited;
@@ -786,9 +784,12 @@ void TrayIcons::updateQuickStartList()
     if (!m_quickStartMenu)
         m_quickStartMenu = new QMenu{tr("Switch to")};
     m_quickStartMenu->clear();
+    if (!m_quickStartAllProjects)
+        m_quickStartAllProjects = new QMenu{tr("All projects")};
+    m_quickStartAllProjects->clear();
 
-    auto addMenuEntry = [this](const Project &project) {
-        connect(m_quickStartMenu->addAction(project.name()), &QAction::triggered, this, [projectId = project.id(), this] {
+    auto addMenuEntry = [this](QMenu *menu, const Project &project) {
+        connect(menu->addAction(project.name()), &QAction::triggered, this, [projectId = project.id(), this] {
             m_eventLoop.stop();
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
@@ -812,35 +813,27 @@ void TrayIcons::updateQuickStartList()
         });
     };
 
-    switch (Settings::instance()->quickStartProjectsLoading())
+    QStringList recentIds;
+    for (const auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
     {
-    case Settings::QuickStartProjectOptions::AllProjects:
+        if (recentIds.size() >= 10)
+            break;
+        if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
+            [[unlikely]]
+            continue;
+        if (recentIds.contains(entry.project().id()))
+            continue;
+        recentIds.push_back(entry.project().id());
+    }
+    for (const auto &project : m_manager->projects())
     {
-        for (const auto &project : m_manager->projects())
-            addMenuEntry(project);
-        break;
+        if (recentIds.contains(project.id()))
+            addMenuEntry(m_quickStartMenu, project);
+        addMenuEntry(m_quickStartAllProjects, project);
     }
-    case Settings::QuickStartProjectOptions::RecentProjects:
-    {
-        auto entries = m_user.getTimeEntries(m_manager->paginationStartsAt(), 25);
-        QStringList addedIds;
-        for (const auto &entry : entries)
-        {
-            if (addedIds.size() >= 10)
-                break;
-            if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
-                [[unlikely]]
-                continue;
-            if (addedIds.contains(entry.project().id()))
-                continue;
-            addedIds.push_back(entry.project().id());
-            addMenuEntry(entry.project());
-        }
-        break;
-    }
-    default:
-        break;
-    }
+
+    m_quickStartMenu->addSeparator();
+    m_quickStartMenu->addMenu(m_quickStartAllProjects);
 }
 
 void TrayIcons::showOfflineNotification()
