@@ -77,14 +77,14 @@ public slots:
     void save()
     {
         auto path = QFileDialog::getSaveFileName(this,
-                                                 tr("Save avatar"),
+                                                 tr("Save image"),
                                                  QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) +
                                                      QStringLiteral("/%1.png").arg(m_id),
                                                  tr("Image files (*.png *.jpg *.bmp)"));
         if (path.isEmpty())
             return;
         if (!m_pixmap.save(path))
-            QMessageBox::warning(this, tr("File error"), tr("Could not save file to %1.").arg(path));
+            QMessageBox::warning(this, tr("Save error"), tr("Could not save file to %1.").arg(path));
     }
 
 private:
