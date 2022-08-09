@@ -781,11 +781,16 @@ void TrayIcons::setTimerState(TimerState state)
 
 void TrayIcons::updateQuickStartList()
 {
+    if (m_updatingQuickStartList)
+        return;
+    m_updatingQuickStartList = true;
+
     if (!m_quickStartMenu)
         m_quickStartMenu = new QMenu{tr("Switch to")};
-    m_quickStartMenu->clear();
     if (!m_quickStartAllProjects)
         m_quickStartAllProjects = new QMenu{tr("All projects")};
+
+    m_quickStartMenu->clear();
     m_quickStartAllProjects->clear();
 
     auto addMenuEntry = [this](QMenu *menu, const Project &project) {
@@ -834,6 +839,8 @@ void TrayIcons::updateQuickStartList()
 
     m_quickStartMenu->addSeparator();
     m_quickStartMenu->addMenu(m_quickStartAllProjects);
+
+    m_updatingQuickStartList = false;
 }
 
 void TrayIcons::showOfflineNotification()
