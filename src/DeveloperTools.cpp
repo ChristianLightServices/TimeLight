@@ -27,16 +27,17 @@ class DownloadableImage : public QAbstractButton
     Q_OBJECT
 
 public:
-    explicit DownloadableImage(const QPixmap &pixmap, QWidget *parent = nullptr)
+    explicit DownloadableImage(const QPixmap &pixmap, QStringView id, QWidget *parent = nullptr)
         : QAbstractButton{parent},
-          m_pixmap{pixmap}
+          m_pixmap{pixmap},
+          m_id{id}
     {
         setToolTip(tr("Download image"));
         connect(this, &QAbstractButton::clicked, this, &DownloadableImage::save);
     }
 
-    explicit DownloadableImage(QWidget *parent = nullptr)
-        : DownloadableImage{{}, parent}
+    explicit DownloadableImage(QStringView id, QWidget *parent = nullptr)
+        : DownloadableImage{{}, id, parent}
     {}
 
     void setPixmap(const QPixmap &p)
@@ -76,9 +77,10 @@ public slots:
     void save()
     {
         auto path = QFileDialog::getSaveFileName(this,
-                                     tr("Save avatar"),
-                                     QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
-                                     tr("Image files (*.png *.jpg *.bmp)"));
+                                                 tr("Save avatar"),
+                                                 QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) +
+                                                     QStringLiteral("/%1.png").arg(m_id),
+                                                 tr("Image files (*.png *.jpg *.bmp)"));
         if (path.isEmpty())
             return;
         if (!m_pixmap.save(path))
@@ -87,6 +89,7 @@ public slots:
 
 private:
     QPixmap m_pixmap;
+    QStringView m_id;
 };
 
 // to make the moc happy
@@ -115,7 +118,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     auto userGroup = new QGroupBox{tr("User"), this};
     auto userGroupLayout = new QGridLayout{userGroup};
 
-    auto image = new DownloadableImage{userGroup};
+    auto image = new DownloadableImage{user.userId(), userGroup};
     if (user.avatarUrl().isEmpty())
         image->deleteLater();
     else
