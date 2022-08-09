@@ -4,70 +4,94 @@
 <context>
     <name>DeveloperTools</name>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="38"/>
+        <location filename="../src/DeveloperTools.cpp" line="115"/>
         <source>API base URL:</source>
         <translation>API base URL:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="41"/>
+        <location filename="../src/DeveloperTools.cpp" line="118"/>
         <source>User</source>
         <translation>User</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="71"/>
-        <location filename="../src/DeveloperTools.cpp" line="86"/>
+        <location filename="../src/DeveloperTools.cpp" line="147"/>
+        <location filename="../src/DeveloperTools.cpp" line="162"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="72"/>
+        <location filename="../src/DeveloperTools.cpp" line="148"/>
         <source>Email:</source>
         <translation>Email:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="73"/>
+        <location filename="../src/DeveloperTools.cpp" line="149"/>
         <source>User ID:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="74"/>
+        <location filename="../src/DeveloperTools.cpp" line="150"/>
         <source>API key:</source>
         <translation>API key:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="80"/>
+        <location filename="../src/DeveloperTools.cpp" line="156"/>
         <source>Workspace</source>
         <translation>Workspace</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="87"/>
+        <location filename="../src/DeveloperTools.cpp" line="163"/>
         <source>Workspace ID:</source>
         <translation>Workspace ID:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="91"/>
+        <location filename="../src/DeveloperTools.cpp" line="167"/>
         <source>Projects</source>
         <translation>Projects</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="102"/>
+        <location filename="../src/DeveloperTools.cpp" line="178"/>
         <source>Project name</source>
         <translation>Project name</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="102"/>
+        <location filename="../src/DeveloperTools.cpp" line="178"/>
         <source>Project ID</source>
         <translation>Project ID</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="113"/>
+        <location filename="../src/DeveloperTools.cpp" line="189"/>
         <source>Disable developer mode</source>
         <translation>Disable developer mode</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="120"/>
+        <location filename="../src/DeveloperTools.cpp" line="196"/>
         <source>Close</source>
         <translation>Close</translation>
+    </message>
+</context>
+<context>
+    <name>DownloadableImage</name>
+    <message>
+        <location filename="../src/DeveloperTools.cpp" line="35"/>
+        <location filename="../src/DeveloperTools.cpp" line="80"/>
+        <source>Save image</source>
+        <translation>Save image</translation>
+    </message>
+    <message>
+        <location filename="../src/DeveloperTools.cpp" line="87"/>
+        <source>Save error</source>
+        <translation>Save error</translation>
+    </message>
+    <message>
+        <location filename="../src/DeveloperTools.cpp" line="83"/>
+        <source>Image files (*.png *.jpg *.bmp)</source>
+        <translation>Image files (*.png *.jpg *.bmp)</translation>
+    </message>
+    <message>
+        <location filename="../src/DeveloperTools.cpp" line="87"/>
+        <source>Could not save file to %1.</source>
+        <translation>Could not save file to %1.</translation>
     </message>
 </context>
 <context>
@@ -384,17 +408,17 @@
         <translation>Please select a default project in the following dialog.</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="788"/>
+        <location filename="../src/TrayIcons.cpp" line="791"/>
         <source>All projects</source>
         <translation>All projects</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="865"/>
+        <location filename="../src/TrayIcons.cpp" line="872"/>
         <source>Your week is done</source>
         <translation>Your week is done</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/TrayIcons.cpp" line="866"/>
+        <location filename="../src/TrayIcons.cpp" line="873"/>
         <source>You have now worked %n hour(s) this week!</source>
         <translation>
             <numerusform>You have now worked %n hour this week!</numerusform>
@@ -402,12 +426,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="872"/>
+        <location filename="../src/TrayIcons.cpp" line="879"/>
         <source>You&apos;re almost done</source>
         <translation>You&apos;re almost done</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="873"/>
+        <location filename="../src/TrayIcons.cpp" line="880"/>
         <source>You have less than an hour to go to complete your work this week!</source>
         <translation>You have less than an hour to go to complete your work this week!</translation>
     </message>
@@ -534,17 +558,17 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
         <translation>You have been ratelimited</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="785"/>
+        <location filename="../src/TrayIcons.cpp" line="789"/>
         <source>Switch to</source>
         <translation>Switch to</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="841"/>
+        <location filename="../src/TrayIcons.cpp" line="848"/>
         <source>Internet connection lost</source>
         <translation>Internet connection lost</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="842"/>
+        <location filename="../src/TrayIcons.cpp" line="849"/>
         <source>The request could not be completed because the internet connection is down.</source>
         <translation>The request could not be completed because the internet connection is down.</translation>
     </message>
