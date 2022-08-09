@@ -125,7 +125,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     {
         auto m = new QNetworkAccessManager;
         auto rep = m->get(QNetworkRequest{user.avatarUrl()});
-        connect(rep, &QNetworkReply::finished, [m, rep, image, userGroupLayout] {
+        connect(rep, &QNetworkReply::finished, image, [m, rep, image, userGroupLayout] {
             QPixmap p;
             p.loadFromData(rep->readAll());
             if (p.isNull())
