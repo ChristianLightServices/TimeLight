@@ -32,7 +32,7 @@ public:
           m_pixmap{pixmap},
           m_id{id}
     {
-        setToolTip(tr("Download image"));
+        setToolTip(tr("Save image"));
         connect(this, &QAbstractButton::clicked, this, &DownloadableImage::save);
     }
 
