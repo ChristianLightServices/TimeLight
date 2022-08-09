@@ -1,5 +1,6 @@
 #include "DeveloperTools.h"
 
+#include <QPainter>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -13,10 +14,83 @@
 #include <QTableView>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QSvgRenderer>
+#include <QPaintEvent>
 
 #include "Settings.h"
 #include "User.h"
-#include "Utils.h"
+
+class DownloadableImage : public QAbstractButton
+{
+    Q_OBJECT
+
+public:
+    explicit DownloadableImage(const QPixmap &pixmap, QWidget *parent = nullptr)
+        : QAbstractButton{parent},
+          m_pixmap{pixmap}
+    {
+        setToolTip(tr("Download image"));
+        connect(this, &QAbstractButton::clicked, this, &DownloadableImage::save);
+    }
+
+    explicit DownloadableImage(QWidget *parent = nullptr)
+        : DownloadableImage{{}, parent}
+    {}
+
+    void setPixmap(const QPixmap &p)
+    {
+        m_pixmap = p;
+        resize(m_pixmap.size());
+        setMinimumSize(m_pixmap.size());
+        repaint();
+    }
+
+    virtual void paintEvent(QPaintEvent *e) override
+    {
+        QPainter p{this};
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        p.drawPixmap(rect(), m_pixmap);
+
+        if (isDown())
+        {
+            p.fillRect(rect(), QBrush{QColor{"#77000000"}});
+            p.setBrush(QBrush{QColor{"#e7626262"}});
+        }
+        else if (underMouse())
+        {
+            p.fillRect(rect(), QBrush{QColor{"#77444444"}});
+            p.setBrush(QBrush{QColor{"#e7e9e9e9"}});
+        }
+        else
+            return;
+
+        p.setPen(Qt::PenStyle::NoPen);
+        p.drawEllipse(QRect{rect().width() / 2 - 25, rect().height() / 2 - 25, 50, 50});
+        QSvgRenderer{QStringLiteral(":/icons/download.svg")}.render(&p, QRect{rect().width() / 2 - 24, rect().height() / 2 - 24, 48, 48});
+    }
+
+public slots:
+    void save()
+    {
+        auto path = QFileDialog::getSaveFileName(this,
+                                     tr("Save avatar"),
+                                     QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
+                                     tr("Image files (*.png *.jpg *.bmp)"));
+        if (path.isEmpty())
+            return;
+        if (!m_pixmap.save(path))
+            QMessageBox::warning(this, tr("File error"), tr("Could not save file to %1.").arg(path));
+    }
+
+private:
+    QPixmap m_pixmap;
+};
+
+// to make the moc happy
+#include "DeveloperTools.moc"
 
 DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *parent)
     : QDialog{parent}
@@ -41,15 +115,14 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     auto userGroup = new QGroupBox{tr("User"), this};
     auto userGroupLayout = new QGridLayout{userGroup};
 
-    auto image = new QLabel{userGroup};
-    image->setPixmap(QPixmap{});
+    auto image = new DownloadableImage{userGroup};
     if (user.avatarUrl().isEmpty())
-        image->setVisible(false);
+        image->deleteLater();
     else
     {
         auto m = new QNetworkAccessManager;
         auto rep = m->get(QNetworkRequest{user.avatarUrl()});
-        connect(rep, &QNetworkReply::finished, image, [m, rep, image, userGroupLayout] {
+        connect(rep, &QNetworkReply::finished, [m, rep, image, userGroupLayout] {
             QPixmap p;
             p.loadFromData(rep->readAll());
             if (p.isNull())

@@ -14,7 +14,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools Svg REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
 # (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
@@ -161,6 +161,7 @@ target_link_libraries(TimeLight PRIVATE
     Qt6::Network
     Qt6::NetworkAuth
     Qt6::Widgets
+    Qt6::Svg
     qt6keychain
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
