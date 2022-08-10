@@ -550,8 +550,8 @@ void TrayIcons::setUpTrayIcon()
 {
     updateQuickStartList();
 
-    auto timerRunningMenu = new QMenu;
-    auto startStopAction = timerRunningMenu->addAction(tr("Start"));
+    auto trayIconMenu = new QMenu;
+    auto startStopAction = trayIconMenu->addAction(tr("Start"));
     connect(this, &TrayIcons::timerStateChanged, startStopAction, [this, startStopAction] {
         startStopAction->setEnabled(true);
         if (m_timerState == TimerState::NotRunning)
@@ -576,11 +576,11 @@ void TrayIcons::setUpTrayIcon()
         updateTrayIcons();
     });
     auto breakResumeAction = createBreakResumeAction();
-    timerRunningMenu->addAction(breakResumeAction);
+    trayIconMenu->addAction(breakResumeAction);
     if (!(Settings::instance()->useSeparateBreakTime() && Settings::instance()->middleClickForBreak()))
         breakResumeAction->setVisible(false);
-    addStandardMenuActions(timerRunningMenu);
-    m_trayIcon->setContextMenu(timerRunningMenu);
+    addStandardMenuActions(trayIconMenu);
+    m_trayIcon->setContextMenu(trayIconMenu);
     connect(m_trayIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
         m_eventLoop.stop();
 
@@ -695,10 +695,10 @@ void TrayIcons::setUpTrayIcon()
 
 void TrayIcons::setUpBreakIcon()
 {
-    auto runningJobMenu = new QMenu;
-    runningJobMenu->addAction(createBreakResumeAction());
-    addStandardMenuActions(runningJobMenu);
-    m_breakIcon->setContextMenu(runningJobMenu);
+    auto breakIconMenu = new QMenu;
+    breakIconMenu->addAction(createBreakResumeAction());
+    addStandardMenuActions(breakIconMenu);
+    m_breakIcon->setContextMenu(breakIconMenu);
     connect(m_breakIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
         m_eventLoop.stop();
 
