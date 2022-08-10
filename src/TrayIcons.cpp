@@ -455,9 +455,8 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(cancel, &QAction::triggered, this, [this] {
         if (auto e = m_user.getRunningTimeEntry(); e)
         {
-            if (QMessageBox::question(nullptr,
-                                      tr("Cancel job"),
-                                      tr("Are you sure you want to cancel the current job?")) == QMessageBox::Yes)
+            if (QMessageBox::question(nullptr, tr("Cancel job"), tr("Are you sure you want to cancel the current job?")) ==
+                QMessageBox::Yes)
             {
                 m_user.deleteTimeEntry(*e, true);
                 updateTrayIcons();
@@ -502,10 +501,9 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
         devTools->setVisible(Settings::instance()->developerMode());
     });
 
-    connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
-            &QAction::triggered,
-            this,
-            [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
+    connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+        QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
+    });
     connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
     connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
     connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
@@ -917,8 +915,8 @@ void TrayIcons::updateQuickStartList()
 void TrayIcons::showOfflineNotification()
 {
     m_trayIcon->showMessage(tr("Internet connection lost"),
-                                tr("The request could not be completed because the internet connection is "
-                                   "down."));
+                            tr("The request could not be completed because the internet connection is "
+                               "down."));
 }
 
 void TrayIcons::checkForFinishedWeek()
@@ -948,7 +946,7 @@ void TrayIcons::checkForFinishedWeek()
         else if (hoursThisWeek >= Settings::instance()->weekHours() - 1 && m_timeUpWarning != TimeUpWarning::AlmostDone)
         {
             m_trayIcon->showMessage(tr("You're almost done"),
-                                        tr("You have less than an hour to go to complete your work this week!"));
+                                    tr("You have less than an hour to go to complete your work this week!"));
             m_timeUpWarning = TimeUpWarning::AlmostDone;
             // fifteen-second delay to make sure we don't get ahead of the time service by any chance
             QTimer::singleShot(msecsThisWeek + 15000, this, &TrayIcons::checkForFinishedWeek);

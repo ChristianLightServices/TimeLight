@@ -1,7 +1,7 @@
 #include "DeveloperTools.h"
 
-#include <QPainter>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -9,15 +9,15 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
+#include <QStandardPaths>
+#include <QSvgRenderer>
 #include <QTableView>
 #include <QTableWidget>
 #include <QVBoxLayout>
-#include <QFileDialog>
-#include <QStandardPaths>
-#include <QSvgRenderer>
-#include <QPaintEvent>
 
 #include "Settings.h"
 #include "User.h"
@@ -70,7 +70,8 @@ public:
 
         p.setPen(Qt::PenStyle::NoPen);
         p.drawEllipse(QRect{rect().width() / 2 - 25, rect().height() / 2 - 25, 50, 50});
-        QSvgRenderer{QStringLiteral(":/icons/download.svg")}.render(&p, QRect{rect().width() / 2 - 24, rect().height() / 2 - 24, 48, 48});
+        QSvgRenderer{QStringLiteral(":/icons/download.svg")}.render(
+            &p, QRect{rect().width() / 2 - 24, rect().height() / 2 - 24, 48, 48});
     }
 
 public slots:

@@ -6,8 +6,8 @@
 #include <optional>
 
 #include "AbstractTimeServiceManager.h"
-#include "TimeEntry.h"
 #include "Project.h"
+#include "TimeEntry.h"
 
 class User : public QObject
 {
