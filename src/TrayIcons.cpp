@@ -509,34 +509,84 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
     connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
     connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
-};
+}
+
+QAction *TrayIcons::createBreakResumeAction()
+{
+    auto breakResumeAction = new QAction{tr("Break")};
+    connect(this, &TrayIcons::timerStateChanged, breakResumeAction, [this, breakResumeAction] {
+        breakResumeAction->setEnabled(true);
+        if (m_timerState == TimerState::Running || m_timerState == TimerState::NotRunning)
+            breakResumeAction->setText(tr("Break"));
+        else if (m_timerState == TimerState::OnBreak)
+            breakResumeAction->setText(tr("Resume"));
+        else
+            breakResumeAction->setDisabled(true);
+    });
+    connect(breakResumeAction, &QAction::triggered, this, [this]() {
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+            showOfflineNotification();
+
+        if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::Running)
+        {
+            if (m_timerState == TimerState::Running)
+                m_user.stopCurrentTimeEntry();
+            m_user.startTimeEntry(Settings::instance()->breakTimeId());
+        }
+        else if (m_timerState == TimerState::OnBreak)
+        {
+            m_user.stopCurrentTimeEntry();
+            auto project = defaultProject();
+            m_user.startTimeEntry(project.id(), project.description());
+        }
+
+        updateTrayIcons();
+    });
+
+    return breakResumeAction;
+}
 
 void TrayIcons::setUpTrayIcon()
 {
     updateQuickStartList();
 
     auto timerRunningMenu = new QMenu;
-    connect(timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
+    auto startStopAction = timerRunningMenu->addAction(tr("Start"));
+    connect(this, &TrayIcons::timerStateChanged, startStopAction, [this, startStopAction] {
+        startStopAction->setEnabled(true);
+        if (m_timerState == TimerState::NotRunning)
+            startStopAction->setText(tr("Start"));
+        else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
+            startStopAction->setText(tr("Stop"));
+        else
+            startStopAction->setDisabled(true);
+    });
+    connect(startStopAction, &QAction::triggered, this, [this]() {
         if (!m_manager->isConnectedToInternet()) [[unlikely]]
             showOfflineNotification();
 
-        if (!m_user.getRunningTimeEntry()) [[likely]]
+        if (m_timerState == TimerState::NotRunning)
         {
-            auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
-            updateTrayIcons();
+            if (!m_user.getRunningTimeEntry()) [[likely]]
+            {
+                auto project = defaultProject();
+                m_user.startTimeEntry(project.id(), project.description());
+                updateTrayIcons();
+            }
+        }
+        else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
+        {
+            if (m_user.getRunningTimeEntry()) [[likely]]
+            {
+                m_user.stopCurrentTimeEntry();
+                updateTrayIcons();
+            }
         }
     });
-    connect(timerRunningMenu->addAction(tr("Stop")), &QAction::triggered, this, [this]() {
-        if (!m_manager->isConnectedToInternet()) [[unlikely]]
-            showOfflineNotification();
-
-        if (m_user.getRunningTimeEntry()) [[likely]]
-        {
-            m_user.stopCurrentTimeEntry();
-            updateTrayIcons();
-        }
-    });
+    auto breakResumeAction = createBreakResumeAction();
+    timerRunningMenu->addAction(breakResumeAction);
+    if (!(Settings::instance()->useSeparateBreakTime() && Settings::instance()->middleClickForBreak()))
+        breakResumeAction->setVisible(false);
     addStandardMenuActions(timerRunningMenu);
     m_trayIcon->setContextMenu(timerRunningMenu);
     connect(m_trayIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
@@ -626,19 +676,22 @@ void TrayIcons::setUpTrayIcon()
     });
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateQuickStartList, Qt::QueuedConnection);
 
-    auto showOrHideBreakButton = [this] {
+    auto showOrHideBreakButton = [this, breakResumeAction] {
         if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         {
             if (m_breakIcon == nullptr)
                 m_breakIcon = new QSystemTrayIcon{this};
             setUpBreakIcon();
             updateIconsAndTooltips();
+            breakResumeAction->setVisible(false);
             m_breakIcon->show();
         }
         else if (m_breakIcon)
         {
             m_breakIcon->deleteLater();
             m_breakIcon = nullptr;
+            if (Settings::instance()->useSeparateBreakTime())
+                breakResumeAction->setVisible(true);
             updateIconsAndTooltips();
         }
     };
@@ -651,35 +704,7 @@ void TrayIcons::setUpTrayIcon()
 void TrayIcons::setUpBreakIcon()
 {
     auto runningJobMenu = new QMenu;
-    connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
-        if (!m_manager->isConnectedToInternet()) [[unlikely]]
-            showOfflineNotification();
-
-        if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
-        {
-            if (e->project().id() == Settings::instance()->breakTimeId())
-                return;
-
-            m_user.stopCurrentTimeEntry();
-        }
-        m_user.startTimeEntry(Settings::instance()->breakTimeId());
-        updateTrayIcons();
-    });
-    connect(runningJobMenu->addAction(tr("Resume")), &QAction::triggered, this, [this]() {
-        if (!m_manager->isConnectedToInternet()) [[unlikely]]
-            showOfflineNotification();
-
-        if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
-        {
-            if (e->project().id() != Settings::instance()->breakTimeId())
-                return;
-
-            m_user.stopCurrentTimeEntry();
-        }
-        auto project = defaultProject();
-        m_user.startTimeEntry(project.id(), project.description());
-        updateTrayIcons();
-    });
+    runningJobMenu->addAction(createBreakResumeAction());
     addStandardMenuActions(runningJobMenu);
     m_breakIcon->setContextMenu(runningJobMenu);
     connect(m_breakIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {

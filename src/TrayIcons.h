@@ -1,6 +1,7 @@
 #ifndef TRAYICONS_H
 #define TRAYICONS_H
 
+#include <QAction>
 #include <QObject>
 #include <QSystemTrayIcon>
 #include <QTimer>
@@ -60,6 +61,7 @@ private:
 
     template<TimeManager Manager> void initializeManager();
     void addStandardMenuActions(QMenu *menu);
+    QAction *createBreakResumeAction();
     void setUpTrayIcon();
     void setUpBreakIcon();
     void setTimerState(TimerState state);
