@@ -59,8 +59,11 @@ private:
     };
 
     template<TimeManager Manager> void initializeManager();
-    void setUpTrayIcons();
+    void addStandardMenuActions(QMenu *menu);
+    void setUpTrayIcon();
+    void setUpBreakIcon();
     void setTimerState(TimerState state);
+    void updateIconsAndTooltips();
     void updateQuickStartList();
     void showOfflineNotification();
     void checkForFinishedWeek();

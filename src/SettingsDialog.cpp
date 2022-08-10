@@ -294,29 +294,20 @@ QWidget *SettingsDialog::createProjectPage()
     });
 
     connect(useBreakTime, &QCheckBox::stateChanged, breakProject, [this, useBreakTime, breakProject](int state) {
-        if (QMessageBox::information(this,
-                                     tr("Restart required"),
-                                     tr("To continue, the program will restart"),
-                                     QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+        switch (state)
         {
-            switch (state)
-            {
-            case Qt::Checked:
-            case Qt::PartiallyChecked:
-                Settings::instance()->setUseSeparateBreakTime(true);
-                breakProject->setEnabled(true);
-                break;
-            case Qt::Unchecked:
-                Settings::instance()->setUseSeparateBreakTime(false);
-                breakProject->setDisabled(true);
-                break;
-            default:
-                break;
-            }
-            TimeLight::restartApp();
+        case Qt::Checked:
+        case Qt::PartiallyChecked:
+            Settings::instance()->setUseSeparateBreakTime(true);
+            breakProject->setEnabled(true);
+            break;
+        case Qt::Unchecked:
+            Settings::instance()->setUseSeparateBreakTime(false);
+            breakProject->setDisabled(true);
+            break;
+        default:
+            break;
         }
-        else
-            useBreakTime->setChecked(Settings::instance()->useSeparateBreakTime());
     });
 
     connect(breakProject, &QComboBox::currentIndexChanged, breakProject, [this, breakProject](int i) {

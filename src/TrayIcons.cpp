@@ -177,7 +177,7 @@ TrayIcons::TrayIcons(QObject *parent)
     if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         m_runningJob = new QSystemTrayIcon;
 
-    setUpTrayIcons();
+    setUpTrayIcon();
 
     m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     m_eventLoop.setSingleShot(false);
@@ -435,84 +435,85 @@ void TrayIcons::setEventLoopInterval(int interval)
     m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
 }
 
-void TrayIcons::setUpTrayIcons()
+void TrayIcons::addStandardMenuActions(QMenu *menu)
+{
+    menu->addMenu(m_quickStartMenu);
+    auto modifyJob = menu->addAction(tr("Modify current job"));
+    connect(modifyJob, &QAction::triggered, this, [this] {
+        if (auto e = m_user.getRunningTimeEntry(); e)
+        {
+            auto dialog = new ModifyJobDialog{m_manager, *e};
+            dialog->show();
+            connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
+                if (result == QDialog::Accepted)
+                    m_user.modifyTimeEntry(std::move(dialog->entry()), true);
+                dialog->deleteLater();
+            });
+        }
+    });
+    auto cancel = menu->addAction(tr("Cancel current job"));
+    connect(cancel, &QAction::triggered, this, [this] {
+        if (auto e = m_user.getRunningTimeEntry(); e)
+        {
+            if (QMessageBox::question(nullptr,
+                                      tr("Cancel job"),
+                                      tr("Are you sure you want to cancel the current job?")) == QMessageBox::Yes)
+            {
+                m_user.deleteTimeEntry(*e, true);
+                updateTrayIcons();
+            }
+        }
+    });
+    modifyJob->setDisabled(true);
+    cancel->setDisabled(true);
+    connect(
+        this,
+        &TrayIcons::jobEnded,
+        this,
+        [modifyJob, cancel] {
+            modifyJob->setDisabled(true);
+            cancel->setDisabled(true);
+        },
+        Qt::QueuedConnection);
+    connect(
+        this,
+        &TrayIcons::jobStarted,
+        this,
+        [modifyJob, cancel] {
+            modifyJob->setDisabled(false);
+            cancel->setDisabled(false);
+        },
+        Qt::QueuedConnection);
+
+    connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
+        SettingsDialog d{m_manager,
+                         {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
+                          {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
+        d.exec();
+    });
+
+    auto devTools = menu->addAction(tr("Developer tools"));
+    devTools->setVisible(Settings::instance()->developerMode());
+    connect(devTools, &QAction::triggered, this, [this] {
+        DeveloperTools d{m_manager};
+        d.exec();
+    });
+    connect(Settings::instance(), &Settings::developerModeChanged, devTools, [devTools] {
+        devTools->setVisible(Settings::instance()->developerMode());
+    });
+
+    connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
+            &QAction::triggered,
+            this,
+            [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
+    connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
+    connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
+    connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
+};
+
+void TrayIcons::setUpTrayIcon()
 {
     updateQuickStartList();
-
-    auto addMenuActions = [this](QMenu *menu) {
-        menu->addMenu(m_quickStartMenu);
-        auto modifyJob = menu->addAction(tr("Modify current job"));
-        connect(modifyJob, &QAction::triggered, this, [this] {
-            if (auto e = m_user.getRunningTimeEntry(); e)
-            {
-                auto dialog = new ModifyJobDialog{m_manager, *e};
-                dialog->show();
-                connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
-                    if (result == QDialog::Accepted)
-                        m_user.modifyTimeEntry(std::move(dialog->entry()), true);
-                    dialog->deleteLater();
-                });
-            }
-        });
-        auto cancel = menu->addAction(tr("Cancel current job"));
-        connect(cancel, &QAction::triggered, this, [this] {
-            if (auto e = m_user.getRunningTimeEntry(); e)
-            {
-                if (QMessageBox::question(nullptr,
-                                          tr("Cancel job"),
-                                          tr("Are you sure you want to cancel the current job?")) == QMessageBox::Yes)
-                {
-                    m_user.deleteTimeEntry(*e, true);
-                    updateTrayIcons();
-                }
-            }
-        });
-        modifyJob->setDisabled(true);
-        cancel->setDisabled(true);
-        connect(
-            this,
-            &TrayIcons::jobEnded,
-            this,
-            [modifyJob, cancel] {
-                modifyJob->setDisabled(true);
-                cancel->setDisabled(true);
-            },
-            Qt::QueuedConnection);
-        connect(
-            this,
-            &TrayIcons::jobStarted,
-            this,
-            [modifyJob, cancel] {
-                modifyJob->setDisabled(false);
-                cancel->setDisabled(false);
-            },
-            Qt::QueuedConnection);
-
-        connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
-            SettingsDialog d{m_manager,
-                             {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
-                              {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
-            d.exec();
-        });
-
-        auto devTools = menu->addAction(tr("Developer tools"));
-        devTools->setVisible(Settings::instance()->developerMode());
-        connect(devTools, &QAction::triggered, this, [this] {
-            DeveloperTools d{m_manager};
-            d.exec();
-        });
-        connect(Settings::instance(), &Settings::developerModeChanged, devTools, [devTools] {
-            devTools->setVisible(Settings::instance()->developerMode());
-        });
-
-        connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())),
-                &QAction::triggered,
-                this,
-                [this]() { QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl()); });
-        connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
-        connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
-        connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
-    };
 
     auto timerRunningMenu = new QMenu;
     connect(timerRunningMenu->addAction(tr("Start")), &QAction::triggered, this, [this]() {
@@ -536,7 +537,7 @@ void TrayIcons::setUpTrayIcons()
             updateTrayIcons();
         }
     });
-    addMenuActions(timerRunningMenu);
+    addStandardMenuActions(timerRunningMenu);
     m_timerRunning->setContextMenu(timerRunningMenu);
     connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
         m_eventLoop.stop();
@@ -590,80 +591,8 @@ void TrayIcons::setUpTrayIcons()
         m_eventLoop.start();
     });
 
-    if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
-    {
-        auto runningJobMenu = new QMenu;
-        connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
-            if (!m_manager->isConnectedToInternet()) [[unlikely]]
-                showOfflineNotification();
-
-            if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
-            {
-                if (e->project().id() == Settings::instance()->breakTimeId())
-                    return;
-
-                m_user.stopCurrentTimeEntry();
-            }
-            m_user.startTimeEntry(Settings::instance()->breakTimeId());
-            updateTrayIcons();
-        });
-        connect(runningJobMenu->addAction(tr("Resume")), &QAction::triggered, this, [this]() {
-            if (!m_manager->isConnectedToInternet()) [[unlikely]]
-                showOfflineNotification();
-
-            if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
-            {
-                if (e->project().id() != Settings::instance()->breakTimeId())
-                    return;
-
-                m_user.stopCurrentTimeEntry();
-            }
-            auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
-            updateTrayIcons();
-        });
-        addMenuActions(runningJobMenu);
-        m_runningJob->setContextMenu(runningJobMenu);
-        connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
-            m_eventLoop.stop();
-
-            if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick) [[unlikely]]
-            {
-                m_eventLoop.start();
-                return;
-            }
-
-            if (!m_manager->isConnectedToInternet()) [[unlikely]]
-            {
-                showOfflineNotification();
-                m_eventLoop.start();
-                return;
-            }
-
-            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
-            {
-                if (runningEntry->project().id() == Settings::instance()->breakTimeId())
-                {
-                    auto time = m_user.stopCurrentTimeEntry();
-                    auto project = defaultProject();
-                    m_user.startTimeEntry(project.id(), project.description(), time);
-                }
-                else
-                {
-                    auto time = m_user.stopCurrentTimeEntry();
-                    m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
-                }
-            }
-            else
-            {
-                auto project = defaultProject();
-                m_user.startTimeEntry(project.id(), project.description());
-            }
-
-            updateTrayIcons();
-            m_eventLoop.start();
-        });
-    }
+    if (m_runningJob)
+        setUpBreakIcon();
 
     connect(m_manager, &ClockifyManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
 
@@ -697,7 +626,101 @@ void TrayIcons::setUpTrayIcons()
     });
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateQuickStartList, Qt::QueuedConnection);
 
+    auto showOrHideBreakButton = [this] {
+        if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
+        {
+            if (m_runningJob == nullptr)
+                m_runningJob = new QSystemTrayIcon{this};
+            setUpBreakIcon();
+            updateIconsAndTooltips();
+            m_runningJob->show();
+        }
+        else if (m_runningJob)
+        {
+            m_runningJob->deleteLater();
+            m_runningJob = nullptr;
+            updateIconsAndTooltips();
+        }
+    };
+    connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, this, showOrHideBreakButton);
+    connect(Settings::instance(), &Settings::middleClickForBreakChanged, this, showOrHideBreakButton);
+
     updateTrayIcons();
+}
+
+void TrayIcons::setUpBreakIcon()
+{
+    auto runningJobMenu = new QMenu;
+    connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+            showOfflineNotification();
+
+        if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
+        {
+            if (e->project().id() == Settings::instance()->breakTimeId())
+                return;
+
+            m_user.stopCurrentTimeEntry();
+        }
+        m_user.startTimeEntry(Settings::instance()->breakTimeId());
+        updateTrayIcons();
+    });
+    connect(runningJobMenu->addAction(tr("Resume")), &QAction::triggered, this, [this]() {
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+            showOfflineNotification();
+
+        if (auto e = m_user.getRunningTimeEntry(); e) [[likely]]
+        {
+            if (e->project().id() != Settings::instance()->breakTimeId())
+                return;
+
+            m_user.stopCurrentTimeEntry();
+        }
+        auto project = defaultProject();
+        m_user.startTimeEntry(project.id(), project.description());
+        updateTrayIcons();
+    });
+    addStandardMenuActions(runningJobMenu);
+    m_runningJob->setContextMenu(runningJobMenu);
+    connect(m_runningJob, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
+        m_eventLoop.stop();
+
+        if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick) [[unlikely]]
+        {
+            m_eventLoop.start();
+            return;
+        }
+
+        if (!m_manager->isConnectedToInternet()) [[unlikely]]
+        {
+            showOfflineNotification();
+            m_eventLoop.start();
+            return;
+        }
+
+        if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+        {
+            if (runningEntry->project().id() == Settings::instance()->breakTimeId())
+            {
+                auto time = m_user.stopCurrentTimeEntry();
+                auto project = defaultProject();
+                m_user.startTimeEntry(project.id(), project.description(), time);
+            }
+            else
+            {
+                auto time = m_user.stopCurrentTimeEntry();
+                m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+            }
+        }
+        else
+        {
+            auto project = defaultProject();
+            m_user.startTimeEntry(project.id(), project.description());
+        }
+
+        updateTrayIcons();
+        m_eventLoop.start();
+    });
 }
 
 void TrayIcons::setTimerState(TimerState state)
@@ -708,8 +731,15 @@ void TrayIcons::setTimerState(TimerState state)
 
     if (state == m_timerState)
         return;
+    m_timerState = state;
 
-    switch (state)
+    updateIconsAndTooltips();
+    emit timerStateChanged();
+}
+
+void TrayIcons::updateIconsAndTooltips()
+{
+    switch (m_timerState)
     {
     case TimerState::Running:
     {
@@ -738,7 +768,7 @@ void TrayIcons::setTimerState(TimerState state)
         if (m_runningJob)
         {
             m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
-            m_timerRunning->setIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
+            m_timerRunning->setIcon(QIcon{QStringLiteral(":/icons/greenpower.png")});
             m_runningJob->setIcon(QIcon{":/icons/yellowlight.png"});
         }
         else
@@ -801,9 +831,6 @@ void TrayIcons::setTimerState(TimerState state)
     default:
         break;
     }
-
-    m_timerState = state;
-    emit timerStateChanged();
 }
 
 void TrayIcons::updateQuickStartList()
