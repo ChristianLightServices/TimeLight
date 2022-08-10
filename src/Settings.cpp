@@ -78,6 +78,7 @@ void Settings::load()
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("app"));
+    m_middleClickForBreak = settings.value(QStringLiteral("middleClickForBreak"), false).toBool();
     m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 5000).toInt();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
@@ -204,6 +205,15 @@ void Settings::setUseSeparateBreakTime(const bool use)
         return;
     m_useSeparateBreakTime = use;
     emit useSeparateBreakTimeChanged();
+    m_settingsDirty = true;
+}
+
+void Settings::setMiddleClickForBreak(const bool use)
+{
+    if (use == m_middleClickForBreak)
+        return;
+    m_middleClickForBreak = use;
+    emit middleClickForBreakChanged();
     m_settingsDirty = true;
 }
 
@@ -372,6 +382,7 @@ void Settings::save(bool async)
     settings.endGroup();
 
     settings.beginGroup(QStringLiteral("app"));
+    settings.setValue(QStringLiteral("middleClickForBreak"), m_middleClickForBreak);
     settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
     settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);

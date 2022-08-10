@@ -18,6 +18,7 @@ public:
     const QString &projectId() const { return m_projectId; }
     const QString &workspaceId() const { return m_workspaceId; }
     bool useSeparateBreakTime() const { return m_useSeparateBreakTime; }
+    bool middleClickForBreak() const { return m_middleClickForBreak; }
     bool disableDescription() const { return m_disableDescription; }
     bool useLastDescription() const { return m_useLastDescription; }
     bool useLastProject() const { return m_useLastProject; }
@@ -44,6 +45,7 @@ public slots:
     void setProjectId(const QString &id);
     void setWorkspaceId(const QString &id);
     void setUseSeparateBreakTime(const bool use);
+    void setMiddleClickForBreak(const bool use);
     void setDisableDescription(const bool disable);
     void setUseLastDescription(const bool use);
     void setUseLastProject(const bool use);
@@ -67,6 +69,7 @@ signals:
     void projectIdChanged();
     void workspaceIdChanged();
     void useSeparateBreakTimeChanged();
+    void middleClickForBreakChanged();
     void disableDescriptionChanged();
     void useLastDescriptionChanged();
     void useLastProjectChanged();
@@ -102,6 +105,7 @@ private:
     QString m_workspaceId;
 
     bool m_useSeparateBreakTime;
+    bool m_middleClickForBreak;
     bool m_disableDescription;
     bool m_useLastDescription;
     bool m_useLastProject;

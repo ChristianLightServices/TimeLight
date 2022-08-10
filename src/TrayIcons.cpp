@@ -174,7 +174,7 @@ TrayIcons::TrayIcons(QObject *parent)
         getNewProjectId();
     }
 
-    if (Settings::instance()->useSeparateBreakTime())
+    if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         m_runningJob = new QSystemTrayIcon;
 
     setUpTrayIcons();
@@ -541,7 +541,9 @@ void TrayIcons::setUpTrayIcons()
     connect(m_timerRunning, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
         m_eventLoop.stop();
 
-        if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick) [[unlikely]]
+        if (reason != QSystemTrayIcon::Trigger && reason != QSystemTrayIcon::DoubleClick &&
+            !(Settings::instance()->useSeparateBreakTime() && Settings::instance()->middleClickForBreak() &&
+              reason == QSystemTrayIcon::MiddleClick)) [[unlikely]]
         {
             m_eventLoop.start();
             return;
@@ -554,7 +556,29 @@ void TrayIcons::setUpTrayIcons()
             return;
         }
 
-        if (m_user.getRunningTimeEntry())
+        if (reason == QSystemTrayIcon::MiddleClick)
+        {
+            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+            {
+                if (runningEntry->project().id() == Settings::instance()->breakTimeId())
+                {
+                    auto time = m_user.stopCurrentTimeEntry();
+                    auto project = defaultProject();
+                    m_user.startTimeEntry(project.id(), project.description(), time);
+                }
+                else
+                {
+                    auto time = m_user.stopCurrentTimeEntry();
+                    m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+                }
+            }
+            else
+            {
+                auto project = defaultProject();
+                m_user.startTimeEntry(Settings::instance()->breakTimeId());
+            }
+        }
+        else if (m_user.getRunningTimeEntry())
             m_user.stopCurrentTimeEntry();
         else
         {
@@ -566,7 +590,7 @@ void TrayIcons::setUpTrayIcons()
         m_eventLoop.start();
     });
 
-    if (Settings::instance()->useSeparateBreakTime())
+    if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
     {
         auto runningJobMenu = new QMenu;
         connect(runningJobMenu->addAction(tr("Break")), &QAction::triggered, this, [this]() {
@@ -711,11 +735,14 @@ void TrayIcons::setTimerState(TimerState state)
         break;
     }
     case TimerState::OnBreak:
-        m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
-        m_timerRunning->setIcon(
-            QIcon{m_runningJob ? QStringLiteral(":/icons/greenpower.png") : QStringLiteral(":/icons/greenlight.png")});
-        if (m_runningJob) // this *should* always be true, but just in case...
+        if (m_runningJob)
+        {
+            m_timerRunning->setToolTip(tr("%1 is running").arg(m_manager->serviceName()));
+            m_timerRunning->setIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             m_runningJob->setIcon(QIcon{":/icons/yellowlight.png"});
+        }
+        else
+            m_timerRunning->setIcon(QIcon{":/icons/yellowlight.png"});
 
         m_runningEntryTooltipBase = tr("You are on break");
         updateRunningEntryTooltip();

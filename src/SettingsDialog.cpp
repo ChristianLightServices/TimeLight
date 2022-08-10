@@ -371,6 +371,10 @@ QWidget *SettingsDialog::createAppPage()
     auto appPage{new QWidget};
     auto layout{new QGridLayout{appPage}};
 
+    auto middleClickForBreak{new QCheckBox{tr("Click with the middle mouse button to switch to break time"), appPage}};
+    middleClickForBreak->setChecked(Settings::instance()->middleClickForBreak());
+    middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
+
     auto eventLoopInterval{new QDoubleSpinBox{appPage}};
     eventLoopInterval->setSuffix(tr(" seconds"));
     eventLoopInterval->setSingleStep(0.5);
@@ -394,15 +398,33 @@ QWidget *SettingsDialog::createAppPage()
     weekHours->setMaximum(100);
     weekHours->setEnabled(Settings::instance()->alertOnTimeUp());
 
-    layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 0, 0);
-    layout->addWidget(eventLoopInterval, 0, 1);
-    layout->addWidget(showNotifications, 1, 0, 1, 2);
-    layout->addWidget(showTimeUpWarning, 2, 0, 1, 2);
-    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 3, 0);
-    layout->addWidget(weekHours, 3, 1);
+    layout->addWidget(middleClickForBreak, 0, 0);
+    layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 1, 0);
+    layout->addWidget(eventLoopInterval, 1, 1);
+    layout->addWidget(showNotifications, 2, 0, 1, 2);
+    layout->addWidget(showTimeUpWarning, 3, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 4, 0);
+    layout->addWidget(weekHours, 4, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
+    connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, middleClickForBreak, [middleClickForBreak] {
+        middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
+    });
+    connect(middleClickForBreak, &QCheckBox::stateChanged, middleClickForBreak, [](int state) {
+        switch (state)
+        {
+        case Qt::Checked:
+        case Qt::PartiallyChecked:
+            Settings::instance()->setMiddleClickForBreak(true);
+            break;
+        case Qt::Unchecked:
+            Settings::instance()->setMiddleClickForBreak(false);
+            break;
+        default:
+            break;
+        }
+    });
     connect(eventLoopInterval, &QDoubleSpinBox::valueChanged, eventLoopInterval, [](double d) {
         Settings::instance()->setEventLoopInterval(static_cast<int>(d * 1000));
     });
