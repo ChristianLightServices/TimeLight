@@ -71,8 +71,8 @@ private:
     AbstractTimeServiceManager *m_manager;
     TeamsClient *m_teamsClient;
 
-    QSystemTrayIcon *m_timerRunning{nullptr};
-    QSystemTrayIcon *m_runningJob{nullptr};
+    QSystemTrayIcon *m_trayIcon{nullptr};
+    QSystemTrayIcon *m_breakIcon{nullptr};
 
     QMenu *m_quickStartMenu{nullptr};
     QMenu *m_quickStartAllProjects{nullptr};
