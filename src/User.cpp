@@ -1,8 +1,5 @@
 #include "User.h"
 
-#include "ClockifyManager.h"
-#include "JsonHelper.h"
-
 User::User(const QString &userId,
            const QString &name,
            const QString &workspaceId,
@@ -39,24 +36,14 @@ QDateTime User::stopCurrentTimeEntry(bool async) const
     return m_manager->stopRunningTimeEntry(m_userId, async);
 }
 
-void User::startTimeEntry(const QString &projectId, bool async) const
+void User::startTimeEntry(const Project &project, bool async) const
 {
-    m_manager->startTimeEntry(m_userId, projectId, async);
+    m_manager->startTimeEntry(m_userId, project, async);
 }
 
-void User::startTimeEntry(const QString &projectId, const QString &description, bool async) const
+void User::startTimeEntry(const Project &project, QDateTime start, bool async) const
 {
-    m_manager->startTimeEntry(m_userId, projectId, description, async);
-}
-
-void User::startTimeEntry(const QString &projectId, QDateTime start, bool async) const
-{
-    m_manager->startTimeEntry(m_userId, projectId, start, async);
-}
-
-void User::startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async) const
-{
-    m_manager->startTimeEntry(m_userId, projectId, description, start, async);
+    m_manager->startTimeEntry(m_userId, project, start, async);
 }
 
 void User::modifyTimeEntry(const TimeEntry &t, bool async)

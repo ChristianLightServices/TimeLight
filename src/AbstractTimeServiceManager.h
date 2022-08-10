@@ -47,11 +47,8 @@ public:
     QString projectName(const QString &projectId);
     QString userName(const QString &userId);
 
-    void startTimeEntry(const QString &userId, const QString &projectId, bool async);
-    void startTimeEntry(const QString &userId, const QString &projectId, const QString &description, bool async);
-    void startTimeEntry(const QString &userId, const QString &projectId, const QDateTime &start, bool async);
-    void startTimeEntry(
-        const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async);
+    void startTimeEntry(const QString &userId, const Project &project, bool async);
+    void startTimeEntry(const QString &userId, const Project &project, const QDateTime &start, bool async);
     std::optional<TimeEntry> getRunningTimeEntry(const QString &userId);
     QDateTime stopRunningTimeEntry(const QString &userId, bool async);
     void modifyTimeEntry(const QString &userId, const TimeEntry &t, bool async);

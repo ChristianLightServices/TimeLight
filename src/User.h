@@ -7,6 +7,7 @@
 
 #include "AbstractTimeServiceManager.h"
 #include "TimeEntry.h"
+#include "Project.h"
 
 class User : public QObject
 {
@@ -24,10 +25,8 @@ public:
 
     std::optional<TimeEntry> getRunningTimeEntry();
     QDateTime stopCurrentTimeEntry(bool async = false) const;
-    void startTimeEntry(const QString &projectId, bool async = false) const;
-    void startTimeEntry(const QString &projectId, const QString &description, bool async = false) const;
-    void startTimeEntry(const QString &projectId, QDateTime start, bool async = false) const;
-    void startTimeEntry(const QString &projectId, const QString &description, QDateTime start, bool async = false) const;
+    void startTimeEntry(const Project &project, bool async = false) const;
+    void startTimeEntry(const Project &project, QDateTime start, bool async = false) const;
     void modifyTimeEntry(const TimeEntry &t, bool async = false);
     void deleteTimeEntry(const TimeEntry &t, bool async = false);
     QVector<TimeEntry> getTimeEntries(std::optional<int> pageNumber = std::nullopt,

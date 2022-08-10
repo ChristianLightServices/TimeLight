@@ -531,13 +531,13 @@ QAction *TrayIcons::createBreakResumeAction()
         {
             if (m_timerState == TimerState::Running)
                 m_user.stopCurrentTimeEntry();
-            m_user.startTimeEntry(Settings::instance()->breakTimeId());
+            m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
         }
         else if (m_timerState == TimerState::OnBreak)
         {
             m_user.stopCurrentTimeEntry();
             auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
+            m_user.startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -568,7 +568,7 @@ void TrayIcons::setUpTrayIcon()
         if (m_timerState == TimerState::NotRunning)
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
+            m_user.startTimeEntry(project);
         }
         else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
             m_user.stopCurrentTimeEntry();
@@ -607,18 +607,18 @@ void TrayIcons::setUpTrayIcon()
                 {
                     auto time = m_user.stopCurrentTimeEntry();
                     auto project = defaultProject();
-                    m_user.startTimeEntry(project.id(), project.description(), time);
+                    m_user.startTimeEntry(project, time);
                 }
                 else
                 {
                     auto time = m_user.stopCurrentTimeEntry();
-                    m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+                    m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
                 }
             }
             else
             {
                 auto project = defaultProject();
-                m_user.startTimeEntry(Settings::instance()->breakTimeId());
+                m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
             }
         }
         else if (m_user.getRunningTimeEntry())
@@ -626,7 +626,7 @@ void TrayIcons::setUpTrayIcon()
         else
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
+            m_user.startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -721,18 +721,18 @@ void TrayIcons::setUpBreakIcon()
             {
                 auto time = m_user.stopCurrentTimeEntry();
                 auto project = defaultProject();
-                m_user.startTimeEntry(project.id(), project.description(), time);
+                m_user.startTimeEntry(project, time);
             }
             else
             {
                 auto time = m_user.stopCurrentTimeEntry();
-                m_user.startTimeEntry(Settings::instance()->breakTimeId(), time);
+                m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
             }
         }
         else
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project.id(), project.description());
+            m_user.startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -884,7 +884,7 @@ void TrayIcons::updateQuickStartList()
                 }
                 now = m_user.stopCurrentTimeEntry();
             }
-            m_user.startTimeEntry(projectId, defaultProject().description(), now, true);
+            m_user.startTimeEntry(Project{projectId, {}, defaultProject().description()}, now, true);
             m_eventLoop.start();
         });
     };

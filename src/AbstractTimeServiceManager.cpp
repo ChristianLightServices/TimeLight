@@ -97,38 +97,17 @@ QString AbstractTimeServiceManager::userName(const QString &userId)
     return "";
 }
 
-void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const QString &projectId, bool async)
+void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const Project &project, bool async)
 {
-    startTimeEntry(userId, projectId, QString{}, currentDateTime(), async);
+    startTimeEntry(userId, project, currentDateTime(), async);
 }
 
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId,
-                                                const QString &projectId,
-                                                const QString &description,
-                                                bool async)
-{
-    startTimeEntry(userId, projectId, description, currentDateTime(), async);
-}
-
-void AbstractTimeServiceManager::startTimeEntry(const QString &userId,
-                                                const QString &projectId,
+                                                const Project &project,
                                                 const QDateTime &start,
                                                 bool async)
 {
-    startTimeEntry(userId, projectId, QString{}, start, async);
-}
-
-void AbstractTimeServiceManager::startTimeEntry(
-    const QString &userId, const QString &projectId, const QString &description, const QDateTime &start, bool async)
-{
-    Project p;
-    auto it =
-        std::find_if(m_projects.begin(), m_projects.end(), [&projectId](const Project &p) { return p.id() == projectId; });
-    if (it != m_projects.end())
-        p = *it;
-    else
-        p = Project{projectId, projectName(projectId), description};
-    TimeEntry t{{}, p, userId, start, {}, {}};
+    TimeEntry t{{}, project, userId, start, {}, {}};
     timeEntryReq(startTimeEntryUrl(userId, m_workspaceId),
                  TimeEntryAction::StartTimeEntry,
                  QByteArray::fromStdString(timeEntryToJson(t, TimeEntryAction::StartTimeEntry).dump()),
