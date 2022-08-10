@@ -567,21 +567,13 @@ void TrayIcons::setUpTrayIcon()
 
         if (m_timerState == TimerState::NotRunning)
         {
-            if (!m_user.getRunningTimeEntry()) [[likely]]
-            {
-                auto project = defaultProject();
-                m_user.startTimeEntry(project.id(), project.description());
-                updateTrayIcons();
-            }
+            auto project = defaultProject();
+            m_user.startTimeEntry(project.id(), project.description());
         }
         else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
-        {
-            if (m_user.getRunningTimeEntry()) [[likely]]
-            {
-                m_user.stopCurrentTimeEntry();
-                updateTrayIcons();
-            }
-        }
+            m_user.stopCurrentTimeEntry();
+
+        updateTrayIcons();
     });
     auto breakResumeAction = createBreakResumeAction();
     timerRunningMenu->addAction(breakResumeAction);
