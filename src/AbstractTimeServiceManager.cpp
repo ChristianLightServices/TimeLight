@@ -253,7 +253,7 @@ Workspace AbstractTimeServiceManager::currentWorkspace()
     // By calling workspaces(), we ensure that the loading logic will happen if needed.
     auto it =
         std::find_if(workspaces().begin(), workspaces().end(), [this](const auto &w) { return w.id() == m_workspaceId; });
-    if (it == m_workspaces.end())
+    if (it == workspaces().end())
         return {this};
     else
         return *it;
