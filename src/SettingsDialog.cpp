@@ -362,12 +362,22 @@ QWidget *SettingsDialog::createAppPage()
     auto layout{new QGridLayout{appPage}};
 
     auto preventSplittingEntries{new QCheckBox{tr("Prevent consecutive entries with the same project"), appPage}};
+    preventSplittingEntries->setToolTip(tr("If enabled, TimeLight will not start a new time entry if there is a currently "
+                                           "running entry with the same project."));
     preventSplittingEntries->setChecked(Settings::instance()->preventSplittingEntries());
 
     auto middleClickForBreak{new QCheckBox{tr("Click with the middle mouse button to switch to break time"), appPage}};
+    middleClickForBreak->setToolTip(tr("If enabled, TimeLight will display only the primary button. Click the button with "
+                                       "the scroll wheel to access break time."));
     middleClickForBreak->setChecked(Settings::instance()->middleClickForBreak());
     middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
 
+    auto eventLoopIntervalLabel =
+        new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage};
+    eventLoopIntervalLabel->setToolTip(tr("After TimeLight fetches data from %1, it will wait for this many seconds before "
+                                          "fetching updated data. For some time services, you need to set this to at least "
+                                          "15 or 30 seconds or TimeLight will be blocked.")
+                                           .arg(m_manager->serviceName()));
     auto eventLoopInterval{new QDoubleSpinBox{appPage}};
     eventLoopInterval->setSuffix(tr(" seconds"));
     eventLoopInterval->setSingleStep(0.5);
@@ -393,7 +403,7 @@ QWidget *SettingsDialog::createAppPage()
 
     layout->addWidget(preventSplittingEntries, 0, 0);
     layout->addWidget(middleClickForBreak, 1, 0);
-    layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 2, 0);
+    layout->addWidget(eventLoopIntervalLabel, 2, 0);
     layout->addWidget(eventLoopInterval, 2, 1);
     layout->addWidget(showNotifications, 3, 0, 1, 2);
     layout->addWidget(showTimeUpWarning, 4, 0, 1, 2);
@@ -466,6 +476,8 @@ QWidget *SettingsDialog::createTeamsPage()
     auto layout{new QGridLayout{teamsPage}};
 
     auto useTeams = new QCheckBox{tr("Set presence in Microsoft Teams to match work status"), teamsPage};
+    useTeams->setToolTip(tr("If enabled, TimeLight will attempt to your Teams presence based on whether or not you are "
+                            "working. You will need to clear your presence in Teams to make this work."));
     useTeams->setChecked(Settings::instance()->useTeamsIntegration());
 
     auto presenceWhenWorking = new QComboBox{teamsPage};
