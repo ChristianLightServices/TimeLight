@@ -230,14 +230,19 @@ void TrayIcons::show()
 
 Project TrayIcons::defaultProject()
 {
-    QString projectId;
-    QString description;
+    Project project;
     int pageNum{m_manager->paginationStartsAt()};
     bool itemsLeftToLoad{true};
     QVector<TimeEntry> entries;
 
     if (!Settings::instance()->useLastProject())
-        projectId = Settings::instance()->projectId();
+    {
+        auto projects = qAsConst(m_manager->projects());
+        if (auto p = std::find_if(projects.begin(), projects.end(), [](const Project &p) { return p.id() == Settings::instance()->projectId(); }); p == projects.end())
+            project = projects.first();
+        else
+            project = *p;
+    }
     else
     {
         do
@@ -258,23 +263,23 @@ Project TrayIcons::defaultProject()
                 else if (!Settings::instance()->useSeparateBreakTime() ||
                          entry.project().id() != Settings::instance()->breakTimeId())
                 {
-                    projectId = entry.project().id();
+                    project = entry.project();
                     break;
                 }
             }
             if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
                 break;
-        } while (itemsLeftToLoad && projectId.isEmpty());
+        } while (itemsLeftToLoad && project.id().isEmpty());
 
         // when all else fails, use the first extant project
-        if (projectId.isEmpty()) [[unlikely]]
-            projectId = m_manager->projects().first().id();
+        if (project.id().isEmpty()) [[unlikely]]
+            project = m_manager->projects().first();
     }
 
     if (Settings::instance()->disableDescription())
         ; // description is already empty, so we will fall through
     else if (!Settings::instance()->useLastDescription())
-        description = Settings::instance()->description();
+        project.setDescription(Settings::instance()->description());
     else
     {
         bool descriptionLoaded{false};
@@ -286,7 +291,7 @@ Project TrayIcons::defaultProject()
                 if (!Settings::instance()->useSeparateBreakTime() ||
                     entry.project().id() != Settings::instance()->breakTimeId())
                 {
-                    description = entry.project().description();
+                    project.setDescription(entry.project().description());
                     descriptionLoaded = true;
                     break;
                 }
@@ -302,10 +307,10 @@ Project TrayIcons::defaultProject()
         } while (itemsLeftToLoad && !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
-            description = m_manager->projects().first().description();
+            project.setDescription(m_manager->projects().first().description());
     }
 
-    return Project{projectId, m_manager->projectName(projectId), description};
+    return project;
 }
 
 void TrayIcons::updateTrayIcons()
