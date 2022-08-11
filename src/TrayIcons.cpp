@@ -732,8 +732,41 @@ void TrayIcons::setTimerState(TimerState state)
 
     if (state == m_timerState)
         return;
-    m_timerState = state;
 
+    switch (state)
+    {
+    case TimerState::Running:
+    {
+        if (m_timerState == TimerState::OnBreak)
+            emit jobEnded();
+        if (m_timerState != TimerState::Running)
+            emit jobStarted();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileWorking());
+        break;
+    }
+    case TimerState::OnBreak:
+        if (m_timerState == TimerState::Running)
+            emit jobEnded();
+        if (m_timerState != TimerState::OnBreak)
+            emit jobStarted();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileOnBreak());
+        break;
+    case TimerState::NotRunning:
+        if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
+            emit jobEnded();
+
+        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
+            m_teamsClient->setPresence(Settings::instance()->presenceWhileNotWorking());
+        break;
+    default:
+        break;
+    }
+
+    m_timerState = state;
     updateIconsAndTooltips();
     emit timerStateChanged();
 }
@@ -755,14 +788,6 @@ void TrayIcons::updateIconsAndTooltips()
         m_runningEntryTooltipBase = tr("Working on %1").arg(m_currentRunningJob.project().name());
         updateRunningEntryTooltip();
         m_updateRunningEntryTooltipTimer.start();
-
-        if (m_timerState == TimerState::OnBreak)
-            emit jobEnded();
-        if (m_timerState != TimerState::Running)
-            emit jobStarted();
-
-        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(Settings::instance()->presenceWhileWorking());
         break;
     }
     case TimerState::OnBreak:
@@ -778,14 +803,6 @@ void TrayIcons::updateIconsAndTooltips()
         m_runningEntryTooltipBase = tr("You are on break");
         updateRunningEntryTooltip();
         m_updateRunningEntryTooltipTimer.start();
-
-        if (m_timerState == TimerState::Running)
-            emit jobEnded();
-        if (m_timerState != TimerState::OnBreak)
-            emit jobStarted();
-
-        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(Settings::instance()->presenceWhileOnBreak());
         break;
     case TimerState::NotRunning:
         m_updateRunningEntryTooltipTimer.stop();
@@ -798,12 +815,6 @@ void TrayIcons::updateIconsAndTooltips()
             m_breakIcon->setToolTip(tr("You are not working"));
             m_breakIcon->setIcon(QIcon{":/icons/redlight.png"});
         }
-
-        if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
-            emit jobEnded();
-
-        if (Settings::instance()->useTeamsIntegration() && m_teamsClient->authenticated())
-            m_teamsClient->setPresence(Settings::instance()->presenceWhileNotWorking());
         break;
     case TimerState::Offline:
         m_updateRunningEntryTooltipTimer.stop();
