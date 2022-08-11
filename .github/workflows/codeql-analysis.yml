@@ -40,7 +40,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '*' # use the latest version
+        version: '6.3.1'
         cache: true
         modules: 'qtnetworkauth'
         
