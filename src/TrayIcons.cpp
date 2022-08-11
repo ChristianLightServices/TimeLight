@@ -380,6 +380,7 @@ void TrayIcons::showAboutDialog()
     layout->addWidget(infoLabel);
 
     auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, dialog};
+    connect(bb->addButton(tr("About Qt"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [] { QMessageBox::aboutQt(nullptr); });
     connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, dialog] {
         showLicenseDialog(dialog);
     });
@@ -490,7 +491,6 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
         QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
     });
-    connect(menu->addAction(tr("About Qt")), &QAction::triggered, this, []() { QMessageBox::aboutQt(nullptr); });
     connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
     connect(menu->addAction(tr("Quit")), &QAction::triggered, qApp, &QApplication::quit);
 }
