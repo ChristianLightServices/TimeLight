@@ -495,7 +495,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
         devTools->setVisible(Settings::instance()->developerMode());
     });
 
-    connect(menu->addAction(tr("Go to the %1 website").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+    connect(menu->addAction(tr("Open the %1 webpage").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
         QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
     });
     connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
