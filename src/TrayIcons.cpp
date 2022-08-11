@@ -879,7 +879,7 @@ void TrayIcons::updateQuickStartList()
             QDateTime now{m_manager->currentDateTime()};
             if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
             {
-                if (runningEntry->project().id() == projectId)
+                if (Settings::instance()->preventSplittingEntries() && runningEntry->project().id() == projectId)
                 {
                     m_eventLoop.start();
                     return;

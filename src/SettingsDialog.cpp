@@ -18,7 +18,6 @@
 
 #include "Settings.h"
 #include "TeamsClient.h"
-#include "User.h"
 #include "Utils.h"
 
 SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
@@ -362,6 +361,9 @@ QWidget *SettingsDialog::createAppPage()
     auto appPage{new QWidget};
     auto layout{new QGridLayout{appPage}};
 
+    auto preventSplittingEntries{new QCheckBox{tr("Prevent consecutive entries with the same project"), appPage}};
+    preventSplittingEntries->setChecked(Settings::instance()->preventSplittingEntries());
+
     auto middleClickForBreak{new QCheckBox{tr("Click with the middle mouse button to switch to break time"), appPage}};
     middleClickForBreak->setChecked(Settings::instance()->middleClickForBreak());
     middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
@@ -389,16 +391,20 @@ QWidget *SettingsDialog::createAppPage()
     weekHours->setMaximum(100);
     weekHours->setEnabled(Settings::instance()->alertOnTimeUp());
 
-    layout->addWidget(middleClickForBreak, 0, 0);
-    layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 1, 0);
-    layout->addWidget(eventLoopInterval, 1, 1);
-    layout->addWidget(showNotifications, 2, 0, 1, 2);
-    layout->addWidget(showTimeUpWarning, 3, 0, 1, 2);
-    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 4, 0);
-    layout->addWidget(weekHours, 4, 1);
+    layout->addWidget(preventSplittingEntries, 0, 0);
+    layout->addWidget(middleClickForBreak, 1, 0);
+    layout->addWidget(new QLabel{tr("Interval between updates of %1 data").arg(m_manager->serviceName()), appPage}, 2, 0);
+    layout->addWidget(eventLoopInterval, 2, 1);
+    layout->addWidget(showNotifications, 3, 0, 1, 2);
+    layout->addWidget(showTimeUpWarning, 4, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 5, 0);
+    layout->addWidget(weekHours, 5, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
+    connect(preventSplittingEntries, &QCheckBox::stateChanged, preventSplittingEntries, [](int state) {
+        Settings::instance()->setPreventSplittingEntries(static_cast<bool>(state));
+    });
     connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, middleClickForBreak, [middleClickForBreak] {
         middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
     });
