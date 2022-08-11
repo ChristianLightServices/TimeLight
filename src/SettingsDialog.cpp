@@ -292,22 +292,8 @@ QWidget *SettingsDialog::createProjectPage()
         Settings::instance()->setProjectId(m_availableProjects.first[i]);
     });
 
-    connect(useBreakTime, &QCheckBox::stateChanged, breakProject, [this, useBreakTime, breakProject](int state) {
-        switch (state)
-        {
-        case Qt::Checked:
-        case Qt::PartiallyChecked:
-            Settings::instance()->setUseSeparateBreakTime(true);
-            breakProject->setEnabled(true);
-            break;
-        case Qt::Unchecked:
-            Settings::instance()->setUseSeparateBreakTime(false);
-            breakProject->setDisabled(true);
-            break;
-        default:
-            break;
-        }
-    });
+    connect(useBreakTime, &QCheckBox::stateChanged, Settings::instance(), &Settings::setUseSeparateBreakTime);
+    connect(useBreakTime, &QCheckBox::stateChanged, breakProject, &QWidget::setEnabled);
 
     connect(breakProject, &QComboBox::currentIndexChanged, breakProject, [this, breakProject](int i) {
         if (m_availableProjects.first[i] == Settings::instance()->breakTimeId())
@@ -412,59 +398,16 @@ QWidget *SettingsDialog::createAppPage()
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
-    connect(preventSplittingEntries, &QCheckBox::stateChanged, preventSplittingEntries, [](int state) {
-        Settings::instance()->setPreventSplittingEntries(static_cast<bool>(state));
-    });
+    connect(preventSplittingEntries, &QCheckBox::stateChanged, Settings::instance(), &Settings::setPreventSplittingEntries);
     connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, middleClickForBreak, [middleClickForBreak] {
         middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());
     });
-    connect(middleClickForBreak, &QCheckBox::stateChanged, middleClickForBreak, [](int state) {
-        switch (state)
-        {
-        case Qt::Checked:
-        case Qt::PartiallyChecked:
-            Settings::instance()->setMiddleClickForBreak(true);
-            break;
-        case Qt::Unchecked:
-            Settings::instance()->setMiddleClickForBreak(false);
-            break;
-        default:
-            break;
-        }
-    });
+    connect(middleClickForBreak, &QCheckBox::stateChanged, Settings::instance(), &Settings::setMiddleClickForBreak);
     connect(eventLoopInterval, &QDoubleSpinBox::valueChanged, eventLoopInterval, [](double d) {
         Settings::instance()->setEventLoopInterval(static_cast<int>(d * 1000));
     });
-    connect(showNotifications, &QCheckBox::stateChanged, showNotifications, [](int state) {
-        switch (state)
-        {
-        case Qt::Checked:
-        case Qt::PartiallyChecked:
-            Settings::instance()->setShowDurationNotifications(true);
-            break;
-        case Qt::Unchecked:
-            Settings::instance()->setShowDurationNotifications(false);
-            break;
-        default:
-            break;
-        }
-    });
-    connect(showTimeUpWarning, &QCheckBox::stateChanged, showTimeUpWarning, [weekHours](int state) {
-        switch (state)
-        {
-        case Qt::Checked:
-        case Qt::PartiallyChecked:
-            Settings::instance()->setAlertOnTimeUp(true);
-            weekHours->setEnabled(true);
-            break;
-        case Qt::Unchecked:
-            Settings::instance()->setAlertOnTimeUp(false);
-            weekHours->setEnabled(false);
-            break;
-        default:
-            break;
-        }
-    });
+    connect(showNotifications, &QCheckBox::stateChanged, Settings::instance(), &Settings::setShowDurationNotifications);
+    connect(showTimeUpWarning, &QCheckBox::stateChanged, Settings::instance(), &Settings::setAlertOnTimeUp);
     connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
 
     return appPage;
