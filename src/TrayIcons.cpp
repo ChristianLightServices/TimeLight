@@ -238,7 +238,10 @@ Project TrayIcons::defaultProject()
     if (!Settings::instance()->useLastProject())
     {
         auto projects = qAsConst(m_manager->projects());
-        if (auto p = std::find_if(projects.begin(), projects.end(), [](const Project &p) { return p.id() == Settings::instance()->projectId(); }); p == projects.end())
+        if (auto p = std::find_if(projects.begin(),
+                                  projects.end(),
+                                  [](const Project &p) { return p.id() == Settings::instance()->projectId(); });
+            p == projects.end())
             project = projects.first();
         else
             project = *p;
