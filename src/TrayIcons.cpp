@@ -465,24 +465,10 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     });
     modifyJob->setDisabled(true);
     cancel->setDisabled(true);
-    connect(
-        this,
-        &TrayIcons::jobEnded,
-        this,
-        [modifyJob, cancel] {
-            modifyJob->setDisabled(true);
-            cancel->setDisabled(true);
-        },
-        Qt::QueuedConnection);
-    connect(
-        this,
-        &TrayIcons::jobStarted,
-        this,
-        [modifyJob, cancel] {
-            modifyJob->setDisabled(false);
-            cancel->setDisabled(false);
-        },
-        Qt::QueuedConnection);
+    connect(this, &TrayIcons::timerStateChanged, this, [this, modifyJob, cancel] {
+        modifyJob->setEnabled(m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak);
+        cancel->setEnabled(m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak);
+    });
 
     connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
         SettingsDialog d{m_manager,
