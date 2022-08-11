@@ -892,13 +892,17 @@ void TrayIcons::updateQuickStartList()
     };
 
     QStringList recentIds;
+    std::optional<Project> addBreakTime;
     for (const auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
     {
         if (recentIds.size() >= 10)
             break;
         if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
             [[unlikely]]
+        {
+            addBreakTime = entry.project();
             continue;
+        }
         if (recentIds.contains(entry.project().id()))
             continue;
         recentIds.push_back(entry.project().id());
@@ -908,6 +912,12 @@ void TrayIcons::updateQuickStartList()
         if (recentIds.contains(project.id()))
             addMenuEntry(m_quickStartMenu, project);
         addMenuEntry(m_quickStartAllProjects, project);
+    }
+    // the break time project always comes last
+    if (addBreakTime.has_value())
+    {
+        m_quickStartMenu->addSeparator();
+        addMenuEntry(m_quickStartMenu, *addBreakTime);
     }
 
     m_quickStartMenu->addSeparator();
