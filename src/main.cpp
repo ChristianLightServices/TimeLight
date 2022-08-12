@@ -6,6 +6,7 @@
 #include "Settings.h"
 #include "TrayIcons.h"
 #include "Utils.h"
+#include "version.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
         {
             SingleApplication a{argc, argv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
+            a.setApplicationVersion(QStringLiteral(VERSION_STR));
 
             if (QTranslator translator;
                 translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
