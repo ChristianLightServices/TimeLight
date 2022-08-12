@@ -20,7 +20,16 @@ int main(int argc, char *argv[])
     {
         try
         {
-            SingleApplication a{argc, argv};
+            // make sure argc and argv survive restarts
+            int newArgc = argc;
+            auto newArgv = new char *[argc];
+            for (int i = 0; i < argc; ++i)
+            {
+                newArgv[i] = new char[std::strlen(argv[i])];
+                std::strcpy(newArgv[i], argv[i]);
+            }
+
+            SingleApplication a{newArgc, newArgv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             a.setApplicationVersion(QStringLiteral(VERSION_STR));
 
