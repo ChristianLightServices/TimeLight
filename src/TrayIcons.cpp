@@ -18,13 +18,13 @@
 
 #include "ClockifyManager.h"
 #include "DeveloperTools.h"
+#include "Logger.h"
 #include "ModifyJobDialog.h"
 #include "Project.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 #include "TimeCampManager.h"
 #include "User.h"
-#include "Logger.h"
 #include "Utils.h"
 #include "version.h"
 

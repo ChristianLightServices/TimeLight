@@ -106,7 +106,8 @@ void Settings::load()
     accessTokenJob->setKey("microsoft-graph-access-token");
     connect(accessTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, accessTokenJob](QKeychain::Job *) {
         if (const auto e = accessTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
-            logs::app()->debug("Could not load Graph access token from secret storage: {}", accessTokenJob->errorString().toStdString());
+            logs::app()->debug("Could not load Graph access token from secret storage: {}",
+                               accessTokenJob->errorString().toStdString());
         else
             m_graphAccessToken = accessTokenJob->textData();
 
@@ -121,7 +122,8 @@ void Settings::load()
     refreshTokenJob->setKey("microsoft-graph-refresh-token");
     connect(refreshTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, refreshTokenJob](QKeychain::Job *) {
         if (const auto e = refreshTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
-            logs::app()->debug("Could not load Graph refresh token from secret storage: {}", refreshTokenJob->errorString().toStdString());
+            logs::app()->debug("Could not load Graph refresh token from secret storage: {}",
+                               refreshTokenJob->errorString().toStdString());
         else
             m_graphRefreshToken = refreshTokenJob->textData();
 

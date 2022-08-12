@@ -9,4 +9,4 @@ namespace TimeLight::logs
     std::shared_ptr<spdlog::logger> app();
     std::shared_ptr<spdlog::logger> teams();
     std::shared_ptr<spdlog::logger> network();
-}
+} // namespace TimeLight::logs
