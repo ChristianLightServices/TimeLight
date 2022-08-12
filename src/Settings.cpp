@@ -3,7 +3,9 @@
 #include <QCoreApplication>
 #include <QSettings>
 
-#include <iostream>
+#include "Logger.h"
+
+namespace logs = TimeLight::logs;
 
 #if __has_include(<keychain.h>)
     #include <keychain.h>
@@ -50,8 +52,7 @@ void Settings::load()
     connect(apiKeyJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, apiKeyJob](QKeychain::Job *) {
         if (const auto e = apiKeyJob->error(); e && e != QKeychain::Error::EntryNotFound)
         {
-            std::cout << "Could not load API key from secret storage: " << apiKeyJob->errorString().toStdString()
-                      << std::endl;
+            logs::app()->debug("Could not load API key from secret storage: {}", apiKeyJob->errorString().toStdString());
 
             // TODO: delete this migration after a while
             QSettings settings;
@@ -105,8 +106,7 @@ void Settings::load()
     accessTokenJob->setKey("microsoft-graph-access-token");
     connect(accessTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, accessTokenJob](QKeychain::Job *) {
         if (const auto e = accessTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
-            std::cout << "Could not load Graph access token from secret storage: "
-                      << accessTokenJob->errorString().toStdString() << std::endl;
+            logs::app()->debug("Could not load Graph access token from secret storage: {}", accessTokenJob->errorString().toStdString());
         else
             m_graphAccessToken = accessTokenJob->textData();
 
@@ -121,8 +121,7 @@ void Settings::load()
     refreshTokenJob->setKey("microsoft-graph-refresh-token");
     connect(refreshTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, refreshTokenJob](QKeychain::Job *) {
         if (const auto e = refreshTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
-            std::cout << "Could not load Graph refresh token from secret storage: "
-                      << refreshTokenJob->errorString().toStdString() << std::endl;
+            logs::app()->debug("Could not load Graph refresh token from secret storage: {}", refreshTokenJob->errorString().toStdString());
         else
             m_graphRefreshToken = refreshTokenJob->textData();
 
@@ -364,7 +363,7 @@ void Settings::save(bool async)
     auto l = new QEventLoop{this};
     connect(apiKeyJob, &QKeychain::WritePasswordJob::finished, apiKeyJob, [l](QKeychain::Job *job) {
         if (job->error())
-            std::cerr << "Failed to save API key to secret storage: " << job->errorString().toStdString() << std::endl;
+            logs::app()->error("Failed to save API key to secret storage: {}", job->errorString().toStdString());
         l->quit();
     });
     apiKeyJob->start();
@@ -414,8 +413,7 @@ void Settings::save(bool async)
     accessTokenJob->setTextData(m_graphAccessToken);
     connect(accessTokenJob, &QKeychain::WritePasswordJob::finished, accessTokenJob, [l](QKeychain::Job *job) {
         if (job->error())
-            std::cerr << "Failed to save Graph access token to secret storage: " << job->errorString().toStdString()
-                      << std::endl;
+            logs::app()->error("Failed to save Graph access token to secret storage: {}", job->errorString().toStdString());
         l->quit();
     });
     accessTokenJob->start();
@@ -429,8 +427,7 @@ void Settings::save(bool async)
     refreshTokenJob->setTextData(m_graphRefreshToken);
     connect(refreshTokenJob, &QKeychain::WritePasswordJob::finished, refreshTokenJob, [l, this](QKeychain::Job *job) {
         if (job->error())
-            std::cerr << "Failed to save Graph refresh token to secret storage: " << job->errorString().toStdString()
-                      << std::endl;
+            logs::app()->error("Failed to save Graph refresh token to secret storage: {}", job->errorString().toStdString());
         l->quit();
         l->deleteLater();
     });

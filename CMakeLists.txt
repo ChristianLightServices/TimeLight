@@ -62,6 +62,26 @@ if (NOT Qt6Keychain_FOUND)
     endif()
 endif()
 
+find_package(spdlog 1.10.0)
+
+if(NOT spdlog_FOUND)
+    message("Fetching spdlog from GitHub...")
+
+    include(FetchContent)
+    FetchContent_Declare(spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog
+        GIT_HASH 76fb40d95455f249bd70824ecfcae7a8f0930fa3
+    )
+
+    FetchContent_GetProperties(spdlog)
+    if(NOT spdlog_POPULATED)
+        FetchContent_Populate(spdlog)
+        add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+
+#    FetchContent_MakeAvailable(spdlog)
+endif()
+
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
@@ -103,6 +123,8 @@ set(SRC
     src/DeveloperTools.cpp
     src/DeveloperTools.h
     src/JsonHelper.h
+    src/Logger.cpp
+    src/Logger.h
     src/main.cpp
     src/ModifyJobDialog.cpp
     src/ModifyJobDialog.h
@@ -163,6 +185,7 @@ target_link_libraries(TimeLight PRIVATE
     Qt6::Widgets
     Qt6::Svg
     qt6keychain
+    spdlog::spdlog_header_only
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
 )

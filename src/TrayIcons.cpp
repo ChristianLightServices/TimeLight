@@ -24,8 +24,11 @@
 #include "SettingsDialog.h"
 #include "TimeCampManager.h"
 #include "User.h"
+#include "Logger.h"
 #include "Utils.h"
 #include "version.h"
+
+namespace logs = TimeLight::logs;
 
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
@@ -260,7 +263,7 @@ Project TrayIcons::defaultProject()
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
                 {
-                    std::cerr << "Error: getting project id failed\n";
+                    logs::network()->error("Getting project id failed");
                     continue; // no project id to see here, move along
                 }
                 else if (!Settings::instance()->useSeparateBreakTime() ||
@@ -335,11 +338,11 @@ void TrayIcons::updateTrayIcons()
         }
         catch (const std::exception &ex)
         {
-            std::cerr << "Could not load running time entry: " << ex.what() << std::endl;
+            logs::network()->error("Could not load running time entry: {}", ex.what());
         }
         catch (...)
         {
-            std::cerr << "Could not load running time entry" << std::endl;
+            logs::network()->error("Could not load running time entry");
         }
     }
     else

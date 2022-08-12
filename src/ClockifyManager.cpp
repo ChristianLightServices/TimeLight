@@ -2,6 +2,8 @@
 
 #include <QUrlQuery>
 
+#include <iostream>
+
 #include "TimeEntry.h"
 #include "User.h"
 

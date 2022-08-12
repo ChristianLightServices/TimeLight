@@ -9,7 +9,6 @@
 #include <QTimer>
 
 #include <functional>
-#include <iostream>
 #include <optional>
 
 #include "JsonHelper.h"

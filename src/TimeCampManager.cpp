@@ -2,6 +2,8 @@
 
 #include <QUrlQuery>
 
+#include <iostream>
+
 #include "User.h"
 
 TimeCampManager::TimeCampManager(const QByteArray &apiKey, QObject *parent)

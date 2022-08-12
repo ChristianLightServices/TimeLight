@@ -8,8 +8,6 @@
 #include <QOAuthHttpServerReplyHandler>
 #include <QUrlQuery>
 
-#include <iostream>
-
 #if __has_include(<keychain.h>)
     #include <keychain.h>
 #else
@@ -17,7 +15,9 @@
 #endif
 
 #include "JsonHelper.h"
+#include "Logger.h"
 
+namespace logs = TimeLight::logs;
 using nlohmann::json;
 
 TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
@@ -59,7 +59,7 @@ TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
             &QOAuth2AuthorizationCodeFlow::error,
             this,
             [this](const QString &error, const QString &desc, const QUrl &url) {
-                std::cerr << "OAuth error: " << error.toStdString() << std::endl;
+                logs::teams()->error("OAuth error: {}", error.toStdString());
 
                 // the error may have been caused by a bad refresh attempt
                 if (m_refreshingTokens)

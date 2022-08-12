@@ -1,10 +1,14 @@
 #include <QTranslator>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
 
 #include <SingleApplication>
 
-#include "JsonHelper.h"
+#include <spdlog/spdlog.h>
+
 #include "Settings.h"
 #include "TrayIcons.h"
+#include "Logger.h"
 #include "Utils.h"
 #include "version.h"
 
@@ -33,6 +37,22 @@ int main(int argc, char *argv[])
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             a.setApplicationVersion(QStringLiteral(VERSION_STR));
 
+            QCommandLineParser parser;
+            QCommandLineOption debug{"debug", QObject::tr("Print debug information to the command line.")};
+            parser.addOption(debug);
+            parser.addHelpOption();
+            parser.addVersionOption();
+            parser.process(a);
+
+            // debug mode will always be on in debug builds
+            TimeLight::logs::init(
+#ifdef DEBUG
+                true
+#else
+                parser.isSet(debug)
+#endif
+            );
+
             if (QTranslator translator;
                 translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
                 QApplication::installTranslator(&translator);
@@ -49,8 +69,10 @@ int main(int argc, char *argv[])
         catch (const nlohmann::json::exception &e)
         {
             // hmm... Unhandled error. Let's just reboot the app and let the chips fall where they may.
-            std::cerr << "Unhandled exception: " << e.what() << "\n";
-            std::cerr << "Restarting the app..." << std::endl;
+            std::shared_ptr<spdlog::logger> l =
+                (TimeLight::logs::app().get() == nullptr) ? std::make_shared<spdlog::logger>("timelight") : TimeLight::logs::app();
+            l->critical("Unhandled exception: {}", e.what());
+            l->critical("Restarting the app...");
             retCode = TimeLight::appRestartCode;
         }
     } while (retCode == TimeLight::appRestartCode);
