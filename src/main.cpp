@@ -14,6 +14,23 @@
 
 int main(int argc, char *argv[])
 {
+    bool debugMode{false};
+    for (int i = 0; i < argc; ++i)
+        if (std::strcmp(argv[i], "--debug") == 0)
+        {
+            debugMode = true;
+            break;
+        }
+
+    // debug mode will always be on in debug builds
+    TimeLight::logs::init(
+#if defined(IS_DEBUG_BUILD)
+        true
+#else
+        debugMode
+#endif
+    );
+
     QApplication::setApplicationName(QStringLiteral("TimeLight"));
     QApplication::setOrganizationName(QStringLiteral("Christian Light"));
     QApplication::setOrganizationDomain(QStringLiteral("org.christianlight"));
@@ -43,15 +60,6 @@ int main(int argc, char *argv[])
             parser.addHelpOption();
             parser.addVersionOption();
             parser.process(a);
-
-            // debug mode will always be on in debug builds
-            TimeLight::logs::init(
-#if defined(IS_DEBUG_BUILD)
-                true
-#else
-                parser.isSet(debug)
-#endif
-            );
 
             TimeLight::logs::app()->trace("Starting TimeLight {}...", VERSION_STR);
 
