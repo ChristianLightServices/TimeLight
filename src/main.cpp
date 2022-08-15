@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
 #endif
             );
 
+            TimeLight::logs::app()->trace("Starting TimeLight {}...", VERSION_STR);
+
             if (QTranslator translator;
                 translator.load(QLocale{}, QStringLiteral("TimeLight"), QStringLiteral("_"), QStringLiteral(":/i18n")))
                 QApplication::installTranslator(&translator);
@@ -65,6 +67,9 @@ int main(int argc, char *argv[])
             icons.show();
 
             retCode = a.exec();
+
+            if (retCode == TimeLight::appRestartCode)
+                TimeLight::logs::app()->debug("App restart requested");
         }
         catch (const nlohmann::json::exception &e)
         {
@@ -74,6 +79,8 @@ int main(int argc, char *argv[])
             retCode = TimeLight::appRestartCode;
         }
     } while (retCode == TimeLight::appRestartCode);
+
+    TimeLight::logs::app()->trace("quitting");
 
     return retCode;
 }
