@@ -213,8 +213,8 @@ TrayIcons::TrayIcons(QObject *parent)
         if (m_ratelimited)
         {
             logs::network()->trace("ratelimited");
-            // go into "sleep mode" to try to snap out of ratelimiting
-            m_eventLoop.setInterval(30000);
+            // Use exponential backoff with a max interval of 10 minutes
+            m_eventLoop.setInterval(std::min(std::pow(m_eventLoop.interval(), 1.25), 10 * 60 * 1000.));
             setTimerState(TimerState::Ratelimited);
         }
         else
