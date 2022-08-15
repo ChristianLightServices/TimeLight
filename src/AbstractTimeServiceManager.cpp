@@ -9,8 +9,6 @@
 #include <QNetworkRequest>
 #include <QUrlQuery>
 
-#include <iostream>
-
 #include "JsonHelper.h"
 #include "Project.h"
 #include "TimeEntry.h"
@@ -187,7 +185,7 @@ QVector<TimeEntry> AbstractTimeServiceManager::getTimeEntries(const QString &use
             }
             catch (const std::exception &e)
             {
-                std::cerr << "Error in parsing time entries: " << e.what() << std::endl;
+                logger()->error("Error in parsing time entries: {}", e.what());
                 retVal = false;
             }
         });
@@ -226,14 +224,14 @@ void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const Ti
 User AbstractTimeServiceManager::getApiKeyOwner()
 {
     json j;
-    get(currentUserUrl(), false, [&j](QNetworkReply *rep) {
+    get(currentUserUrl(), false, [this, &j](QNetworkReply *rep) {
         try
         {
             j = json::parse(rep->readAll().toStdString());
         }
-        catch (const std::exception &ex)
+        catch (const std::exception &e)
         {
-            std::cout << ex.what() << std::endl;
+            logger()->error("Could not parse user JSON: {}", e.what());
         }
     });
 
@@ -270,11 +268,19 @@ void AbstractTimeServiceManager::setWorkspaceId(const QString &workspaceId)
     m_usersLoaded = false;
 }
 
+void AbstractTimeServiceManager::setLogger(std::shared_ptr<spdlog::logger> newLogger)
+{
+    m_logger = newLogger ? newLogger : std::make_shared<spdlog::logger>(serviceIdentifier().toStdString());
+}
+
 void AbstractTimeServiceManager::callInitVirtualMethods()
 {
     // request currently logged in user (the one whose API key we're using) as a validity test
     // and also in order to cache API key info
     updateCurrentUser();
+
+    // set up logger
+    setLogger(nullptr);
 }
 
 void AbstractTimeServiceManager::updateCurrentUser()
@@ -289,9 +295,9 @@ void AbstractTimeServiceManager::updateCurrentUser()
                 auto user = jsonToUser(j.is_array() ? j[0] : j);
                 m_isValid = user.isValid();
             }
-            catch (const std::exception &ex)
+            catch (const std::exception &e)
             {
-                std::cerr << "Error: " << ex.what() << std::endl;
+                logger()->error("Error while parsing user: {}", e.what());
             }
         },
         [this](QNetworkReply *rep) {
@@ -330,7 +336,7 @@ void AbstractTimeServiceManager::updateUsers()
             }
             catch (const std::exception &e)
             {
-                std::cerr << "Error in parsing users: " << e.what() << std::endl;
+                logger()->error("Error in parsing users: {}", e.what());
                 retCode = false;
             }
         });
@@ -397,7 +403,7 @@ void AbstractTimeServiceManager::updateProjects()
             }
             catch (const std::exception &e)
             {
-                std::cerr << "Error in parsing projects: " << e.what() << std::endl;
+                logger()->error("Error in parsing projects: {}", e.what());
                 retVal = false;
             }
         });
@@ -463,7 +469,7 @@ void AbstractTimeServiceManager::updateWorkspaces()
             }
             catch (const std::exception &e)
             {
-                std::cerr << "Error in parsing workspaces: " << e.what() << std::endl;
+                logger()->error("Error in parsing workspaces: {}", e.what());
                 retVal = false;
             }
         });
@@ -522,7 +528,7 @@ QDateTime AbstractTimeServiceManager::jsonToDateTime(const nlohmann::json &j) co
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error in parsing time: " << e.what() << std::endl;
+        logger()->error("Error in parsing time: {}", e.what());
         return {};
     }
 }
@@ -537,9 +543,9 @@ void AbstractTimeServiceManager::defaultSuccessCb(QNetworkReply *rep) {}
 void AbstractTimeServiceManager::defaultFailureCb(QNetworkReply *reply)
 {
     if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code == 0)
-        std::cerr << "Internet connection lost" << std::endl;
+        logger()->warn("Internet connection lost");
     else
-        std::cerr << "Request " << reply->url().toString().toStdString() << " failed with code " << code << std::endl;
+        logger()->error("Request {} failed with code {}", reply->url().toString().toStdString(), code);
 }
 
 // *****************************************************************************

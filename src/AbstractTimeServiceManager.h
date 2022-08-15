@@ -8,6 +8,8 @@
 #include <QSet>
 #include <QTimer>
 
+#include <spdlog/spdlog.h>
+
 #include <functional>
 #include <optional>
 
@@ -69,6 +71,13 @@ public:
 
     void setApiKey(const QString &apiKey);
     void setWorkspaceId(const QString &workspaceId);
+
+    //! Register a custom logger object to be used.
+
+    //! By default, AbstractTimeServiceManager generates a basic spdlog::logger object. If you wish to register a custom
+    //! spdlog::logger for use by AbstractTimeServiceManager, pass it to this function. To regenerate the default handler,
+    //! call this function with `nullptr` as the parameter.
+    void setLogger(std::shared_ptr<spdlog::logger> newLogger);
 
     // ***** BEGIN FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
@@ -193,6 +202,9 @@ protected:
 
     //! Call this function in the constructor of any derived, non-abstract class.
     void callInitVirtualMethods();
+
+    //! Returns a general-purpose logger object.
+    std::shared_ptr<spdlog::logger> logger() const { return m_logger; }
 
     //! Parse JSON into a QDateTime.
     QDateTime jsonToDateTime(const json &j) const;
@@ -333,6 +345,8 @@ private:
              int expectedReturnCode,
              NetworkReplyCallback successCb = {},
              NetworkReplyCallback failureCb = {});
+
+    std::shared_ptr<spdlog::logger> m_logger;
 
     QString m_workspaceId;
     QByteArray m_apiKey;

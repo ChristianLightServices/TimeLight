@@ -2,8 +2,6 @@
 
 #include <QUrlQuery>
 
-#include <iostream>
-
 #include "User.h"
 
 TimeCampManager::TimeCampManager(const QByteArray &apiKey, QObject *parent)
@@ -112,7 +110,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing running time entry: " << e.what() << std::endl;
+        logger()->error("Error while parsing running time entry: {}", e.what());
         return std::nullopt;
     }
 }
@@ -137,7 +135,7 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing time entry: " << e.what() << std::endl;
+        logger()->error("Error while parsing time entry: {}", e.what());
         return {this};
     }
 }
@@ -155,7 +153,7 @@ User TimeCampManager::jsonToUser(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing user: " << e.what() << std::endl;
+        logger()->error("Error while parsing user: {}", e.what());
         return {this};
     }
 }
@@ -168,7 +166,7 @@ QPair<QString, QString> TimeCampManager::jsonToUserData(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing users: " << e.what() << std::endl;
+        logger()->error("Error while parsing users: {}", e.what());
         return {};
     }
 }
@@ -182,7 +180,7 @@ Workspace TimeCampManager::jsonToWorkspace(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing workspace: " << e.what() << std::endl;
+        logger()->error("Error while parsing workspace: {}", e.what());
         return {this};
     }
 }
@@ -196,7 +194,7 @@ Project TimeCampManager::jsonToProject(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing project: " << e.what() << std::endl;
+        logger()->error("Error while parsing project: {}", e.what());
         return {this};
     }
 }
@@ -241,7 +239,7 @@ AbstractTimeServiceManager::HttpVerb TimeCampManager::httpVerbForAction(const Ti
     case TimeEntryAction::DeleteTimeEntry:
         return HttpVerb::Delete;
     default:
-        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
+        logger()->error("Unhandled time entry action: {}:{}", __FILE__, __LINE__);
         Q_UNREACHABLE();
         return HttpVerb::Post;
     }

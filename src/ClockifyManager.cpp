@@ -2,8 +2,6 @@
 
 #include <QUrlQuery>
 
-#include <iostream>
-
 #include "TimeEntry.h"
 #include "User.h"
 
@@ -136,7 +134,7 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while creating time entry: " << e.what() << std::endl;
+        logger()->error("Error while creating time entry: {}", e.what());
         return {this};
     }
 }
@@ -154,7 +152,7 @@ User ClockifyManager::jsonToUser(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing user: " << e.what() << std::endl;
+        logger()->error("Error while parsing user: {}", e.what());
         return {this};
     }
 }
@@ -167,7 +165,7 @@ QPair<QString, QString> ClockifyManager::jsonToUserData(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing users: " << e.what() << std::endl;
+        logger()->error("Error while parsing users: {}", e.what());
         return {};
     }
 }
@@ -181,7 +179,7 @@ Workspace ClockifyManager::jsonToWorkspace(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing workspace: " << e.what() << std::endl;
+        logger()->error("Error while parsing workspace: {}", e.what());
         return {this};
     }
 }
@@ -195,7 +193,7 @@ Project ClockifyManager::jsonToProject(const nlohmann::json &j)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error while parsing project: " << e.what() << std::endl;
+        logger()->error("Error while parsing project: {}", e.what());
         return {this};
     }
 }
@@ -230,7 +228,7 @@ AbstractTimeServiceManager::HttpVerb ClockifyManager::httpVerbForAction(const Ti
     case TimeEntryAction::DeleteTimeEntry:
         return HttpVerb::Delete;
     default:
-        std::cerr << "Unhandled time entry action: " << __FILE__ << ":" << __LINE__;
+        logger()->error("Unhandled time entry action: {}:{}", __FILE__, __LINE__);
         Q_UNREACHABLE();
         return HttpVerb::Get;
     }
