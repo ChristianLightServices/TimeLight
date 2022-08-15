@@ -51,14 +51,7 @@ void Settings::load()
     auto l = new QEventLoop{this};
     connect(apiKeyJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, apiKeyJob](QKeychain::Job *) {
         if (const auto e = apiKeyJob->error(); e && e != QKeychain::Error::EntryNotFound)
-        {
             logs::app()->debug("Could not load API key from secret storage: {}", apiKeyJob->errorString().toStdString());
-
-            // TODO: delete this migration after a while
-            QSettings settings;
-            if (settings.contains(apiKeyJob->key()))
-                m_apiKey = settings.value(apiKeyJob->key()).toString();
-        }
         else
         {
             m_apiKey = apiKeyJob->textData();
@@ -389,10 +382,6 @@ void Settings::save(bool async)
     settings.setValue(QStringLiteral("timeService"), m_timeService);
 
     settings.beginGroup(m_timeService);
-
-    // Since the API key is now handled by qtkeychain, we'll delete the old copy.
-    settings.remove(QStringLiteral("apiKey"));
-    // TODO: Delete the above migration after an appropriate amount of time.
 
     settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
     settings.setValue(QStringLiteral("description"), m_description);
