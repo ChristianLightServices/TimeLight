@@ -371,7 +371,7 @@ void Settings::save(bool async)
         else
             logs::app()->trace("Saved API key to secret storage");
         if (l)
-           l->quit();
+            l->quit();
     });
     apiKeyJob->start();
     if (!async)
@@ -420,7 +420,7 @@ void Settings::save(bool async)
         else
             logs::app()->trace("Saved Graph access token to secret storage");
         if (l)
-           l->quit();
+            l->quit();
     });
     accessTokenJob->start();
     if (!async)

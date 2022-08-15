@@ -221,7 +221,6 @@ TrayIcons::TrayIcons(QObject *parent)
         {
             logs::network()->trace("unratelimited");
             m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
-
         }
     });
 
