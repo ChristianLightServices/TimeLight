@@ -169,7 +169,7 @@ TrayIcons::TrayIcons(QObject *parent)
     if (!m_user.isValid()) [[unlikely]]
     {
         logs::app()->error("Invalid user!");
-        QMessageBox::warning(nullptr, tr("Fatal error"), tr("Could not load user!"));
+        QMessageBox::critical(nullptr, tr("Fatal error"), tr("Could not load user!"));
         m_valid = false;
         return;
     }
