@@ -70,7 +70,7 @@ if(NOT spdlog_FOUND)
     include(FetchContent)
     FetchContent_Declare(spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog
-        GIT_HASH 76fb40d95455f249bd70824ecfcae7a8f0930fa3
+        GIT_TAG v1.10.0
     )
 
     FetchContent_GetProperties(spdlog)
