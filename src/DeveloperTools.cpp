@@ -19,6 +19,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
+#include "Logger.h"
 #include "Settings.h"
 #include "User.h"
 
@@ -119,18 +120,19 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     auto userGroup = new QGroupBox{tr("User"), this};
     auto userGroupLayout = new QGridLayout{userGroup};
 
-    auto image = new DownloadableImage{user.userId(), userGroup};
-    if (user.avatarUrl().isEmpty())
-        image->deleteLater();
-    else
+    if (!user.avatarUrl().isEmpty())
     {
+        auto image = new DownloadableImage{user.userId(), userGroup};
         auto m = new QNetworkAccessManager;
         auto rep = m->get(QNetworkRequest{user.avatarUrl()});
         connect(rep, &QNetworkReply::finished, image, [m, rep, image, userGroupLayout] {
             QPixmap p;
             p.loadFromData(rep->readAll());
             if (p.isNull())
+            {
+                TimeLight::logs::network()->debug("Attempted to download null avatar");
                 image->deleteLater();
+            }
             else
             {
                 image->setPixmap(p.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));

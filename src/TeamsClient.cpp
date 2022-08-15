@@ -54,6 +54,8 @@ TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
         // refresh 15 seconds ahead of time
         m_refreshTokenTimer.setInterval(QDateTime::currentDateTime().msecsTo(m_oauth->expirationAt()) - 15 * 1000);
         m_refreshTokenTimer.start();
+
+        logs::teams()->debug("Successfully authenticated with Graph");
     });
     connect(m_oauth,
             &QOAuth2AuthorizationCodeFlow::error,
@@ -64,6 +66,7 @@ TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
                 // the error may have been caused by a bad refresh attempt
                 if (m_refreshingTokens)
                 {
+                    logs::teams()->debug("Attempting to counteract bad refresh attempt");
                     m_refreshingTokens = false;
                     m_oauth->grant();
                 }
@@ -91,10 +94,14 @@ void TeamsClient::authenticate()
     if (!m_oauth->refreshToken().isEmpty())
     {
         m_refreshingTokens = true;
+        logs::teams()->debug("Refreshing access token");
         m_oauth->refreshAccessToken();
     }
     else
+    {
+        logs::teams()->debug("Attempting to authenticate with Graph");
         m_oauth->grant();
+    }
 }
 
 void TeamsClient::clearPresence()
@@ -114,6 +121,14 @@ void TeamsClient::clearPresence()
         &QNetworkReply::finished,
         this,
         [this, rep, done]() {
+            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200) [[likely]]
+                    ;
+            else
+            {
+                logs::teams()->error("Failed to clear presence (HTTP responce code {})", status);
+                logs::teams()->trace("Response data: '{}'", rep->readAll().toStdString());
+            }
+
             if (done)
                 *done = true;
         },
@@ -173,6 +188,11 @@ void TeamsClient::setPresence(const TeamsClient::Presence p)
         [this, rep, done, p]() {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200) [[likely]]
                 m_presence = p;
+            else
+            {
+                logs::teams()->error("Failed to set presence (HTTP responce code {})", status);
+                logs::teams()->trace("Response data: '{}'", rep->readAll().toStdString());
+            }
 
             if (done)
                 *done = true;

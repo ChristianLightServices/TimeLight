@@ -54,6 +54,7 @@ TrayIcons::TrayIcons(QObject *parent)
 
     while (Settings::instance()->timeService().isEmpty())
     {
+        logs::app()->trace("Initializing time service");
         bool ok{false};
         QString service = QInputDialog::getItem(nullptr,
                                                 tr("Time service"),
@@ -78,6 +79,7 @@ TrayIcons::TrayIcons(QObject *parent)
 
     while (Settings::instance()->apiKey().isEmpty())
     {
+        logs::app()->trace("Initializing API key");
         bool ok{false};
         QString newKey =
             QInputDialog::getText(nullptr, tr("API key"), tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
@@ -104,6 +106,7 @@ TrayIcons::TrayIcons(QObject *parent)
     auto fixApiKey = [&] {
         while (!m_manager->isValid())
         {
+            logs::app()->debug("Fixing API key");
             bool ok{false};
             QString newKey = QInputDialog::getText(nullptr,
                                                    tr("API key"),
@@ -137,6 +140,7 @@ TrayIcons::TrayIcons(QObject *parent)
     m_user = m_manager->getApiKeyOwner();
     if (Settings::instance()->workspaceId().isEmpty())
     {
+        logs::app()->trace("Initializing workspace");
         auto workspaces = m_manager->workspaces();
         QStringList names;
         for (const auto &w : workspaces)
@@ -164,6 +168,7 @@ TrayIcons::TrayIcons(QObject *parent)
 
     if (!m_user.isValid()) [[unlikely]]
     {
+        logs::app()->error("Invalid user!");
         QMessageBox::warning(nullptr, tr("Fatal error"), tr("Could not load user!"));
         m_valid = false;
         return;
@@ -172,6 +177,7 @@ TrayIcons::TrayIcons(QObject *parent)
     while ((!Settings::instance()->useLastProject() && Settings::instance()->projectId().isEmpty()) ||
            (Settings::instance()->useSeparateBreakTime() && Settings::instance()->breakTimeId().isEmpty()))
     {
+        logs::app()->trace("Initializing project ID(s)");
         QMessageBox::information(
             nullptr, tr("Select a project"), tr("Please select a default project in the following dialog."));
         getNewProjectId();
@@ -198,6 +204,7 @@ TrayIcons::TrayIcons(QObject *parent)
     m_alertOnTimeUpTimer.start();
 
     connect(Settings::instance(), &Settings::eventLoopIntervalChanged, this, [this] {
+        logs::app()->trace("Changing event loop interval to {}", Settings::instance()->eventLoopInterval());
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     });
 
@@ -205,12 +212,17 @@ TrayIcons::TrayIcons(QObject *parent)
         m_ratelimited = ratelimited;
         if (m_ratelimited)
         {
+            logs::network()->trace("ratelimited");
             // go into "sleep mode" to try to snap out of ratelimiting
             m_eventLoop.setInterval(30000);
             setTimerState(TimerState::Ratelimited);
         }
         else
+        {
+            logs::network()->trace("unratelimited");
             m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
+
+        }
     });
 
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
@@ -247,7 +259,10 @@ Project TrayIcons::defaultProject()
             p == projects.end())
             project = projects.first();
         else
+        {
+            logs::app()->warn("Attempted to use invalid project ID for default project");
             project = *p;
+        }
     }
     else
     {
@@ -279,7 +294,10 @@ Project TrayIcons::defaultProject()
 
         // when all else fails, use the first extant project
         if (project.id().isEmpty()) [[unlikely]]
+        {
+            logs::app()->info("Could not load a suitable project from past entries");
             project = m_manager->projects().first();
+        }
     }
 
     if (Settings::instance()->disableDescription())
@@ -313,7 +331,10 @@ Project TrayIcons::defaultProject()
         } while (itemsLeftToLoad && !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
+        {
+            logs::app()->info("Could not load a suitable description from past entries");
             project.setDescription(m_manager->projects().first().description());
+        }
     }
 
     return project;
@@ -545,6 +566,8 @@ QAction *TrayIcons::createBreakResumeAction()
 
 void TrayIcons::setUpTrayIcon()
 {
+    logs::app()->trace("Setting up tray icon");
+
     updateQuickStartList();
 
     auto trayIconMenu = new QMenu;
@@ -668,6 +691,7 @@ void TrayIcons::setUpTrayIcon()
     auto showOrHideBreakButton = [this, breakResumeAction] {
         if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         {
+            logs::app()->trace("Showing break icon");
             if (m_breakIcon == nullptr)
                 m_breakIcon = new QSystemTrayIcon{this};
             setUpBreakIcon();
@@ -677,6 +701,7 @@ void TrayIcons::setUpTrayIcon()
         }
         else if (m_breakIcon)
         {
+            logs::app()->trace("Hiding break icon");
             m_breakIcon->deleteLater();
             m_breakIcon = nullptr;
             if (Settings::instance()->useSeparateBreakTime())
@@ -692,6 +717,8 @@ void TrayIcons::setUpTrayIcon()
 
 void TrayIcons::setUpBreakIcon()
 {
+    logs::app()->trace("Setting up break icon");
+
     auto breakIconMenu = new QMenu;
     breakIconMenu->addAction(createBreakResumeAction());
     addStandardMenuActions(breakIconMenu);

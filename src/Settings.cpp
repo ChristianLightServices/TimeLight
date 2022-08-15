@@ -60,7 +60,10 @@ void Settings::load()
                 m_apiKey = settings.value(apiKeyJob->key()).toString();
         }
         else
+        {
             m_apiKey = apiKeyJob->textData();
+            logs::app()->trace("Loaded API key from secret storage");
+        }
 
         l->quit();
     });
@@ -109,7 +112,10 @@ void Settings::load()
             logs::app()->debug("Could not load Graph access token from secret storage: {}",
                                accessTokenJob->errorString().toStdString());
         else
+        {
             m_graphAccessToken = accessTokenJob->textData();
+            logs::app()->trace("Loaded Graph access token from secret storage");
+        }
 
         l->quit();
     });
@@ -125,7 +131,10 @@ void Settings::load()
             logs::app()->debug("Could not load Graph refresh token from secret storage: {}",
                                refreshTokenJob->errorString().toStdString());
         else
+        {
             m_graphRefreshToken = refreshTokenJob->textData();
+            logs::app()->trace("Loaded Graph refresh token from secret storage");
+        }
 
         l->quit();
         l->deleteLater();
@@ -366,6 +375,8 @@ void Settings::save(bool async)
     connect(apiKeyJob, &QKeychain::WritePasswordJob::finished, apiKeyJob, [l](QKeychain::Job *job) {
         if (job->error())
             logs::app()->error("Failed to save API key to secret storage: {}", job->errorString().toStdString());
+        else
+            logs::app()->trace("Saved API key to secret storage");
         l->quit();
     });
     apiKeyJob->start();
@@ -416,6 +427,8 @@ void Settings::save(bool async)
     connect(accessTokenJob, &QKeychain::WritePasswordJob::finished, accessTokenJob, [l](QKeychain::Job *job) {
         if (job->error())
             logs::app()->error("Failed to save Graph access token to secret storage: {}", job->errorString().toStdString());
+        else
+            logs::app()->trace("Saved Graph access token to secret storage");
         l->quit();
     });
     accessTokenJob->start();
@@ -430,6 +443,8 @@ void Settings::save(bool async)
     connect(refreshTokenJob, &QKeychain::WritePasswordJob::finished, refreshTokenJob, [l, this](QKeychain::Job *job) {
         if (job->error())
             logs::app()->error("Failed to save Graph refresh token to secret storage: {}", job->errorString().toStdString());
+        else
+            logs::app()->trace("Saved Graph refresh token to secret storage");
         l->quit();
         l->deleteLater();
     });

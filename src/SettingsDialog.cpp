@@ -16,9 +16,12 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
+#include "Logger.h"
 #include "Settings.h"
 #include "TeamsClient.h"
 #include "Utils.h"
+
+namespace logs = TimeLight::logs;
 
 SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
                                const QList<QPair<QString, QString>> &availableManagers,
@@ -57,6 +60,7 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
         auto devMode = new QShortcut{Qt::Key_F7, this};
         connect(devMode, &QShortcut::activated, this, [this] {
             QMessageBox::information(this, tr("Developer mode"), tr("Developer mode has been enabled!"), QMessageBox::Ok);
+            logs::app()->trace("Developer mode enabled");
             Settings::instance()->setDeveloperMode(true);
         });
     }
@@ -146,6 +150,7 @@ QWidget *SettingsDialog::createBackendPage()
         {
         case QMessageBox::Ok:
             Settings::instance()->setTimeService(timeServices->currentData().toString());
+            logs::app()->trace("Setting time service to {}", Settings::instance()->timeService().toStdString());
             TimeLight::restartApp();
             break;
         case QMessageBox::Cancel:
@@ -168,12 +173,14 @@ QWidget *SettingsDialog::createBackendPage()
         {
             m_manager->setApiKey(apiKeyInput->text());
             Settings::instance()->setApiKey(apiKeyInput->text());
+            logs::app()->trace("Changing API key");
             TimeLight::restartApp();
         }
     });
 
     connect(workspaces, &QComboBox::currentIndexChanged, workspaces, [this, workspaces] {
         Settings::instance()->setWorkspaceId(workspaces->currentData().toString());
+        logs::app()->trace("Changing default workspace");
         m_manager->setWorkspaceId(workspaces->currentData().toString());
     });
 
@@ -290,6 +297,7 @@ QWidget *SettingsDialog::createProjectPage()
 
     connect(defaultProjectCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), defaultProjectCombo, [this](int i) {
         Settings::instance()->setProjectId(m_availableProjects.first[i]);
+        logs::app()->trace("Changed default project");
     });
 
     connect(useBreakTime, &QCheckBox::stateChanged, Settings::instance(), &Settings::setUseSeparateBreakTime);
@@ -301,9 +309,13 @@ QWidget *SettingsDialog::createProjectPage()
             QMessageBox::warning(
                 this, tr("Invalid choice"), tr("You cannot set the same default project and break project!"));
             breakProject->setCurrentIndex(m_availableProjects.first.indexOf(Settings::instance()->breakTimeId()));
+            logs::app()->trace("Resetting default project to avoid overriding break project");
         }
         else
+        {
             Settings::instance()->setBreakTimeId(m_availableProjects.first[i]);
+            logs::app()->trace("Changed break project");
+        }
     });
 
     connect(
@@ -463,7 +475,10 @@ QWidget *SettingsDialog::createTeamsPage()
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
-    connect(useTeams, &QCheckBox::clicked, this, [](bool state) { Settings::instance()->setUseTeamsIntegration(state); });
+    connect(useTeams, &QCheckBox::clicked, this, [](bool state) {
+        Settings::instance()->setUseTeamsIntegration(state);
+        logs::teams()->trace("Teams integration enabled");
+    });
     connect(presenceWhenWorking, &QComboBox::currentIndexChanged, this, [presenceWhenWorking] {
         Settings::instance()->setPresenceWhileWorking(presenceWhenWorking->currentData().value<TeamsClient::Presence>());
     });
