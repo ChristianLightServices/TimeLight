@@ -69,11 +69,8 @@ int main(int argc, char *argv[])
         catch (const nlohmann::json::exception &e)
         {
             // hmm... Unhandled error. Let's just reboot the app and let the chips fall where they may.
-            std::shared_ptr<spdlog::logger> l = (TimeLight::logs::app().get() == nullptr) ?
-                                                    std::make_shared<spdlog::logger>("timelight") :
-                                                    TimeLight::logs::app();
-            l->critical("Unhandled exception: {}", e.what());
-            l->critical("Restarting the app...");
+            TimeLight::logs::app()->critical("Unhandled exception: {}", e.what());
+            TimeLight::logs::app()->critical("Restarting the app...");
             retCode = TimeLight::appRestartCode;
         }
     } while (retCode == TimeLight::appRestartCode);
