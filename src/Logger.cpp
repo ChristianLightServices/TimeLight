@@ -3,6 +3,7 @@
 #include <QStandardPaths>
 
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/ansicolor_sink.h>
 
 namespace TimeLight::logs
 {
