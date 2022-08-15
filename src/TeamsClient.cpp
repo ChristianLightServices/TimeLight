@@ -80,7 +80,7 @@ TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
     });
 
     // Graph API tokens expire every 60-90 minutes; by default, we'll keep the access token up-to-date all the time
-    m_refreshTokenTimer.setInterval(1000 * 60 * 58);
+    m_refreshTokenTimer.setInterval(m_oauth->expirationAt().isValid() ? QDateTime::currentDateTime().msecsTo(m_oauth->expirationAt()) - 60000 : 1000 * 60 * 59);
     m_refreshTokenTimer.setSingleShot(false);
     m_refreshTokenTimer.callOnTimeout(m_oauth, &QOAuth2AuthorizationCodeFlow::refreshAccessToken);
 }
