@@ -69,7 +69,7 @@ void SettingsDialog::switchToPage(Pages page)
     switch (page)
     {
     case Pages::BackendPage:
-        m_tabWidget->setCornerWidget(m_backendPage);
+        m_tabWidget->setCurrentWidget(m_backendPage);
         break;
     case Pages::ProjectPage:
         m_tabWidget->setCurrentWidget(m_projectPage);
