@@ -3,6 +3,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QGridLayout>
@@ -405,6 +406,8 @@ QWidget *SettingsDialog::createAppPage()
     weekHours->setMaximum(100);
     weekHours->setEnabled(Settings::instance()->alertOnTimeUp());
 
+    auto openLogLocation = new QPushButton{tr("Open log folder..."), appPage};
+
     layout->addWidget(preventSplittingEntries, 0, 0);
     layout->addWidget(middleClickForBreak, 1, 0);
     layout->addWidget(eventLoopIntervalLabel, 2, 0);
@@ -415,6 +418,8 @@ QWidget *SettingsDialog::createAppPage()
     layout->addWidget(weekHours, 5, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
+
+    layout->addWidget(openLogLocation, 7, 0, 1, 2, Qt::AlignRight);
 
     connect(preventSplittingEntries, &QCheckBox::stateChanged, Settings::instance(), &Settings::setPreventSplittingEntries);
     connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, middleClickForBreak, [middleClickForBreak] {
@@ -427,6 +432,9 @@ QWidget *SettingsDialog::createAppPage()
     connect(showNotifications, &QCheckBox::stateChanged, Settings::instance(), &Settings::setShowDurationNotifications);
     connect(showTimeUpWarning, &QCheckBox::stateChanged, Settings::instance(), &Settings::setAlertOnTimeUp);
     connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
+    connect(openLogLocation, &QPushButton::clicked, this, [] {
+        QDesktopServices::openUrl("file://" + logs::logFileLocation());
+    });
 
     return appPage;
 }

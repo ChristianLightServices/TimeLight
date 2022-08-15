@@ -10,6 +10,11 @@ namespace TimeLight::logs
     std::shared_ptr<spdlog::logger> _app, _teams, _network, _qt;
 }
 
+QString TimeLight::logs::logFileLocation()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+}
+
 void TimeLight::logs::qtMessagesToSpdlog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     auto formatted = qFormatLogMessage(type, context, msg);
@@ -38,8 +43,7 @@ void TimeLight::logs::init(bool debugMode)
 {
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
     console->set_level(debugMode ? spdlog::level::debug : spdlog::level::warn);
-    auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).append("/log.txt").toStdString());
+    auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileLocation().append("/log.txt").toStdString());
     file->set_level(spdlog::level::trace);
     std::vector<spdlog::sink_ptr> sinks = {console, file};
 

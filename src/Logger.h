@@ -6,11 +6,12 @@
 
 namespace TimeLight::logs
 {
+    QString logFileLocation();
+    void qtMessagesToSpdlog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
     void init(bool debugMode);
 
     std::shared_ptr<spdlog::logger> app();
     std::shared_ptr<spdlog::logger> teams();
     std::shared_ptr<spdlog::logger> network();
 
-    void qtMessagesToSpdlog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 } // namespace TimeLight::logs
