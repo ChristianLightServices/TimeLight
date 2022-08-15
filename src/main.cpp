@@ -14,6 +14,11 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication::setApplicationName(QStringLiteral("TimeLight"));
+    QApplication::setOrganizationName(QStringLiteral("Christian Light"));
+    QApplication::setOrganizationDomain(QStringLiteral("org.christianlight"));
+    QApplication::setQuitOnLastWindowClosed(false);
+
 #if defined(IS_DEBUG_BUILD)
     // debug mode will always be on in debug builds
     TimeLight::logs::init(true);
@@ -27,11 +32,6 @@ int main(int argc, char *argv[])
         }
     TimeLight::logs::init(debugMode);
 #endif
-
-    QApplication::setApplicationName(QStringLiteral("TimeLight"));
-    QApplication::setOrganizationName(QStringLiteral("Christian Light"));
-    QApplication::setOrganizationDomain(QStringLiteral("org.christianlight"));
-    QApplication::setQuitOnLastWindowClosed(false);
 
     int retCode{0};
     do
