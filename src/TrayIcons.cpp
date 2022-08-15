@@ -464,12 +464,6 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
     dialog.exec();
 }
 
-void TrayIcons::setEventLoopInterval(int interval)
-{
-    Settings::instance()->setEventLoopInterval(interval);
-    m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
-}
-
 void TrayIcons::addStandardMenuActions(QMenu *menu)
 {
     menu->addMenu(m_quickStartMenu);

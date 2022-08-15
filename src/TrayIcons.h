@@ -30,9 +30,6 @@ signals:
     void jobStarted();
     void jobEnded();
 
-public slots:
-    void setEventLoopInterval(int interval);
-
 private slots:
     void updateTrayIcons();
     void updateRunningEntryTooltip();
