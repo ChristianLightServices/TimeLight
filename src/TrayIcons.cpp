@@ -273,7 +273,7 @@ Project TrayIcons::defaultProject()
             else
                 entries.append(newEntries);
 
-            for (const auto &entry : entries)
+            for (const auto &entry : newEntries)
             {
                 if (entry.project().id().isEmpty()) [[unlikely]]
                 {
@@ -322,11 +322,9 @@ Project TrayIcons::defaultProject()
             if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
                 break;
 
-            auto newEntries = m_user.getTimeEntries(++pageNum);
-            if (newEntries.empty())
+            entries = m_user.getTimeEntries(++pageNum);
+            if (entries.empty())
                 itemsLeftToLoad = false;
-            else
-                entries.append(newEntries);
         } while (itemsLeftToLoad && !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
