@@ -7,7 +7,31 @@
 
 namespace TimeLight::logs
 {
-    std::shared_ptr<spdlog::logger> _app, _teams, _network;
+    std::shared_ptr<spdlog::logger> _app, _teams, _network, _qt;
+}
+
+void TimeLight::logs::qtMessagesToSpdlog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    auto formatted = qFormatLogMessage(type, context, msg);
+
+    switch (type)
+    {
+    case QtDebugMsg:
+        _qt->debug(formatted.toStdString());
+        break;
+    case QtInfoMsg:
+        _qt->info(formatted.toStdString());
+        break;
+    case QtWarningMsg:
+        _qt->warn(formatted.toStdString());
+        break;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        _qt->critical(formatted.toStdString());
+        break;
+    default:
+        break;
+    }
 }
 
 void TimeLight::logs::init(bool debugMode)
@@ -28,6 +52,11 @@ void TimeLight::logs::init(bool debugMode)
     _network = std::make_shared<spdlog::logger>("network", sinks.begin(), sinks.end());
     _network->set_level(spdlog::level::trace);
     _network->flush_on(spdlog::level::trace);
+    _qt = std::make_shared<spdlog::logger>("qt", sinks.begin(), sinks.end());
+    _qt->set_level(spdlog::level::trace);
+    _qt->flush_on(spdlog::level::trace);
+
+    qInstallMessageHandler(TimeLight::logs::qtMessagesToSpdlog);
 }
 
 std::shared_ptr<spdlog::logger> TimeLight::logs::app()
