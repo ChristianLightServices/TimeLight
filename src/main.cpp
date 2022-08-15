@@ -14,6 +14,10 @@
 
 int main(int argc, char *argv[])
 {
+#if defined(IS_DEBUG_BUILD)
+    // debug mode will always be on in debug builds
+    TimeLight::logs::init(true);
+#else
     bool debugMode{false};
     for (int i = 0; i < argc; ++i)
         if (std::strcmp(argv[i], "--debug") == 0)
@@ -21,15 +25,8 @@ int main(int argc, char *argv[])
             debugMode = true;
             break;
         }
-
-    // debug mode will always be on in debug builds
-    TimeLight::logs::init(
-#if defined(IS_DEBUG_BUILD)
-        true
-#else
-        debugMode
+    TimeLight::logs::init(debugMode);
 #endif
-    );
 
     QApplication::setApplicationName(QStringLiteral("TimeLight"));
     QApplication::setOrganizationName(QStringLiteral("Christian Light"));
