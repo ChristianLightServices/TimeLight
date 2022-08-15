@@ -13,7 +13,7 @@ namespace TimeLight::logs
 void TimeLight::logs::init(bool debugMode)
 {
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
-    console->set_level(debugMode ? spdlog::level::trace : spdlog::level::warn);
+    console->set_level(debugMode ? spdlog::level::debug : spdlog::level::warn);
     auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation).append("/log.txt").toStdString());
     file->set_level(spdlog::level::trace);
