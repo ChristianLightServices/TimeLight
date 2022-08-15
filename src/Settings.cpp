@@ -377,7 +377,8 @@ void Settings::save(bool async)
             logs::app()->error("Failed to save API key to secret storage: {}", job->errorString().toStdString());
         else
             logs::app()->trace("Saved API key to secret storage");
-        l->quit();
+        if (l)
+           l->quit();
     });
     apiKeyJob->start();
     if (!async)
@@ -429,7 +430,8 @@ void Settings::save(bool async)
             logs::app()->error("Failed to save Graph access token to secret storage: {}", job->errorString().toStdString());
         else
             logs::app()->trace("Saved Graph access token to secret storage");
-        l->quit();
+        if (l)
+           l->quit();
     });
     accessTokenJob->start();
     if (!async)
@@ -445,8 +447,11 @@ void Settings::save(bool async)
             logs::app()->error("Failed to save Graph refresh token to secret storage: {}", job->errorString().toStdString());
         else
             logs::app()->trace("Saved Graph refresh token to secret storage");
-        l->quit();
-        l->deleteLater();
+        if (l)
+        {
+            l->quit();
+            l->deleteLater();
+        }
     });
     refreshTokenJob->start();
     if (!async)
