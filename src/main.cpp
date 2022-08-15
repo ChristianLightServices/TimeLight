@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
             // debug mode will always be on in debug builds
             TimeLight::logs::init(
-#ifdef DEBUG
+#if defined(IS_DEBUG_BUILD)
                 true
 #else
                 parser.isSet(debug)

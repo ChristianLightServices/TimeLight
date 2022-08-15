@@ -14,6 +14,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions("IS_DEBUG_BUILD")
+endif()
+
 find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools Svg REQUIRED)
 
 # some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
