@@ -55,15 +55,21 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
 
-    if (!Settings::instance()->developerMode())
-    {
-        auto devMode = new QShortcut{Qt::Key_F7, this};
-        connect(devMode, &QShortcut::activated, this, [this] {
+    auto devMode = new QShortcut{Qt::Key_F7, this};
+    connect(devMode, &QShortcut::activated, this, [this] {
+        if (Settings::instance()->developerMode())
+        {
+            Settings::instance()->setDeveloperMode(false);
+            QMessageBox::information(this, tr("Developer mode"), tr("Developer mode has been disabled."), QMessageBox::Ok);
+            logs::app()->trace("Developer mode disabled");
+        }
+        else
+        {
+            Settings::instance()->setDeveloperMode(true);
             QMessageBox::information(this, tr("Developer mode"), tr("Developer mode has been enabled!"), QMessageBox::Ok);
             logs::app()->trace("Developer mode enabled");
-            Settings::instance()->setDeveloperMode(true);
-        });
-    }
+        }
+    });
 
     resize(600, -1);
 }
