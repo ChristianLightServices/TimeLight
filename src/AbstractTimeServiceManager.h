@@ -206,130 +206,133 @@ private:
 
     QByteArray apiKeyForRequests() const { return apiKeyTemplate().arg(m_apiKey).toUtf8(); }
 
+    void defaultSuccessCb(QNetworkReply *rep);
+    void defaultFailureCb(QNetworkReply *reply);
+
     void timeEntryReq(const QUrl &url,
                       const TimeEntryAction action,
                       const QByteArray &body = {},
                       bool async = true,
-                      const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-                      const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+                      NetworkReplyCallback successCb = {},
+                      NetworkReplyCallback failureCb = {});
 
     void get(const QUrl &url,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void get(const QUrl &url,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void get(const QUrl &url,
              bool async,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void get(const QUrl &url,
              bool async,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
 
     void post(const QUrl &url,
               const QByteArray &body,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void post(const QUrl &url,
               const QByteArray &body,
               int expectedReturnCode,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void post(const QUrl &url,
               const QByteArray &body,
               bool async,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void post(const QUrl &url,
               const QByteArray &body,
               bool async,
               int expectedReturnCode,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
 
     void patch(const QUrl &url,
                const QByteArray &body,
-               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+               NetworkReplyCallback successCb = {},
+               NetworkReplyCallback failureCb = {});
     void patch(const QUrl &url,
                const QByteArray &body,
                int expectedReturnCode,
-               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+               NetworkReplyCallback successCb = {},
+               NetworkReplyCallback failureCb = {});
     void patch(const QUrl &url,
                const QByteArray &body,
                bool async,
-               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+               NetworkReplyCallback successCb = {},
+               NetworkReplyCallback failureCb = {});
     void patch(const QUrl &url,
                const QByteArray &body,
                bool async,
                int expectedReturnCode,
-               const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-               const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+               NetworkReplyCallback successCb = {},
+               NetworkReplyCallback failureCb = {});
 
     void put(const QUrl &url,
              const QByteArray &body,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void put(const QUrl &url,
              const QByteArray &body,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void put(const QUrl &url,
              const QByteArray &body,
              bool async,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void put(const QUrl &url,
              const QByteArray &body,
              bool async,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
 
     void head(const QUrl &url,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void head(const QUrl &url,
               int expectedReturnCode,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void head(const QUrl &url,
               bool async,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
     void head(const QUrl &url,
               bool async,
               int expectedReturnCode,
-              const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-              const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+              NetworkReplyCallback successCb = {},
+              NetworkReplyCallback failureCb = {});
 
     void del(const QUrl &url,
              const QByteArray &body,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void del(const QUrl &url,
              const QByteArray &body,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void del(const QUrl &url,
              const QByteArray &body,
              bool async,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
     void del(const QUrl &url,
              const QByteArray &body,
              bool async,
              int expectedReturnCode,
-             const NetworkReplyCallback &successCb = s_defaultSuccessCb,
-             const NetworkReplyCallback &failureCb = s_defaultFailureCb);
+             NetworkReplyCallback successCb = {},
+             NetworkReplyCallback failureCb = {});
 
     QString m_workspaceId;
     QByteArray m_apiKey;
@@ -350,9 +353,6 @@ private:
     QTimer m_expireProjectsTimer;
     QTimer m_expireWorkspacesTimer;
     QTimer m_expireUsersTimer;
-
-    static const NetworkReplyCallback s_defaultSuccessCb;
-    static const NetworkReplyCallback s_defaultFailureCb;
 
     bool m_isValid{false};
     bool m_projectsLoaded{false};
