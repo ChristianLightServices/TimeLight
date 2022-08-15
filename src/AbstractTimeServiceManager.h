@@ -228,17 +228,12 @@ private:
                       NetworkReplyCallback successCb = {},
                       NetworkReplyCallback failureCb = {});
 
-    void get(const QUrl &url,
-             NetworkReplyCallback successCb = {},
-             NetworkReplyCallback failureCb = {});
+    void get(const QUrl &url, NetworkReplyCallback successCb = {}, NetworkReplyCallback failureCb = {});
     void get(const QUrl &url,
              int expectedReturnCode,
              NetworkReplyCallback successCb = {},
              NetworkReplyCallback failureCb = {});
-    void get(const QUrl &url,
-             bool async,
-             NetworkReplyCallback successCb = {},
-             NetworkReplyCallback failureCb = {});
+    void get(const QUrl &url, bool async, NetworkReplyCallback successCb = {}, NetworkReplyCallback failureCb = {});
     void get(const QUrl &url,
              bool async,
              int expectedReturnCode,
@@ -308,17 +303,12 @@ private:
              NetworkReplyCallback successCb = {},
              NetworkReplyCallback failureCb = {});
 
-    void head(const QUrl &url,
-              NetworkReplyCallback successCb = {},
-              NetworkReplyCallback failureCb = {});
+    void head(const QUrl &url, NetworkReplyCallback successCb = {}, NetworkReplyCallback failureCb = {});
     void head(const QUrl &url,
               int expectedReturnCode,
               NetworkReplyCallback successCb = {},
               NetworkReplyCallback failureCb = {});
-    void head(const QUrl &url,
-              bool async,
-              NetworkReplyCallback successCb = {},
-              NetworkReplyCallback failureCb = {});
+    void head(const QUrl &url, bool async, NetworkReplyCallback successCb = {}, NetworkReplyCallback failureCb = {});
     void head(const QUrl &url,
               bool async,
               int expectedReturnCode,

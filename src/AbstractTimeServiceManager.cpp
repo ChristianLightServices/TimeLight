@@ -552,9 +552,7 @@ void AbstractTimeServiceManager::defaultFailureCb(QNetworkReply *reply)
 // *****     BEYOND THIS POINT THERE ARE ONLY FUNCTIONS FOR REST STUFF     *****
 // *****************************************************************************
 
-void AbstractTimeServiceManager::get(const QUrl &url,
-                                     NetworkReplyCallback successCb,
-                                     NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::get(const QUrl &url, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     get(url, true, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
@@ -575,11 +573,8 @@ void AbstractTimeServiceManager::get(const QUrl &url,
     get(url, async, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::get(const QUrl &url,
-                                     bool async,
-                                     int expectedReturnCode,
-                                     NetworkReplyCallback successCb,
-                                     NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::get(
+    const QUrl &url, bool async, int expectedReturnCode, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     QNetworkRequest req{url};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -658,11 +653,8 @@ void AbstractTimeServiceManager::post(const QUrl &url,
     post(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::post(const QUrl &url,
-                                      const QByteArray &body,
-                                      bool async,
-                                      NetworkReplyCallback successCb,
-                                      NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::post(
+    const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     post(url, body, async, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
@@ -752,11 +744,8 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
     patch(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::patch(const QUrl &url,
-                                       const QByteArray &body,
-                                       bool async,
-                                       NetworkReplyCallback successCb,
-                                       NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::patch(
+    const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     patch(url, body, async, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
@@ -846,11 +835,8 @@ void AbstractTimeServiceManager::put(const QUrl &url,
     put(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::put(const QUrl &url,
-                                     const QByteArray &body,
-                                     bool async,
-                                     NetworkReplyCallback successCb,
-                                     NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::put(
+    const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     put(url, body, async, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
@@ -923,9 +909,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
         delete done;
 }
 
-void AbstractTimeServiceManager::head(const QUrl &url,
-                                      NetworkReplyCallback successCb,
-                                      NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::head(const QUrl &url, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     head(url, true, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
@@ -946,11 +930,8 @@ void AbstractTimeServiceManager::head(const QUrl &url,
     head(url, async, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::head(const QUrl &url,
-                                      bool async,
-                                      int expectedReturnCode,
-                                      NetworkReplyCallback successCb,
-                                      NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::head(
+    const QUrl &url, bool async, int expectedReturnCode, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     QNetworkRequest req{url};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -1030,11 +1011,8 @@ void AbstractTimeServiceManager::del(const QUrl &url,
     del(url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
-void AbstractTimeServiceManager::del(const QUrl &url,
-                                     const QByteArray &body,
-                                     bool async,
-                                     NetworkReplyCallback successCb,
-                                     NetworkReplyCallback failureCb)
+void AbstractTimeServiceManager::del(
+    const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
     del(url, body, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
 }
