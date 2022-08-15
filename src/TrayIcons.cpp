@@ -411,9 +411,7 @@ void TrayIcons::showAboutDialog()
     layout->addWidget(infoLabel);
 
     auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, dialog};
-    connect(bb->addButton(tr("About Qt"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [] {
-        QMessageBox::aboutQt(nullptr);
-    });
+    connect(bb->addButton(tr("About Qt"), QDialogButtonBox::ActionRole), &QPushButton::clicked, qApp, &QApplication::aboutQt);
     connect(bb->addButton(tr("Show license"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this, dialog] {
         showLicenseDialog(dialog);
     });
