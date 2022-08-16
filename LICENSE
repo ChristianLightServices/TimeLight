@@ -1,9 +1,3 @@
-This project is licensed under the MIT License (reproduced below). Additionally, this project uses the following libraries:
-
-    1. Qt, licensed under the GNU LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.en.html)
-    2. SingleApplication (https://www.gnu.org/licenses/lgpl-3.0.en.html), licensed under the MIT license (https://github.com/itay-grudev/SingleApplication/blob/master/LICENSE).
-    3. JSON for Modern C++ (https://github.com/nlohmann/json), licensed under the MIT license (https://github.com/nlohmann/json/blob/develop/LICENSE.MIT).
------
 Copyright 2021 Christian Light
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
