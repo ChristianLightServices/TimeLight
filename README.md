@@ -33,15 +33,16 @@ This project depends on the following libraries:
 - [nlohmann/json](https://github.com/nlohmann/json) 3.10.5 or higher
 - [qtkeychain](https://github.com/frankosterfeld/qtkeychain) 0.13.2 or higher
 - [SingleApplication](https://github.com/itay-grudev/SingleApplication) (bundled as a submodule)
+- [spdlog](https://github.com/gabime/spdlog) 1.10.0 or higher
+- [backward-cpp](https://github.com/bombela/backward-cpp)
 
-`nlohmann/json` and `qtkeychain` will automatically be fetched from GitHub by CMake if you do not provide them in your build environment.
+`nlohmann/json`, `qtkeychain`, `spdlog`, and `backward-cpp` will automatically be fetched from GitHub by CMake if you do not provide them in your build environment.
 
 Additionally, building the application requires the following:
 
 - [CMake](https://cmake.org) 3.23 or higher
 - A [C++20-capable compiler](https://en.cppreference.com/w/cpp/compiler_support/20) (the latest Clang, MSVC, and GCC all work)
 - [Qt Installer Framework](https://doc.qt.io/qtinstallerframework/index.html) 4.x (if you are building the installer)
-
 
 ## Getting the code
 
