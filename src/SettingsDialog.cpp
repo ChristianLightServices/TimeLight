@@ -433,7 +433,7 @@ QWidget *SettingsDialog::createAppPage()
     connect(showTimeUpWarning, &QCheckBox::stateChanged, Settings::instance(), &Settings::setAlertOnTimeUp);
     connect(weekHours, &QDoubleSpinBox::valueChanged, Settings::instance(), &Settings::setWeekHours);
     connect(openLogLocation, &QPushButton::clicked, this, [] {
-        QDesktopServices::openUrl("file://" + logs::logFileLocation());
+        QDesktopServices::openUrl("file:///" + logs::logFileLocation());
     });
 
     return appPage;
