@@ -86,6 +86,24 @@ if(NOT spdlog_FOUND)
 #    FetchContent_MakeAvailable(spdlog)
 endif()
 
+find_package(Backward)
+
+if (NOT Backward_FOUND)
+    message("Fetching backward-cpp from GitHub...")
+
+    include(FetchContent)
+    FetchContent_Declare(Backward
+        GIT_REPOSITORY https://github.com/bombela/backward-cpp
+        GIT_TAG v1.6
+    )
+
+    FetchContent_GetProperties(Backward)
+    if(NOT Backward_POPULATED)
+        FetchContent_Populate(Backward)
+        add_subdirectory(${Backward_SOURCE_DIR} ${Backward_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endif()
+
 set(QAPPLICATION_CLASS QApplication CACHE STRING "Inheritance class for SingleApplication")
 add_subdirectory(singleapplication)
 
@@ -192,6 +210,8 @@ target_link_libraries(TimeLight PRIVATE
     spdlog::spdlog_header_only
     SingleApplication::SingleApplication
     nlohmann_json::nlohmann_json
+    PUBLIC
+    Backward::Backward
 )
 
 install(TARGETS TimeLight "${INSTALL_TYPE}" DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${PROJECT_NAME}")

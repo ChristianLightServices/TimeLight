@@ -1,13 +1,20 @@
 #include "Logger.h"
 
 #include <QStandardPaths>
+#include <QDateTime>
 
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
+#include <backward.hpp>
+
+#include <csignal>
+
 namespace TimeLight::logs
 {
     std::shared_ptr<spdlog::logger> _app, _teams, _network, _qt;
+
+    extern "C" void crashHandler(int signal);
 }
 
 QString TimeLight::logs::logFileLocation()
@@ -61,6 +68,10 @@ void TimeLight::logs::init(bool debugMode)
     _qt->flush_on(spdlog::level::trace);
 
     qInstallMessageHandler(TimeLight::logs::qtMessagesToSpdlog);
+    std::signal(SIGILL, crashHandler);
+    std::signal(SIGSEGV, crashHandler);
+    std::signal(SIGABRT, crashHandler);
+    std::signal(SIGFPE, crashHandler);
 }
 
 std::shared_ptr<spdlog::logger> TimeLight::logs::app()
@@ -76,4 +87,37 @@ std::shared_ptr<spdlog::logger> TimeLight::logs::teams()
 std::shared_ptr<spdlog::logger> TimeLight::logs::network()
 {
     return _network;
+}
+
+void TimeLight::logs::crashHandler(int signal)
+{
+    _app->critical("Crash signal detected! {}", signal);
+    _app->critical("stack trace:");
+
+    using namespace backward;
+
+    StackTrace st;
+    st.load_here(100);
+    Printer p;
+    p.address = true;
+    p.object = true;
+    p.print(st);
+
+    auto filename{logFileLocation().toStdString() + "/backtrace-" + std::to_string(QDateTime::currentDateTime().toMSecsSinceEpoch()) + ".txt"};
+    std::ofstream dump{filename};
+    if (dump)
+    {
+        p.print(st, dump);
+        _app->critical("Also dumped stack trace to {}", filename);
+    }
+
+    // clear logs
+    _app->flush();
+    _teams->flush();
+    _network->flush();
+    _qt->flush();
+
+    // let's get the Genuine Crash Experience(R)
+    std::signal(signal, SIG_DFL);
+    std::raise(signal);
 }
