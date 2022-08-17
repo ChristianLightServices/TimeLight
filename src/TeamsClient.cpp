@@ -55,7 +55,7 @@ TeamsClient::TeamsClient(const QString &appId, int port, QObject *parent)
         m_refreshTokenTimer.setInterval(QDateTime::currentDateTime().msecsTo(m_oauth->expirationAt()) - 15 * 1000);
         m_refreshTokenTimer.start();
 
-        logs::teams()->debug("Successfully authenticated with Graph");
+        logs::teams()->trace("Successfully authenticated with Graph");
     });
     connect(m_oauth,
             &QOAuth2AuthorizationCodeFlow::error,
@@ -96,12 +96,12 @@ void TeamsClient::authenticate()
     if (!m_oauth->refreshToken().isEmpty())
     {
         m_refreshingTokens = true;
-        logs::teams()->debug("Refreshing access token");
+        logs::teams()->trace("Refreshing access token");
         m_oauth->refreshAccessToken();
     }
     else
     {
-        logs::teams()->debug("Attempting to authenticate with Graph");
+        logs::teams()->trace("Attempting to authenticate with Graph");
         m_oauth->grant();
     }
 }
@@ -128,7 +128,7 @@ void TeamsClient::clearPresence()
             else
             {
                 logs::teams()->error("Failed to clear presence (HTTP responce code {})", status);
-                logs::teams()->trace("Response data: '{}'", rep->readAll().toStdString());
+                logs::teams()->debug("Response data: '{}'", rep->readAll().toStdString());
             }
 
             if (done)
@@ -193,7 +193,7 @@ void TeamsClient::setPresence(const TeamsClient::Presence p)
             else
             {
                 logs::teams()->error("Failed to set presence (HTTP responce code {})", status);
-                logs::teams()->trace("Response data: '{}'", rep->readAll().toStdString());
+                logs::teams()->debug("Response data: '{}'", rep->readAll().toStdString());
             }
 
             if (done)
