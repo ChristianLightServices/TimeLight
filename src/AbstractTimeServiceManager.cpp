@@ -545,7 +545,10 @@ void AbstractTimeServiceManager::defaultFailureCb(QNetworkReply *reply)
     if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code == 0)
         logger()->warn("Internet connection lost");
     else
+    {
         logger()->error("Request {} failed with code {}", reply->url().toString().toStdString(), code);
+        logger()->debug("Response data: '{}'", reply->readAll());
+    }
 }
 
 // *****************************************************************************
