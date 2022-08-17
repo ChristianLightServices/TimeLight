@@ -557,7 +557,7 @@ void AbstractTimeServiceManager::defaultFailureCb(QNetworkReply *reply)
 
 void AbstractTimeServiceManager::get(const QUrl &url, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    get(url, true, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
+    httpRequest(HttpVerb::Get, url, {}, true, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -565,7 +565,7 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    get(url, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Get, url, {}, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(const QUrl &url,
@@ -573,70 +573,13 @@ void AbstractTimeServiceManager::get(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    get(url, async, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
+    httpRequest(HttpVerb::Get, url, {}, async, httpReturnCodeForVerb(HttpVerb::Get), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::get(
     const QUrl &url, bool async, int expectedReturnCode, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    QNetworkRequest req{url};
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    req.setRawHeader("Accept", "application/json");
-    req.setRawHeader(authHeaderName(), apiKeyForRequests());
-
-    auto rep = m_manager.get(req);
-    using namespace std::placeholders;
-    m_pendingReplies.insert(rep,
-                            {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
-                             failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
-    bool *done = async ? nullptr : new bool{false};
-
-    connect(
-        rep,
-        &QNetworkReply::finished,
-        this,
-        [this, rep, expectedReturnCode, done]() {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
-            {
-                if (m_isRatelimited)
-                {
-                    m_isRatelimited = false;
-                    emit ratelimited(false);
-                }
-                m_pendingReplies[rep].first(rep);
-            }
-            else [[unlikely]]
-            {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
-                {
-                    m_isRatelimited = true;
-                    emit ratelimited(true);
-                }
-                m_pendingReplies[rep].second(rep);
-            }
-
-            if (done)
-                *done = true;
-
-            m_pendingReplies.remove(rep);
-        },
-        Qt::DirectConnection);
-
-    if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+    httpRequest(HttpVerb::Get, url, {}, async, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -644,7 +587,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       NetworkReplyCallback successCb,
                                       NetworkReplyCallback failureCb)
 {
-    post(url, body, true, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
+    httpRequest(HttpVerb::Post, url, body, true, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -653,13 +596,13 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       NetworkReplyCallback successCb,
                                       NetworkReplyCallback failureCb)
 {
-    post(url, body, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Post, url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(
     const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    post(url, body, async, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
+    httpRequest(HttpVerb::Post, url, body, async, httpReturnCodeForVerb(HttpVerb::Post), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::post(const QUrl &url,
@@ -669,65 +612,7 @@ void AbstractTimeServiceManager::post(const QUrl &url,
                                       NetworkReplyCallback successCb,
                                       NetworkReplyCallback failureCb)
 {
-    QNetworkRequest req{url};
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    req.setRawHeader("Accept", "application/json");
-    req.setRawHeader(authHeaderName(), apiKeyForRequests());
-
-    auto rep = m_manager.post(req, body);
-    using namespace std::placeholders;
-    m_pendingReplies.insert(rep,
-                            {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
-                             failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
-
-    bool *done = async ? nullptr : new bool{false};
-
-    connect(
-        rep,
-        &QNetworkReply::finished,
-        this,
-        [this, rep, expectedReturnCode, done]() {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
-            {
-                if (m_isRatelimited)
-                {
-                    m_isRatelimited = false;
-                    emit ratelimited(false);
-                }
-                m_pendingReplies[rep].first(rep);
-            }
-            else [[unlikely]]
-            {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
-                {
-                    m_isRatelimited = true;
-                    emit ratelimited(true);
-                }
-                m_pendingReplies[rep].second(rep);
-            }
-
-            if (done)
-                *done = true;
-
-            m_pendingReplies.remove(rep);
-        },
-        Qt::DirectConnection);
-
-    if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+    httpRequest(HttpVerb::Post, url, body, async, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -735,7 +620,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        NetworkReplyCallback successCb,
                                        NetworkReplyCallback failureCb)
 {
-    patch(url, body, true, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
+    httpRequest(HttpVerb::Patch, url, body, true, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -744,13 +629,13 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        NetworkReplyCallback successCb,
                                        NetworkReplyCallback failureCb)
 {
-    patch(url, body, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Patch, url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(
     const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    patch(url, body, async, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
+    httpRequest(HttpVerb::Patch, url, body, async, httpReturnCodeForVerb(HttpVerb::Patch), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::patch(const QUrl &url,
@@ -760,65 +645,7 @@ void AbstractTimeServiceManager::patch(const QUrl &url,
                                        NetworkReplyCallback successCb,
                                        NetworkReplyCallback failureCb)
 {
-    QNetworkRequest req{url};
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    req.setRawHeader(authHeaderName(), m_apiKey);
-    req.setRawHeader("Accept", "application/json");
-
-    auto rep = m_manager.sendCustomRequest(req, QByteArrayLiteral("PATCH"), body);
-    using namespace std::placeholders;
-    m_pendingReplies.insert(rep,
-                            {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
-                             failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
-
-    bool *done = async ? nullptr : new bool{false};
-
-    connect(
-        rep,
-        &QNetworkReply::finished,
-        this,
-        [this, rep, expectedReturnCode, done]() {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
-            {
-                if (m_isRatelimited)
-                {
-                    m_isRatelimited = false;
-                    emit ratelimited(false);
-                }
-                m_pendingReplies[rep].first(rep);
-            }
-            else [[unlikely]]
-            {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
-                {
-                    m_isRatelimited = true;
-                    emit ratelimited(true);
-                }
-                m_pendingReplies[rep].second(rep);
-            }
-
-            if (done)
-                *done = true;
-
-            m_pendingReplies.remove(rep);
-        },
-        Qt::DirectConnection);
-
-    if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+    httpRequest(HttpVerb::Patch, url, body, async, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -826,7 +653,7 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    put(url, body, true, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
+    httpRequest(HttpVerb::Put, url, body, true, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -835,13 +662,13 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    put(url, body, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Put, url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(
     const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    put(url, body, async, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
+    httpRequest(HttpVerb::Put, url, body, async, httpReturnCodeForVerb(HttpVerb::Put), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::put(const QUrl &url,
@@ -851,70 +678,12 @@ void AbstractTimeServiceManager::put(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    QNetworkRequest req{url};
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    req.setRawHeader("Accept", "application/json");
-    req.setRawHeader(authHeaderName(), apiKeyForRequests());
-
-    auto rep = m_manager.put(req, body);
-    using namespace std::placeholders;
-    m_pendingReplies.insert(rep,
-                            {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
-                             failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
-
-    bool *done = async ? nullptr : new bool{false};
-
-    connect(
-        rep,
-        &QNetworkReply::finished,
-        this,
-        [this, rep, expectedReturnCode, done]() {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
-            {
-                if (m_isRatelimited)
-                {
-                    m_isRatelimited = false;
-                    emit ratelimited(false);
-                }
-                m_pendingReplies[rep].first(rep);
-            }
-            else [[unlikely]]
-            {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
-                {
-                    m_isRatelimited = true;
-                    emit ratelimited(true);
-                }
-                m_pendingReplies[rep].second(rep);
-            }
-
-            if (done)
-                *done = true;
-
-            m_pendingReplies.remove(rep);
-        },
-        Qt::DirectConnection);
-
-    if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+    httpRequest(HttpVerb::Put, url, body, async, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    head(url, true, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
+    httpRequest(HttpVerb::Head, url, {}, true, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
@@ -922,7 +691,7 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       NetworkReplyCallback successCb,
                                       NetworkReplyCallback failureCb)
 {
-    head(url, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Head, url, {}, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(const QUrl &url,
@@ -930,71 +699,13 @@ void AbstractTimeServiceManager::head(const QUrl &url,
                                       NetworkReplyCallback successCb,
                                       NetworkReplyCallback failureCb)
 {
-    head(url, async, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
+    httpRequest(HttpVerb::Head, url, {}, async, httpReturnCodeForVerb(HttpVerb::Head), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::head(
     const QUrl &url, bool async, int expectedReturnCode, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    QNetworkRequest req{url};
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    req.setRawHeader("Accept", "application/json");
-    req.setRawHeader(authHeaderName(), apiKeyForRequests());
-
-    auto rep = m_manager.head(req);
-    using namespace std::placeholders;
-    m_pendingReplies.insert(rep,
-                            {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
-                             failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
-
-    bool *done = async ? nullptr : new bool{false};
-
-    connect(
-        rep,
-        &QNetworkReply::finished,
-        this,
-        [this, rep, expectedReturnCode, done]() {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
-            {
-                if (m_isRatelimited)
-                {
-                    m_isRatelimited = false;
-                    emit ratelimited(false);
-                }
-                m_pendingReplies[rep].first(rep);
-            }
-            else [[unlikely]]
-            {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
-                {
-                    m_isRatelimited = true;
-                    emit ratelimited(true);
-                }
-                m_pendingReplies[rep].second(rep);
-            }
-
-            if (done)
-                *done = true;
-
-            m_pendingReplies.remove(rep);
-        },
-        Qt::DirectConnection);
-
-    if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+    httpRequest(HttpVerb::Head, url, {}, async, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
@@ -1002,7 +713,7 @@ void AbstractTimeServiceManager::del(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    del(url, body, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+    httpRequest(HttpVerb::Delete, url, body, true, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
@@ -1011,13 +722,13 @@ void AbstractTimeServiceManager::del(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
-    del(url, body, true, expectedReturnCode, successCb, failureCb);
+    httpRequest(HttpVerb::Delete, url, body, true, expectedReturnCode, successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(
     const QUrl &url, const QByteArray &body, bool async, NetworkReplyCallback successCb, NetworkReplyCallback failureCb)
 {
-    del(url, body, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
+    httpRequest(HttpVerb::Delete, url, body, async, httpReturnCodeForVerb(HttpVerb::Delete), successCb, failureCb);
 }
 
 void AbstractTimeServiceManager::del(const QUrl &url,
@@ -1027,12 +738,48 @@ void AbstractTimeServiceManager::del(const QUrl &url,
                                      NetworkReplyCallback successCb,
                                      NetworkReplyCallback failureCb)
 {
+    httpRequest(HttpVerb::Delete, url, body, async, expectedReturnCode, successCb, failureCb);
+}
+
+void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
+                                             const QUrl &url,
+                                             const QByteArray &body,
+                                             bool async,
+                                             int expectedReturnCode,
+                                             NetworkReplyCallback successCb,
+                                             NetworkReplyCallback failureCb)
+{
+
     QNetworkRequest req{url};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("Accept", "application/json");
     req.setRawHeader(authHeaderName(), apiKeyForRequests());
 
-    auto rep = m_manager.deleteResource(req);
+    QNetworkReply *rep = nullptr;
+    switch (verb)
+    {
+    case HttpVerb::Get:
+        rep = m_manager.get(req);
+        break;
+    case HttpVerb::Post:
+        rep = m_manager.post(req, body);
+        break;
+    case HttpVerb::Patch:
+        rep = m_manager.sendCustomRequest(req, QByteArrayLiteral("PATCH"), body);
+        break;
+    case HttpVerb::Put:
+        rep = m_manager.put(req, body);
+        break;
+    case HttpVerb::Head:
+        rep = m_manager.head(req);
+        break;
+    case HttpVerb::Delete:
+        rep = m_manager.deleteResource(req);
+        break;
+    default:
+        break;
+    }
+
     using namespace std::placeholders;
     m_pendingReplies.insert(rep,
                             {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
@@ -1044,7 +791,7 @@ void AbstractTimeServiceManager::del(const QUrl &url,
         rep,
         &QNetworkReply::finished,
         this,
-        [this, rep, expectedReturnCode, done]() {
+        [this, rep, expectedReturnCode, done] {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
             {
