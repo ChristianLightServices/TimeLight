@@ -799,8 +799,8 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
         &QNetworkReply::finished,
         this,
         [this, rep, expectedReturnCode] {
-            if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
-                [[likely]]
+            auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            if (status == expectedReturnCode) [[likely]]
             {
                 if (m_isRatelimited)
                 {
@@ -811,17 +811,30 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
             }
             else [[unlikely]]
             {
-                if (status == 0) [[likely]]
-                {
-                    m_isConnectedToInternet = false;
-                    emit internetConnectionChanged(false);
-                }
-                else if (status == 429)
+                if (status == 429)
                 {
                     m_isRatelimited = true;
                     emit ratelimited(true);
                 }
                 m_pendingReplies[rep].second(rep);
+            }
+
+            // offline?
+            if (status == 0) [[likely]]
+            {
+                if (m_isConnectedToInternet)
+                {
+                    m_isConnectedToInternet = false;
+                    emit internetConnectionChanged(false);
+                }
+            }
+            else
+            {
+                if (!m_isConnectedToInternet)
+                {
+                    m_isConnectedToInternet = true;
+                    emit internetConnectionChanged(true);
+                }
             }
 
             m_pendingReplies.remove(rep);
