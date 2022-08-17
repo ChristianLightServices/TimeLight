@@ -354,7 +354,7 @@ QWidget *SettingsDialog::createProjectPage()
             }
         });
 
-    connect(defaultDescriptionEdit, &QLineEdit::textChanged, defaultDescriptionEdit, [defaultDescriptionEdit]() {
+    connect(defaultDescriptionEdit, &QLineEdit::textChanged, defaultDescriptionEdit, [defaultDescriptionEdit] {
         Settings::instance()->setDescription(defaultDescriptionEdit->text());
     });
 

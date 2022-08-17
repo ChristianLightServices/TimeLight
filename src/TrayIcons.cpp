@@ -129,7 +129,7 @@ TrayIcons::TrayIcons(QObject *parent)
         return;
     }
 
-    connect(m_manager, &ClockifyManager::invalidated, this, [this, fixApiKey]() {
+    connect(m_manager, &ClockifyManager::invalidated, this, [this, fixApiKey] {
         if (!fixApiKey())
         {
             m_valid = false;
@@ -512,7 +512,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
         devTools->setVisible(Settings::instance()->developerMode());
     });
 
-    connect(menu->addAction(tr("Open the %1 webpage").arg(m_manager->serviceName())), &QAction::triggered, this, [this]() {
+    connect(menu->addAction(tr("Open the %1 webpage").arg(m_manager->serviceName())), &QAction::triggered, this, [this] {
         QDesktopServices::openUrl(m_manager->timeTrackerWebpageUrl());
     });
     connect(menu->addAction(tr("About")), &QAction::triggered, this, &TrayIcons::showAboutDialog);
@@ -531,7 +531,7 @@ QAction *TrayIcons::createBreakResumeAction()
         else
             breakResumeAction->setDisabled(true);
     });
-    connect(breakResumeAction, &QAction::triggered, this, [this]() {
+    connect(breakResumeAction, &QAction::triggered, this, [this] {
         if (!m_manager->isConnectedToInternet()) [[unlikely]]
             showOfflineNotification();
 
@@ -571,7 +571,7 @@ void TrayIcons::setUpTrayIcon()
         else
             startStopAction->setDisabled(true);
     });
-    connect(startStopAction, &QAction::triggered, this, [this]() {
+    connect(startStopAction, &QAction::triggered, this, [this] {
         if (!m_manager->isConnectedToInternet()) [[unlikely]]
             showOfflineNotification();
 

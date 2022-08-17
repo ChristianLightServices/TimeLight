@@ -122,7 +122,7 @@ void TeamsClient::clearPresence()
         rep,
         &QNetworkReply::finished,
         this,
-        [this, rep, done]() {
+        [this, rep, done] {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200)
                 [[likely]];
             else
@@ -187,7 +187,7 @@ void TeamsClient::setPresence(const TeamsClient::Presence p)
         rep,
         &QNetworkReply::finished,
         this,
-        [this, rep, done, p]() {
+        [this, rep, done, p] {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == 200) [[likely]]
                 m_presence = p;
             else

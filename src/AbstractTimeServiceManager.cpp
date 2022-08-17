@@ -22,21 +22,21 @@ AbstractTimeServiceManager::AbstractTimeServiceManager(const QByteArray &apiKey,
     m_manager.setAutoDeleteReplies(true);
 
     m_expireProjectsTimer.setInterval(15 * 60 * 1000);
-    m_expireProjectsTimer.callOnTimeout(this, [this]() {
+    m_expireProjectsTimer.callOnTimeout(this, [this] {
         m_projectsLoaded = false;
         m_projects.clear();
     });
     m_expireProjectsTimer.setSingleShot(true);
 
     m_expireWorkspacesTimer.setInterval(15 * 60 * 1000); // every 15 mins
-    m_expireWorkspacesTimer.callOnTimeout(this, [this]() {
+    m_expireWorkspacesTimer.callOnTimeout(this, [this] {
         m_workspacesLoaded = false;
         m_workspaces.clear();
     });
     m_expireWorkspacesTimer.setSingleShot(true);
 
     m_expireUsersTimer.setInterval(15 * 60 * 1000); // every 15 mins
-    m_expireUsersTimer.callOnTimeout(this, [this]() {
+    m_expireUsersTimer.callOnTimeout(this, [this] {
         m_usersLoaded = false;
         m_users.clear();
     });
