@@ -749,7 +749,6 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
                                              NetworkReplyCallback successCb,
                                              NetworkReplyCallback failureCb)
 {
-
     QNetworkRequest req{url};
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("Accept", "application/json");

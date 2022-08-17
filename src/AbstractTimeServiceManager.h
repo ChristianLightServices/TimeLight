@@ -336,12 +336,13 @@ private:
              NetworkReplyCallback successCb = {},
              NetworkReplyCallback failureCb = {});
 
-    void httpRequest(const HttpVerb verb, const QUrl &url,
-             const QByteArray &body,
-             bool async,
-             int expectedReturnCode,
-             NetworkReplyCallback successCb = {},
-             NetworkReplyCallback failureCb = {});
+    void httpRequest(const HttpVerb verb,
+                     const QUrl &url,
+                     const QByteArray &body,
+                     bool async,
+                     int expectedReturnCode,
+                     NetworkReplyCallback successCb = {},
+                     NetworkReplyCallback failureCb = {});
 
     std::shared_ptr<spdlog::logger> m_logger;
 

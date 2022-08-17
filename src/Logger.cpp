@@ -1,7 +1,7 @@
 #include "Logger.h"
 
-#include <QStandardPaths>
 #include <QDateTime>
+#include <QStandardPaths>
 
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -15,7 +15,7 @@ namespace TimeLight::logs
     std::shared_ptr<spdlog::logger> _app, _teams, _network, _qt;
 
     extern "C" void crashHandler(int signal);
-}
+} // namespace TimeLight::logs
 
 QString TimeLight::logs::logFileLocation()
 {
@@ -51,7 +51,8 @@ void TimeLight::logs::init(bool debugMode)
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
     console->set_level(debugMode ? spdlog::level::debug : spdlog::level::warn);
     // up to 5 files that are 5 MB each
-    auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFileLocation().append("/TimeLight.log").toStdString(), 5 * std::pow(2, 20), 5);
+    auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        logFileLocation().append("/TimeLight.log").toStdString(), 5 * std::pow(2, 20), 5);
     file->set_level(spdlog::level::trace);
     std::vector<spdlog::sink_ptr> sinks = {console, file};
 
@@ -104,7 +105,8 @@ void TimeLight::logs::crashHandler(int signal)
     p.object = true;
     p.print(st);
 
-    auto filename{logFileLocation().toStdString() + "/backtrace-" + std::to_string(QDateTime::currentDateTime().toMSecsSinceEpoch()) + ".txt"};
+    auto filename{logFileLocation().toStdString() + "/backtrace-" +
+                  std::to_string(QDateTime::currentDateTime().toMSecsSinceEpoch()) + ".txt"};
     std::ofstream dump{filename};
     if (dump)
     {
