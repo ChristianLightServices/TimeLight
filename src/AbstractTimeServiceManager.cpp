@@ -785,13 +785,20 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
                             {successCb ? successCb : std::bind(&AbstractTimeServiceManager::defaultSuccessCb, this, _1),
                              failureCb ? failureCb : std::bind(&AbstractTimeServiceManager::defaultFailureCb, this, _1)});
 
-    bool *done = async ? nullptr : new bool{false};
+    // The reason that not all of the event loop code is located together is that, in my experience so far, the loop has to
+    // be connected to finished() before the reply handler is connected.
+    QEventLoop *loop;
+    if (!async)
+    {
+        loop = new QEventLoop{this};
+        connect(rep, &QNetworkReply::finished, loop, &QEventLoop::quit);
+    }
 
     connect(
         rep,
         &QNetworkReply::finished,
         this,
-        [this, rep, expectedReturnCode, done] {
+        [this, rep, expectedReturnCode] {
             if (auto status = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); status == expectedReturnCode)
                 [[likely]]
             {
@@ -817,20 +824,10 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
                 m_pendingReplies[rep].second(rep);
             }
 
-            if (done)
-                *done = true;
-
             m_pendingReplies.remove(rep);
         },
         Qt::DirectConnection);
 
     if (!async)
-        while (!(*done))
-        {
-            qApp->processEvents();
-            qApp->sendPostedEvents();
-        }
-
-    if (done)
-        delete done;
+        loop->exec();
 }
