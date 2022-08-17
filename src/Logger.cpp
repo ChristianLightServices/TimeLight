@@ -50,7 +50,7 @@ void TimeLight::logs::init(bool debugMode)
 {
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
     console->set_level(debugMode ? spdlog::level::debug : spdlog::level::warn);
-    auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileLocation().append("/log.txt").toStdString());
+    auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileLocation().append("/TimeLight.log").toStdString());
     file->set_level(spdlog::level::trace);
     std::vector<spdlog::sink_ptr> sinks = {console, file};
 
