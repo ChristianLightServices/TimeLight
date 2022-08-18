@@ -127,7 +127,7 @@ void TeamsClient::clearPresence()
                 [[likely]];
             else
             {
-                logs::teams()->error("Failed to clear presence (HTTP responce code {})", status);
+                logs::teams()->error("Failed to clear presence (HTTP response code {})", status);
                 logs::teams()->debug("Response data: '{}'", rep->readAll().toStdString());
             }
 
