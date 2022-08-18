@@ -129,7 +129,7 @@ TrayIcons::TrayIcons(QObject *parent)
         return;
     }
 
-    connect(m_manager, &ClockifyManager::invalidated, this, [this, fixApiKey] {
+    connect(m_manager, &AbstractTimeServiceManager::invalidated, this, [this, fixApiKey] {
         if (!fixApiKey())
         {
             m_valid = false;
@@ -646,7 +646,7 @@ void TrayIcons::setUpTrayIcon()
     if (m_breakIcon)
         setUpBreakIcon();
 
-    connect(m_manager, &ClockifyManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
+    connect(m_manager, &AbstractTimeServiceManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
 
     connect(this, &TrayIcons::jobEnded, this, [this] {
         if (!Settings::instance()->showDurationNotifications())
