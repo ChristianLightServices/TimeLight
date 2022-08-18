@@ -192,7 +192,7 @@ void TeamsClient::setPresence(const TeamsClient::Presence p)
                 m_presence = p;
             else
             {
-                logs::teams()->error("Failed to set presence (HTTP responce code {})", status);
+                logs::teams()->error("Failed to set presence (HTTP response code {})", status);
                 logs::teams()->debug("Response data: '{}'", rep->readAll().toStdString());
             }
 
