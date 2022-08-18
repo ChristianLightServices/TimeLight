@@ -542,9 +542,7 @@ void AbstractTimeServiceManager::defaultSuccessCb(QNetworkReply *rep) {}
 
 void AbstractTimeServiceManager::defaultFailureCb(QNetworkReply *reply)
 {
-    if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code == 0)
-        logger()->warn("Internet connection lost");
-    else
+    if (auto code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(); code != 0)
     {
         logger()->error("Request {} failed with code {}", reply->url().toString().toStdString(), code);
         logger()->debug("Response data: '{}'", reply->readAll());
@@ -819,10 +817,11 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
             }
 
             // offline?
-            if (status == 0) [[likely]]
+            if (status == 0)
             {
                 if (m_isConnectedToInternet)
                 {
+                    logger()->warn("Internet connection lost");
                     m_isConnectedToInternet = false;
                     emit internetConnectionChanged(false);
                 }
@@ -831,6 +830,7 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
             {
                 if (!m_isConnectedToInternet)
                 {
+                    logger()->info("Internet connection restored");
                     m_isConnectedToInternet = true;
                     emit internetConnectionChanged(true);
                 }

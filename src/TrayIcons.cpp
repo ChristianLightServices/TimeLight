@@ -340,7 +340,11 @@ Project TrayIcons::defaultProject()
 void TrayIcons::updateTrayIcons()
 {
     if (!m_manager->isConnectedToInternet()) [[unlikely]]
+    {
         setTimerState(TimerState::Offline);
+        // make requests to see if the internet came back up
+        m_user.getRunningTimeEntry();
+    }
     else if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
     {
         try
