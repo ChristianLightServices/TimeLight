@@ -650,7 +650,11 @@ void TrayIcons::setUpTrayIcon()
     if (m_breakIcon)
         setUpBreakIcon();
 
-    connect(m_manager, &AbstractTimeServiceManager::internetConnectionChanged, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
+    connect(m_manager,
+            &AbstractTimeServiceManager::internetConnectionChanged,
+            this,
+            &TrayIcons::updateTrayIcons,
+            Qt::QueuedConnection);
 
     connect(this, &TrayIcons::jobEnded, this, [this] {
         if (!Settings::instance()->showDurationNotifications())
