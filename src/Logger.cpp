@@ -49,7 +49,7 @@ void TimeLight::logs::qtMessagesToSpdlog(QtMsgType type, const QMessageLogContex
 void TimeLight::logs::init(bool debugMode)
 {
     auto console = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>();
-    console->set_level(debugMode ? spdlog::level::debug : spdlog::level::warn);
+    console->set_level(debugMode ? spdlog::level::debug : spdlog::level::info);
     // up to 5 files that are 5 MB each
     auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         logFileLocation().append("/TimeLight.log").toStdString(), 5 * std::pow(2, 20), 5);
