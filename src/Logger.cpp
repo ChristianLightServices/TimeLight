@@ -52,7 +52,7 @@ void TimeLight::logs::init(bool debugMode)
     console->set_level(debugMode ? spdlog::level::debug : spdlog::level::info);
     // up to 5 files that are 5 MB each
     auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        logFileLocation().append("/TimeLight.log").toStdString(), 5 * std::pow(2, 20), 5);
+        logFileLocation().append("/TimeLight.log").toStdString(), 5 << 20, 5);
     file->set_level(spdlog::level::trace);
     std::vector<spdlog::sink_ptr> sinks = {console, file};
 
