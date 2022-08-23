@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows binary (Qt ${{ matrix.qt-version }})
-          path: build\Release\TimeLight.exe
+          path: build\RelWithDebInfo\TimeLight.exe
           retention-days: 7
 
       - name: Upload release package
