@@ -34,8 +34,8 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build . --config Release
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+          cmake --build . --config RelWithDebInfo
           cd ..
 
       # If Apple didn't insist on bundling apps as folders, this wouldn't be necessary; however, this is done to ensure that the .app folder remains intact
