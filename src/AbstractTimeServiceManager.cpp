@@ -275,12 +275,12 @@ void AbstractTimeServiceManager::setLogger(std::shared_ptr<spdlog::logger> newLo
 
 void AbstractTimeServiceManager::callInitVirtualMethods()
 {
+    // set up logger
+    setLogger(nullptr);
+
     // request currently logged in user (the one whose API key we're using) as a validity test
     // and also in order to cache API key info
     updateCurrentUser();
-
-    // set up logger
-    setLogger(nullptr);
 }
 
 void AbstractTimeServiceManager::updateCurrentUser()

@@ -53,42 +53,57 @@ TrayIcons::TrayIcons(QObject *parent)
             m_teamsClient->authenticate();
     });
 
-    SetupFlow flow{this};
-
-    while (!flow.done())
-    {
-        if (auto r = flow.runNextStage(); r == SetupFlow::Result::Valid)
-            ;
-        else if (r == SetupFlow::Result::Invalid)
-            flow.rerunCurrentStage();
-        else if (r == SetupFlow::Result::Canceled)
-            flow.runPreviousStage();
-    }
-
     auto fixApiKey = [&] {
         while (!m_manager->isValid())
         {
             logs::app()->debug("Fixing API key");
-            bool ok{false};
-            QString newKey = QInputDialog::getText(nullptr,
-                                                   tr("API key"),
-                                                   tr("The API key seems to be incorrect or invalid. Please enter a valid "
-                                                      "API key:"),
-                                                   QLineEdit::Normal,
-                                                   QString{},
-                                                   &ok);
-            if (!ok)
+            QMessageBox::warning(nullptr, tr("API key"), tr("The API key seems to be incorrect or invalid."));
+            SetupFlow flow{this};
+            flow.resetStage<SetupFlow::Stage::ApiKey>();
+            if (auto r = flow.runStage<SetupFlow::Stage::ApiKey>(); r == SetupFlow::Result::Canceled)
                 return false;
-            Settings::instance()->setApiKey(newKey);
-            m_manager->setApiKey(newKey);
         }
 
         return true;
     };
-    if (!fixApiKey())
+
+    SetupFlow flow{this};
+
+    auto r = flow.runNextStage();
+    while (!flow.done())
     {
-        m_valid = false;
-        return;
+        switch (r)
+        {
+        case SetupFlow::Result::Valid:
+            if (flow.stage() == SetupFlow::Stage::ApiKey)
+            {
+                if (!fixApiKey())
+                {
+                    flow.resetPreviousStage();
+                    r = flow.runPreviousStage();
+                    break;
+                }
+            }
+            r = flow.runNextStage();
+            break;
+        case SetupFlow::Result::Invalid:
+            r = flow.rerunCurrentStage();
+            break;
+        case SetupFlow::Result::Canceled:
+            if (flow.stage() == SetupFlow::Stage::TimeService)
+            {
+                m_valid = false;
+                return;
+            }
+            else
+            {
+                flow.resetPreviousStage();
+                r = flow.runPreviousStage();
+            }
+            break;
+        default:
+            break;
+        }
     }
 
     connect(m_manager, &AbstractTimeServiceManager::invalidated, this, [this, fixApiKey] {

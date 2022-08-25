@@ -7,10 +7,10 @@
 #include <QTimer>
 
 #include "AbstractTimeServiceManager.h"
-#include "Project.h"
-#include "TeamsClient.h"
 #include "Logger.h"
+#include "Project.h"
 #include "Settings.h"
+#include "TeamsClient.h"
 #include "User.h"
 
 class TrayIcons : public QObject
@@ -75,7 +75,7 @@ private:
     void showOfflineNotification();
     void checkForFinishedWeek();
 
-    AbstractTimeServiceManager *m_manager;
+    AbstractTimeServiceManager *m_manager{nullptr};
     TeamsClient *m_teamsClient;
 
     QSystemTrayIcon *m_trayIcon{nullptr};

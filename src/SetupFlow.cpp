@@ -46,6 +46,28 @@ SetupFlow::Result SetupFlow::runNextStage()
     }
 }
 
+SetupFlow::Result SetupFlow::runPreviousStage()
+{
+    switch (m_stage)
+    {
+    case Stage::Done:
+        m_stage = Stage::Project;
+        return runStage<Stage::Project>();
+    case Stage::Project:
+        m_stage = Stage::Workspace;
+        return runStage<Stage::Workspace>();
+    case Stage::Workspace:
+        m_stage = Stage::ApiKey;
+        return runStage<Stage::ApiKey>();
+    case Stage::ApiKey:
+        m_stage = Stage::TimeService;
+        return runStage<Stage::TimeService>();
+    default:
+        m_stage = Stage::NotStarted;
+        return SetupFlow::Result::Valid;
+    }
+}
+
 SetupFlow::Result SetupFlow::rerunCurrentStage()
 {
     switch (m_stage)
@@ -63,34 +85,72 @@ SetupFlow::Result SetupFlow::rerunCurrentStage()
     }
 }
 
-SetupFlow::Result SetupFlow::runPreviousStage()
+void SetupFlow::resetNextStage()
 {
     switch (m_stage)
     {
     case Stage::Done:
-        m_stage = Stage::Project;
-        return runStage<Stage::Project>();
-    case Stage::Project:
-        m_stage = Stage::Workspace;
-        return runStage<Stage::Workspace>();
-    case Stage::Workspace:
-        m_stage = Stage::ApiKey;
-        return runStage<Stage::ApiKey>();
-    case Stage::ApiKey:
-        m_stage = Stage::TimeService;
-        return runStage<Stage::TimeService>();
+        resetStage<Stage::TimeService>();
+        break;
     case Stage::TimeService:
+        resetStage<Stage::ApiKey>();
+        break;
+    case Stage::ApiKey:
+        resetStage<Stage::Workspace>();
+        break;
+    case Stage::Workspace:
+        resetStage<Stage::Project>();
+        break;
     default:
-        m_stage = Stage::NotStarted;
-        return SetupFlow::Result::Valid;
+        break;
+    }
+}
+
+void SetupFlow::resetPreviousStage()
+{
+    switch (m_stage)
+    {
+    case Stage::ApiKey:
+        resetStage<Stage::TimeService>();
+        break;
+    case Stage::Workspace:
+        resetStage<Stage::ApiKey>();
+        break;
+    case Stage::Project:
+        resetStage<Stage::Workspace>();
+        break;
+    case Stage::Done:
+        resetStage<Stage::Project>();
+        break;
+    default:
+        break;
+    }
+}
+
+void SetupFlow::resetCurrentStage()
+{
+    switch (m_stage)
+    {
+    case Stage::TimeService:
+        resetStage<Stage::TimeService>();
+        break;
+    case Stage::ApiKey:
+        resetStage<Stage::ApiKey>();
+        break;
+    case Stage::Workspace:
+        resetStage<Stage::Workspace>();
+        break;
+    case Stage::Project:
+        resetStage<Stage::Project>();
+        break;
+    default:
+        break;
     }
 }
 
 template<>
 SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
 {
-    Result r = SetupFlow::Result::Valid;
-
     if (Settings::instance()->timeService().isEmpty())
     {
         logs::app()->trace("Initializing time service");
@@ -110,39 +170,48 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
             Settings::instance()->setEventLoopInterval(15000);
         }
 
-         r = ok ? SetupFlow::Result::Valid : SetupFlow::Result::Canceled;
+        return ok ? (service.isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) : SetupFlow::Result::Canceled;
     }
 
-    if (Settings::instance()->timeService() == QStringLiteral("com.clockify"))
-        m_parent->initializeManager<ClockifyManager>();
-    else if (Settings::instance()->timeService() == QStringLiteral("com.timecamp"))
-        m_parent->initializeManager<TimeCampManager>();
-    else
-    {
-        // since the service is invalid, we'll just select Clockify...
-        Settings::instance()->setTimeService("com.clockify");
-        m_parent->initializeManager<ClockifyManager>();
-    }
-
-    return r;
+    return SetupFlow::Result::Valid;
 }
 
 template<>
 SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::ApiKey>() const
 {
-    while (Settings::instance()->apiKey().isEmpty())
+    Result r = SetupFlow::Result::Valid;
+
+    if (Settings::instance()->apiKey().isEmpty())
     {
         logs::app()->trace("Initializing API key");
         bool ok{false};
         QString newKey =
             QInputDialog::getText(nullptr, tr("API key"), tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
         if (ok)
+        {
             Settings::instance()->setApiKey(newKey);
+            if (m_parent->m_manager)
+                m_parent->m_manager->setApiKey(newKey);
+        }
 
-        return ok ? SetupFlow::Result::Valid : SetupFlow::Result::Canceled;
+        r = ok ? (newKey.isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) : SetupFlow::Result::Canceled;
     }
 
-    return SetupFlow::Result::Valid;
+    if (r == SetupFlow::Result::Valid)
+    {
+        if (Settings::instance()->timeService() == QStringLiteral("com.clockify"))
+            m_parent->initializeManager<ClockifyManager>();
+        else if (Settings::instance()->timeService() == QStringLiteral("com.timecamp"))
+            m_parent->initializeManager<TimeCampManager>();
+        else
+        {
+            // since the service is invalid, we'll just select Clockify...
+            Settings::instance()->setTimeService("com.clockify");
+            m_parent->initializeManager<ClockifyManager>();
+        }
+    }
+
+    return r;
 }
 
 template<>
@@ -171,10 +240,11 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
                         break;
                     }
 
-            r = ok ? SetupFlow::Result::Valid : SetupFlow::Result::Canceled;
+            r = ok ? (Settings::instance()->workspaceId().isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) : SetupFlow::Result::Canceled;
         }
     }
-    m_parent->m_manager->setWorkspaceId(Settings::instance()->workspaceId());
+    if (r == SetupFlow::Result::Valid)
+        m_parent->m_manager->setWorkspaceId(Settings::instance()->workspaceId());
 
     return r;
 }
@@ -201,4 +271,29 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Project>() const
     }
 
     return validProjectSet() ? SetupFlow::Result::Valid : SetupFlow::Result::Invalid;
+}
+
+template<>
+void SetupFlow::resetStage<SetupFlow::Stage::TimeService>() const
+{
+    Settings::instance()->setTimeService({});
+}
+
+template<>
+void SetupFlow::resetStage<SetupFlow::Stage::ApiKey>() const
+{
+    Settings::instance()->setApiKey({});
+}
+
+template<>
+void SetupFlow::resetStage<SetupFlow::Stage::Workspace>() const
+{
+    Settings::instance()->setWorkspaceId({});
+}
+
+template<>
+void SetupFlow::resetStage<SetupFlow::Stage::Project>() const
+{
+    Settings::instance()->setProjectId({});
+    Settings::instance()->setBreakTimeId({});
 }

@@ -31,6 +31,7 @@ public:
     };
 
     bool done() const { return m_stage == Stage::Done; }
+    Stage stage() const { return m_stage; }
 
     template<Stage stage>
     Result runStage() const
@@ -46,11 +47,27 @@ public:
     template<>
     Result runStage<Stage::Project>() const;
 
+    template<Stage stage>
+    void resetStage() const
+    {}
+    template<>
+    void resetStage<Stage::TimeService>() const;
+    template<>
+    void resetStage<Stage::ApiKey>() const;
+    template<>
+    void resetStage<Stage::Workspace>() const;
+    template<>
+    void resetStage<Stage::Project>() const;
+
 public slots:
     void cancelFlow();
+
     Result runNextStage();
-    Result rerunCurrentStage();
     Result runPreviousStage();
+    Result rerunCurrentStage();
+    void resetNextStage();
+    void resetPreviousStage();
+    void resetCurrentStage();
 
 private:
     TrayIcons *m_parent;
