@@ -189,13 +189,11 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     projectGroupLayout->addWidget(projectTable, 0, 0);
 
     auto buttons = new QDialogButtonBox{this};
-    connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole),
-            &QPushButton::clicked,
-            this,
-            [this] {
-                Settings::instance()->setDeveloperMode(false);
-                close();
-            });
+    connect(
+        buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole), &QPushButton::clicked, this, [this] {
+            Settings::instance()->setDeveloperMode(false);
+            close();
+        });
     buttons->addButton(tr("Close"), QDialogButtonBox::AcceptRole);
 
     layout->addWidget(timeServiceGroup);

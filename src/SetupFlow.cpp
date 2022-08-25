@@ -4,10 +4,10 @@
 #include <QMessageBox>
 
 #include "ClockifyManager.h"
-#include "TimeCampManager.h"
+#include "Logger.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
-#include "Logger.h"
+#include "TimeCampManager.h"
 
 namespace logs = TimeLight::logs;
 
@@ -170,7 +170,8 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
             Settings::instance()->setEventLoopInterval(15000);
         }
 
-        return ok ? (service.isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) : SetupFlow::Result::Canceled;
+        return ok ? (service.isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) :
+                    SetupFlow::Result::Canceled;
     }
 
     return SetupFlow::Result::Valid;
@@ -240,7 +241,9 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
                         break;
                     }
 
-            r = ok ? (Settings::instance()->workspaceId().isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) : SetupFlow::Result::Canceled;
+            r = ok ?
+                    (Settings::instance()->workspaceId().isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) :
+                    SetupFlow::Result::Canceled;
         }
     }
     if (r == SetupFlow::Result::Valid)
@@ -254,8 +257,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Project>() const
 {
     auto validProjectSet = [] {
         return (Settings::instance()->useLastProject() || !Settings::instance()->projectId().isEmpty()) &&
-                       (Settings::instance()->useSeparateBreakTime() ? !Settings::instance()->breakTimeId().isEmpty() :
-                                                                       true);
+               (Settings::instance()->useSeparateBreakTime() ? !Settings::instance()->breakTimeId().isEmpty() : true);
     };
 
     if (!validProjectSet())
