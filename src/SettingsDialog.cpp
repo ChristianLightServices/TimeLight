@@ -287,7 +287,7 @@ QWidget *SettingsDialog::createProjectPage()
     connect(projectButtons,
             QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
             projectButtons,
-            [projectButtons, useSpecificProjectBtn, defaultProjectCombo, useLastProjectBtn](QAbstractButton *) {
+            [projectButtons, useSpecificProjectBtn, defaultProjectCombo, useLastProjectBtn] {
                 if (projectButtons->checkedButton() == static_cast<QAbstractButton *>(useSpecificProjectBtn))
                 {
                     Settings::instance()->setUseLastProject(false);
@@ -329,8 +329,7 @@ QWidget *SettingsDialog::createProjectPage()
         descriptionButtons,
         QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
         descriptionButtons,
-        [descriptionButtons, useSpecificDescriptionBtn, defaultDescriptionEdit, useLastDescriptionBtn, useNoDescriptionBtn](
-            QAbstractButton *) {
+        [descriptionButtons, useSpecificDescriptionBtn, defaultDescriptionEdit, useLastDescriptionBtn, useNoDescriptionBtn] {
             if (descriptionButtons->checkedButton() == static_cast<QAbstractButton *>(useSpecificDescriptionBtn))
             {
                 Settings::instance()->setUseLastDescription(false);

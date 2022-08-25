@@ -192,7 +192,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     connect(buttons->addButton(tr("Disable developer mode"), QDialogButtonBox::ActionRole),
             &QPushButton::clicked,
             this,
-            [this](bool) {
+            [this] {
                 Settings::instance()->setDeveloperMode(false);
                 close();
             });

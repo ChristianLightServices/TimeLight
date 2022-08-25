@@ -49,7 +49,7 @@ void Settings::load()
     apiKeyJob->setKey(m_timeService + "/apiKey");
 
     auto l = new QEventLoop{this};
-    connect(apiKeyJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, apiKeyJob](QKeychain::Job *) {
+    connect(apiKeyJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, apiKeyJob] {
         if (const auto e = apiKeyJob->error(); e && e != QKeychain::Error::EntryNotFound)
             logs::app()->debug("Could not load API key from secret storage: {}", apiKeyJob->errorString().toStdString());
         else
@@ -100,7 +100,7 @@ void Settings::load()
     accessTokenJob->setAutoDelete(true);
     accessTokenJob->setInsecureFallback(true);
     accessTokenJob->setKey("microsoft-graph-access-token");
-    connect(accessTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, accessTokenJob](QKeychain::Job *) {
+    connect(accessTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, accessTokenJob] {
         if (const auto e = accessTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
             logs::app()->debug("Could not load Graph access token from secret storage: {}",
                                accessTokenJob->errorString().toStdString());
@@ -119,7 +119,7 @@ void Settings::load()
     refreshTokenJob->setAutoDelete(true);
     refreshTokenJob->setInsecureFallback(true);
     refreshTokenJob->setKey("microsoft-graph-refresh-token");
-    connect(refreshTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, refreshTokenJob](QKeychain::Job *) {
+    connect(refreshTokenJob, &QKeychain::ReadPasswordJob::finished, this, [this, l, refreshTokenJob] {
         if (const auto e = refreshTokenJob->error(); e && e != QKeychain::Error::EntryNotFound)
             logs::app()->debug("Could not load Graph refresh token from secret storage: {}",
                                refreshTokenJob->errorString().toStdString());
