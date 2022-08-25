@@ -997,7 +997,8 @@ void TrayIcons::checkForFinishedWeek()
     }
 }
 
-template<TimeManager Manager> void TrayIcons::initializeManager()
+template<TimeManager Manager>
+void TrayIcons::initializeManager()
 {
     m_manager = new Manager{Settings::instance()->apiKey().toUtf8()};
     m_manager->setLogger(logs::network());

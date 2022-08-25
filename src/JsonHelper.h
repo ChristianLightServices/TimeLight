@@ -15,14 +15,16 @@ namespace nlohmann
     //	using QJson = basic_json<QMap, QVector, QString, bool, std::int64_t, std::uint64_t, double, std::allocator,
     // adl_serializer, QVector<std::uint8_t>>;
 
-    template<> struct adl_serializer<QString>
+    template<>
+    struct adl_serializer<QString>
     {
         static void to_json(json &j, const QString &opt) { j = opt.toStdString(); }
 
         static void from_json(const json &j, QString &opt) { opt = QString::fromStdString(j.get<std::string>()); }
     };
 
-    template<> struct adl_serializer<QByteArray>
+    template<>
+    struct adl_serializer<QByteArray>
     {
         static void to_json(json &j, const QByteArray &opt) { j = opt.toStdString(); }
 

@@ -56,7 +56,8 @@ private:
         Done,
     };
 
-    template<TimeManager Manager> void initializeManager();
+    template<TimeManager Manager>
+    void initializeManager();
     void addStandardMenuActions(QMenu *menu);
     QAction *createBreakResumeAction();
     void setUpTrayIcon();
