@@ -151,6 +151,8 @@ set(SRC
     src/Settings.h
     src/SettingsDialog.cpp
     src/SettingsDialog.h
+    src/SetupFlow.cpp
+    src/SetupFlow.h
     src/TeamsClient.cpp
     src/TeamsClient.h
     src/TimeEntry.cpp

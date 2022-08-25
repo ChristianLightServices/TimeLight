@@ -23,6 +23,7 @@
 #include "Project.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
+#include "SetupFlow.h"
 #include "TimeCampManager.h"
 #include "User.h"
 #include "Utils.h"
@@ -52,55 +53,16 @@ TrayIcons::TrayIcons(QObject *parent)
             m_teamsClient->authenticate();
     });
 
-    while (Settings::instance()->timeService().isEmpty())
-    {
-        logs::app()->trace("Initializing time service");
-        bool ok{false};
-        QString service = QInputDialog::getItem(nullptr,
-                                                tr("Time service"),
-                                                tr("Choose which time service to use:"),
-                                                QStringList{} << QStringLiteral("Clockify") << QStringList("TimeCamp"),
-                                                0,
-                                                false,
-                                                &ok);
-        if (!ok)
-        {
-            m_valid = false;
-            return;
-        }
-        else if (service == QStringLiteral("Clockify"))
-            Settings::instance()->setTimeService(QStringLiteral("com.clockify"));
-        else if (service == QStringLiteral("TimeCamp"))
-        {
-            Settings::instance()->setTimeService(QStringLiteral("com.timecamp"));
-            Settings::instance()->setEventLoopInterval(15000);
-        }
-    }
+    SetupFlow flow{this};
 
-    while (Settings::instance()->apiKey().isEmpty())
+    while (!flow.done())
     {
-        logs::app()->trace("Initializing API key");
-        bool ok{false};
-        QString newKey =
-            QInputDialog::getText(nullptr, tr("API key"), tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
-        if (!ok)
-        {
-            m_valid = false;
-            return;
-        }
-        else
-            Settings::instance()->setApiKey(newKey);
-    }
-
-    if (Settings::instance()->timeService() == QStringLiteral("com.clockify"))
-        initializeManager<ClockifyManager>();
-    else if (Settings::instance()->timeService() == QStringLiteral("com.timecamp"))
-        initializeManager<TimeCampManager>();
-    else
-    {
-        // since the service is invalid, we'll just select Clockify...
-        Settings::instance()->setTimeService("com.clockify");
-        initializeManager<ClockifyManager>();
+        if (auto r = flow.runNextStage(); r == SetupFlow::Result::Valid)
+            ;
+        else if (r == SetupFlow::Result::Invalid)
+            flow.rerunCurrentStage();
+        else if (r == SetupFlow::Result::Canceled)
+            flow.runPreviousStage();
     }
 
     auto fixApiKey = [&] {
@@ -138,49 +100,12 @@ TrayIcons::TrayIcons(QObject *parent)
     });
 
     m_user = m_manager->getApiKeyOwner();
-    if (Settings::instance()->workspaceId().isEmpty())
-    {
-        logs::app()->trace("Initializing workspace");
-        auto workspaces = m_manager->workspaces();
-        QStringList names;
-        for (const auto &w : workspaces)
-            names << w.name();
-        while (Settings::instance()->workspaceId().isEmpty())
-        {
-            bool ok{false};
-            QString workspace = QInputDialog::getItem(
-                nullptr, tr("Workspace"), tr("Choose which workspace to track time on:"), names, 0, false, &ok);
-            if (!ok)
-            {
-                m_valid = false;
-                return;
-            }
-
-            for (const auto &w : workspaces)
-                if (w.name() == workspace)
-                {
-                    Settings::instance()->setWorkspaceId(w.id());
-                    break;
-                }
-        }
-    }
-    m_manager->setWorkspaceId(Settings::instance()->workspaceId());
-
     if (!m_user.isValid()) [[unlikely]]
     {
         logs::app()->error("Invalid user!");
         QMessageBox::critical(nullptr, tr("Fatal error"), tr("Could not load user!"));
         m_valid = false;
         return;
-    }
-
-    while ((!Settings::instance()->useLastProject() && Settings::instance()->projectId().isEmpty()) ||
-           (Settings::instance()->useSeparateBreakTime() && Settings::instance()->breakTimeId().isEmpty()))
-    {
-        logs::app()->trace("Initializing project ID(s)");
-        QMessageBox::information(
-            nullptr, tr("Select a project"), tr("Please select a default project in the following dialog."));
-        getNewProjectId();
     }
 
     if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
@@ -995,11 +920,4 @@ void TrayIcons::checkForFinishedWeek()
             QTimer::singleShot(msecsThisWeek + 15000, this, &TrayIcons::checkForFinishedWeek);
         }
     }
-}
-
-template<TimeManager Manager>
-void TrayIcons::initializeManager()
-{
-    m_manager = new Manager{Settings::instance()->apiKey().toUtf8()};
-    m_manager->setLogger(logs::network());
 }

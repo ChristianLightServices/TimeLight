@@ -9,6 +9,8 @@
 #include "AbstractTimeServiceManager.h"
 #include "Project.h"
 #include "TeamsClient.h"
+#include "Logger.h"
+#include "Settings.h"
 #include "User.h"
 
 class TrayIcons : public QObject
@@ -57,7 +59,12 @@ private:
     };
 
     template<TimeManager Manager>
-    void initializeManager();
+    void initializeManager()
+    {
+        m_manager = new Manager{Settings::instance()->apiKey().toUtf8()};
+        m_manager->setLogger(TimeLight::logs::network());
+    }
+
     void addStandardMenuActions(QMenu *menu);
     QAction *createBreakResumeAction();
     void setUpTrayIcon();
@@ -93,6 +100,8 @@ private:
     bool m_ratelimited{false};
 
     TimeUpWarning m_timeUpWarning{TimeUpWarning::NotDone};
+
+    friend class SetupFlow;
 };
 
 #endif // TRAYICONS_H
