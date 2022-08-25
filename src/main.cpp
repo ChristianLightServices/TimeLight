@@ -42,10 +42,7 @@ int main(int argc, char *argv[])
             int newArgc = argc;
             auto newArgv = new char *[argc];
             for (int i = 0; i < argc; ++i)
-            {
-                newArgv[i] = new char[std::strlen(argv[i])];
-                std::strcpy(newArgv[i], argv[i]);
-            }
+                newArgv[i] = qstrdup(argv[i]);
 
             SingleApplication a{newArgc, newArgv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
