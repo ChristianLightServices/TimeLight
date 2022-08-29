@@ -70,7 +70,8 @@ public:
             return;
 
         p.setPen(Qt::PenStyle::NoPen);
-        p.drawEllipse(QRect{rect().width() / 2 - 25, rect().height() / 2 - 25, 50, 50});
+        auto side = std::min(rect().width(), rect().height()) / 2 - 25;
+        p.drawEllipse(QRect{side, side, 50, 50});
         QSvgRenderer{QStringLiteral(":/icons/download.svg")}.render(
             &p, QRect{rect().width() / 2 - 24, rect().height() / 2 - 24, 48, 48});
     }
