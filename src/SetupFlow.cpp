@@ -227,24 +227,20 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
         QStringList names;
         for (const auto &w : workspaces)
             names << w.name();
-        if (Settings::instance()->workspaceId().isEmpty())
-        {
-            bool ok{false};
-            QString workspace = QInputDialog::getItem(
-                nullptr, tr("Workspace"), tr("Choose which workspace to track time on:"), names, 0, false, &ok);
+        bool ok{false};
+        QString workspace = QInputDialog::getItem(
+            nullptr, tr("Workspace"), tr("Choose which workspace to track time on:"), names, 0, false, &ok);
 
-            if (ok)
-                for (const auto &w : workspaces)
-                    if (w.name() == workspace)
-                    {
-                        Settings::instance()->setWorkspaceId(w.id());
-                        break;
-                    }
+        if (ok)
+            for (const auto &w : workspaces)
+                if (w.name() == workspace)
+                {
+                    Settings::instance()->setWorkspaceId(w.id());
+                    break;
+                }
 
-            r = ok ?
-                    (Settings::instance()->workspaceId().isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) :
-                    SetupFlow::Result::Canceled;
-        }
+        r = ok ? (Settings::instance()->workspaceId().isEmpty() ? SetupFlow::Result::Invalid : SetupFlow::Result::Valid) :
+                 SetupFlow::Result::Canceled;
     }
     if (r == SetupFlow::Result::Valid)
         m_parent->m_manager->setWorkspaceId(Settings::instance()->workspaceId());
