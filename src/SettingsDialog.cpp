@@ -134,12 +134,6 @@ QWidget *SettingsDialog::createBackendPage()
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
     connect(timeServices, &QComboBox::currentIndexChanged, timeServices, [this, timeServices](int i) {
-        if (m_resetOfTimeServiceComboBoxInProgress)
-        {
-            m_resetOfTimeServiceComboBoxInProgress = false;
-            return;
-        }
-
         if (m_availableManagers[i].second == QStringLiteral("com.timecamp") &&
             Settings::instance()->eventLoopInterval() < 15000)
             if (QMessageBox::question(this,
@@ -162,10 +156,12 @@ QWidget *SettingsDialog::createBackendPage()
             break;
         case QMessageBox::Cancel:
         default:
-            m_resetOfTimeServiceComboBoxInProgress = true;
+        {
+            QSignalBlocker _{timeServices};
             timeServices->setCurrentIndex(
                 m_availableManagers.indexOf({m_manager->serviceName(), m_manager->serviceIdentifier()}));
             break;
+        }
         }
     });
 
