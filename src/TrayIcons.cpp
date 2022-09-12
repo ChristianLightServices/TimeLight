@@ -633,7 +633,6 @@ void TrayIcons::setUpTrayIcon()
             if (m_breakIcon == nullptr)
                 m_breakIcon = new QSystemTrayIcon{this};
             setUpBreakIcon();
-            updateIconsAndTooltips();
             breakResumeAction->setVisible(false);
             m_breakIcon->show();
         }
@@ -644,8 +643,9 @@ void TrayIcons::setUpTrayIcon()
             m_breakIcon = nullptr;
             if (Settings::instance()->useSeparateBreakTime())
                 breakResumeAction->setVisible(true);
-            updateIconsAndTooltips();
         }
+        updateIconsAndTooltips();
+        updateQuickStartList();
     };
     connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, this, showOrHideBreakButton);
     connect(Settings::instance(), &Settings::middleClickForBreakChanged, this, showOrHideBreakButton);
