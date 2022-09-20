@@ -137,7 +137,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
             else
             {
                 image->setPixmap(p.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-                userGroupLayout->addWidget(image, 0, 0, 4, 1);
+                userGroupLayout->addWidget(image, 0, 0, 5, 1);
             }
             m->deleteLater();
             rep->deleteLater();
@@ -152,10 +152,16 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     userGroupLayout->addWidget(new QLabel{tr("Email:")}, 1, 1);
     userGroupLayout->addWidget(new QLabel{tr("User ID:")}, 2, 1);
     userGroupLayout->addWidget(new QLabel{tr("API key:")}, 3, 1);
+    userGroupLayout->addWidget(new QLabel{tr("Creation time:")}, 4, 1);
     userGroupLayout->addWidget(new QLabel{user.name()}, 0, 2);
     userGroupLayout->addWidget(new QLabel{user.email()}, 1, 2);
     userGroupLayout->addWidget(userId, 2, 2);
     userGroupLayout->addWidget(apiKey, 3, 2);
+    userGroupLayout->addWidget(
+        new QLabel{
+            QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16)).toString("MMMM d, yyyy h:mm:ss A")},
+        4,
+        2);
 
     auto workspaceGroup = new QGroupBox{tr("Workspace"), this};
     auto workspaceGroupLayout = new QGridLayout{workspaceGroup};
@@ -165,21 +171,32 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
 
     workspaceGroupLayout->addWidget(new QLabel{tr("Name:")}, 0, 0);
     workspaceGroupLayout->addWidget(new QLabel{tr("Workspace ID:")}, 1, 0);
+    workspaceGroupLayout->addWidget(new QLabel{tr("Creation time:")}, 2, 0);
     workspaceGroupLayout->addWidget(new QLabel{workspace.name()}, 0, 1);
     workspaceGroupLayout->addWidget(workspaceId, 1, 1);
+    workspaceGroupLayout->addWidget(
+        new QLabel{
+            QDateTime::fromSecsSinceEpoch(workspace.id().mid(0, 8).toLong(nullptr, 16)).toString("MMMM d, yyyy h:mm:ss A")},
+        2,
+        1);
 
     auto projectGroup = new QGroupBox{tr("Projects"), this};
     auto projectGroupLayout = new QGridLayout{projectGroup};
 
-    auto projectTable = new QTableWidget{static_cast<int>(projects.count()), 2, workspaceGroup};
+    auto projectTable = new QTableWidget{static_cast<int>(projects.count()), 3, workspaceGroup};
     for (int i = 0; i < projects.size(); ++i)
     {
         projectTable->setItem(i, 0, new QTableWidgetItem{projects[i].name()});
         auto id = new QLineEdit{projects[i].id()};
         id->setReadOnly(true);
         projectTable->setCellWidget(i, 1, id);
+        projectTable->setItem(
+            i,
+            2,
+            new QTableWidgetItem{QDateTime::fromSecsSinceEpoch(projects[i].id().mid(0, 8).toLong(nullptr, 16))
+                                     .toString("MMMM d, yyyy h:mm:ss A")});
     }
-    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID"));
+    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Creation time"));
     projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
     projectTable->verticalHeader()->setVisible(false);
     projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
