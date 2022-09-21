@@ -842,7 +842,10 @@ void TrayIcons::updateQuickStartList()
     m_quickStartAllProjects->clear();
 
     auto addMenuEntry = [this](QMenu *menu, const Project &project) {
-        connect(menu->addAction(project.name()), &QAction::triggered, this, [projectId = project.id(), this] {
+        auto name{project.name()};
+        if (!project.description().isEmpty())
+            name.append(" | ").append(project.description());
+        connect(menu->addAction(name), &QAction::triggered, this, [projectId = project.id(), this] {
             m_eventLoop.stop();
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
@@ -868,7 +871,7 @@ void TrayIcons::updateQuickStartList()
 
     QList<Project> recents;
     std::optional<Project> addBreakTime;
-    for (const auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
+    for (auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
     {
         if (recents.size() >= 10)
             break;
@@ -877,6 +880,12 @@ void TrayIcons::updateQuickStartList()
         {
             addBreakTime = entry.project();
             continue;
+        }
+        if (!Settings::instance()->splitByDescription())
+        {
+            auto p = entry.project();
+            p.setDescription({});
+            entry.setProject(p);
         }
         if (recents.contains(entry.project()))
             continue;

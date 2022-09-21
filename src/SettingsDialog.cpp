@@ -361,6 +361,10 @@ QWidget *SettingsDialog::createAppPage()
     auto appPage{new QWidget};
     auto layout{new QGridLayout{appPage}};
 
+    auto splitByDescription{new QCheckBox{tr("Show descriptions for entries in quick start list"), appPage}};
+    splitByDescription->setToolTip(tr("If enabled, the project list will show descriptions for each recent time entry."));
+    splitByDescription->setChecked(Settings::instance()->splitByDescription());
+
     auto preventSplittingEntries{new QCheckBox{tr("Prevent consecutive entries with the same project"), appPage}};
     preventSplittingEntries->setToolTip(tr("If enabled, TimeLight will not start a new time entry if there is a currently "
                                            "running entry with the same project."));
@@ -403,19 +407,21 @@ QWidget *SettingsDialog::createAppPage()
 
     auto openLogLocation = new QPushButton{tr("Open log folder..."), appPage};
 
-    layout->addWidget(preventSplittingEntries, 0, 0);
-    layout->addWidget(middleClickForBreak, 1, 0);
-    layout->addWidget(eventLoopIntervalLabel, 2, 0);
-    layout->addWidget(eventLoopInterval, 2, 1);
-    layout->addWidget(showNotifications, 3, 0, 1, 2);
-    layout->addWidget(showTimeUpWarning, 4, 0, 1, 2);
-    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 5, 0);
-    layout->addWidget(weekHours, 5, 1);
+    layout->addWidget(splitByDescription, 0, 0);
+    layout->addWidget(preventSplittingEntries, 1, 0);
+    layout->addWidget(middleClickForBreak, 2, 0);
+    layout->addWidget(eventLoopIntervalLabel, 3, 0);
+    layout->addWidget(eventLoopInterval, 3, 1);
+    layout->addWidget(showNotifications, 4, 0, 1, 2);
+    layout->addWidget(showTimeUpWarning, 5, 0, 1, 2);
+    layout->addWidget(new QLabel{tr("Duration of a work week"), appPage}, 6, 0);
+    layout->addWidget(weekHours, 6, 1);
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
-    layout->addWidget(openLogLocation, 7, 0, 1, 2, Qt::AlignRight);
+    layout->addWidget(openLogLocation, 8, 0, 1, 2, Qt::AlignRight);
 
+    connect(splitByDescription, &QCheckBox::stateChanged, Settings::instance(), &Settings::setSplitByDescription);
     connect(preventSplittingEntries, &QCheckBox::stateChanged, Settings::instance(), &Settings::setPreventSplittingEntries);
     connect(Settings::instance(), &Settings::useSeparateBreakTimeChanged, middleClickForBreak, [middleClickForBreak] {
         middleClickForBreak->setEnabled(Settings::instance()->useSeparateBreakTime());

@@ -77,6 +77,7 @@ void Settings::load()
     settings.beginGroup(QStringLiteral("app"));
     m_middleClickForBreak = settings.value(QStringLiteral("middleClickForBreak"), false).toBool();
     m_eventLoopInterval = settings.value(QStringLiteral("eventLoopInterval"), 5000).toInt();
+    m_splitByDescription = settings.value(QStringLiteral("splitByDescription"), true).toBool();
     m_preventSplittingEntries = settings.value(QStringLiteral("preventSplittingEntries"), true).toBool();
     m_showDurationNotifications = settings.value(QStringLiteral("showDurationNotifications"), true).toBool();
     m_alertOnTimeUp = settings.value(QStringLiteral("alertOnTimeUp"), true).toBool();
@@ -248,6 +249,15 @@ void Settings::setUseLastProject(const bool use)
     m_settingsDirty = true;
 }
 
+void Settings::setSplitByDescription(const bool state)
+{
+    if (state == m_splitByDescription)
+        return;
+    m_splitByDescription = state;
+    emit splitByDescriptionChanged();
+    m_settingsDirty = true;
+}
+
 void Settings::setPreventSplittingEntries(const bool prevent)
 {
     if (prevent == m_preventSplittingEntries)
@@ -396,6 +406,7 @@ void Settings::save(bool async)
     settings.beginGroup(QStringLiteral("app"));
     settings.setValue(QStringLiteral("middleClickForBreak"), m_middleClickForBreak);
     settings.setValue(QStringLiteral("eventLoopInterval"), m_eventLoopInterval);
+    settings.setValue(QStringLiteral("splitByDescription"), m_splitByDescription);
     settings.setValue(QStringLiteral("preventSplittingEntries"), m_preventSplittingEntries);
     settings.setValue(QStringLiteral("showDurationNotifications"), m_showDurationNotifications);
     settings.setValue(QStringLiteral("alertOnTimeUp"), m_alertOnTimeUp);

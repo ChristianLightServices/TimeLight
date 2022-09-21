@@ -22,6 +22,7 @@ public:
     bool disableDescription() const { return m_disableDescription; }
     bool useLastDescription() const { return m_useLastDescription; }
     bool useLastProject() const { return m_useLastProject; }
+    bool splitByDescription() const { return m_splitByDescription; }
     bool preventSplittingEntries() const { return m_preventSplittingEntries; }
     bool showDurationNotifications() const { return m_showDurationNotifications; }
     int eventLoopInterval() const { return m_eventLoopInterval; }
@@ -50,6 +51,7 @@ public slots:
     void setDisableDescription(const bool disable);
     void setUseLastDescription(const bool use);
     void setUseLastProject(const bool use);
+    void setSplitByDescription(const bool state);
     void setPreventSplittingEntries(const bool prevent);
     void setShowDurationNotifications(const bool show);
     void setEventLoopInterval(const int interval);
@@ -75,6 +77,7 @@ signals:
     void disableDescriptionChanged();
     void useLastDescriptionChanged();
     void useLastProjectChanged();
+    void splitByDescriptionChanged();
     void preventSplittingEntriesChanged();
     void showDurationNotificationsChanged();
     void eventLoopIntervalChanged();
@@ -112,6 +115,7 @@ private:
     bool m_disableDescription;
     bool m_useLastDescription;
     bool m_useLastProject;
+    bool m_splitByDescription;
     bool m_preventSplittingEntries;
     bool m_showDurationNotifications;
     bool m_alertOnTimeUp;
