@@ -135,6 +135,46 @@
         <source>Print debug information to the command line.</source>
         <translation>Print debug information to the command line.</translation>
     </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="159"/>
+        <source>Time service</source>
+        <translation>Time service</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="160"/>
+        <source>Choose which time service to use:</source>
+        <translation>Choose which time service to use:</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="190"/>
+        <source>API key</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="190"/>
+        <source>Enter your API key:</source>
+        <translation>Enter your API key:</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="232"/>
+        <source>Workspace</source>
+        <translation>Workspace</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="232"/>
+        <source>Choose which workspace to track time on:</source>
+        <translation>Choose which workspace to track time on:</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="267"/>
+        <source>Select a project</source>
+        <translation>Select a project</translation>
+    </message>
+    <message>
+        <location filename="../src/SetupFlow.cpp" line="267"/>
+        <source>Please select a default project in the following dialog.</source>
+        <translation>Please select a default project in the following dialog.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>

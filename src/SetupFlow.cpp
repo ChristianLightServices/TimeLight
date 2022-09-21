@@ -156,8 +156,8 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
         logs::app()->trace("Initializing time service");
         bool ok{false};
         QString service = QInputDialog::getItem(nullptr,
-                                                tr("Time service"),
-                                                tr("Choose which time service to use:"),
+                                                QObject::tr("Time service"),
+                                                QObject::tr("Choose which time service to use:"),
                                                 QStringList{} << QStringLiteral("Clockify") << QStringList("TimeCamp"),
                                                 0,
                                                 false,
@@ -187,7 +187,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::ApiKey>() const
         logs::app()->trace("Initializing API key");
         bool ok{false};
         QString newKey =
-            QInputDialog::getText(nullptr, tr("API key"), tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
+            QInputDialog::getText(nullptr, QObject::tr("API key"), QObject::tr("Enter your API key:"), QLineEdit::Normal, QString{}, &ok);
         if (ok)
         {
             Settings::instance()->setApiKey(newKey);
@@ -229,7 +229,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
             names << w.name();
         bool ok{false};
         QString workspace = QInputDialog::getItem(
-            nullptr, tr("Workspace"), tr("Choose which workspace to track time on:"), names, 0, false, &ok);
+            nullptr, QObject::tr("Workspace"), QObject::tr("Choose which workspace to track time on:"), names, 0, false, &ok);
 
         if (ok)
             for (const auto &w : workspaces)
@@ -264,7 +264,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Project>() const
                           {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
         d.switchToPage(SettingsDialog::Pages::ProjectPage);
         QMessageBox::information(
-            nullptr, tr("Select a project"), tr("Please select a default project in the following dialog."));
+            nullptr, QObject::tr("Select a project"), QObject::tr("Please select a default project in the following dialog."));
         d.exec();
     }
 
