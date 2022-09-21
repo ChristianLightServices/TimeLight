@@ -330,6 +330,11 @@
         <translation> hours</translation>
     </message>
     <message>
+        <location filename="../src/SettingsDialog.cpp" line="443"/>
+        <source>If enabled, TimeLight will attempt to set your Teams presence based on whether or not you are working. You will need to clear your presence in Teams to make this work.</source>
+        <translation>If enabled, TimeLight will attempt to set your Teams presence based on whether or not you are working. You will need to clear your presence in Teams to make this work.</translation>
+    </message>
+    <message>
         <location filename="../src/SettingsDialog.cpp" line="376"/>
         <source>Interval between updates of %1 data</source>
         <translation>Interval between updates of %1 data</translation>
@@ -348,11 +353,6 @@
         <location filename="../src/SettingsDialog.cpp" line="442"/>
         <source>Set presence in Microsoft Teams to match work status</source>
         <translation>Set presence in Microsoft Teams to match work status</translation>
-    </message>
-    <message>
-        <location filename="../src/SettingsDialog.cpp" line="443"/>
-        <source>If enabled, TimeLight will attempt to your Teams presence based on whether or not you are working. You will need to clear your presence in Teams to make this work.</source>
-        <translation>If enabled, TimeLight will attempt to your Teams presence based on whether or not you are working. You will need to clear your presence in Teams to make this work.</translation>
     </message>
     <message>
         <location filename="../src/SettingsDialog.cpp" line="452"/>

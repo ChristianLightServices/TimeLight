@@ -440,7 +440,7 @@ QWidget *SettingsDialog::createTeamsPage()
     auto layout{new QGridLayout{teamsPage}};
 
     auto useTeams = new QCheckBox{tr("Set presence in Microsoft Teams to match work status"), teamsPage};
-    useTeams->setToolTip(tr("If enabled, TimeLight will attempt to your Teams presence based on whether or not you are "
+    useTeams->setToolTip(tr("If enabled, TimeLight will attempt to set your Teams presence based on whether or not you are "
                             "working. You will need to clear your presence in Teams to make this work."));
     useTeams->setChecked(Settings::instance()->useTeamsIntegration());
 
