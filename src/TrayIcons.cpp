@@ -415,7 +415,11 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
             dialog->show();
             connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
                 if (result == QDialog::Accepted)
+                {
                     m_user.modifyTimeEntry(std::move(dialog->entry()), true);
+                    updateTrayIcons();
+                    updateQuickStartList();
+                }
                 dialog->deleteLater();
             });
         }
