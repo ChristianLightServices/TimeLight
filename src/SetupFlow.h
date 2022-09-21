@@ -8,6 +8,7 @@
 class SetupFlow : public QObject
 {
     Q_OBJECT
+
 public:
     explicit SetupFlow(TrayIcons *parent);
 
@@ -62,9 +63,9 @@ public:
 public slots:
     void cancelFlow();
 
-    Result runNextStage();
-    Result runPreviousStage();
-    Result rerunCurrentStage();
+    SetupFlow::Result runNextStage();
+    SetupFlow::Result runPreviousStage();
+    SetupFlow::Result rerunCurrentStage();
     void resetNextStage();
     void resetPreviousStage();
     void resetCurrentStage();
