@@ -845,7 +845,7 @@ void TrayIcons::updateQuickStartList()
         auto name{project.name()};
         if (!project.description().isEmpty())
             name.append(" | ").append(project.description());
-        connect(menu->addAction(name), &QAction::triggered, this, [projectId = project.id(), this] {
+        connect(menu->addAction(name), &QAction::triggered, this, [project, this] {
             m_eventLoop.stop();
             if (!m_manager->isConnectedToInternet()) [[unlikely]]
             {
@@ -857,14 +857,14 @@ void TrayIcons::updateQuickStartList()
             QDateTime now{m_manager->currentDateTime()};
             if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
             {
-                if (Settings::instance()->preventSplittingEntries() && runningEntry->project().id() == projectId)
+                if (Settings::instance()->preventSplittingEntries() && runningEntry->project().id() == project.id())
                 {
                     m_eventLoop.start();
                     return;
                 }
                 now = m_user.stopCurrentTimeEntry();
             }
-            m_user.startTimeEntry(Project{projectId, {}, defaultProject().description()}, now, true);
+            m_user.startTimeEntry(project, now, true);
             m_eventLoop.start();
         });
     };
