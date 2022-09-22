@@ -243,7 +243,7 @@ Project TrayIcons::defaultProject()
         ; // description is already empty, so we will fall through
     else if (!Settings::instance()->useLastDescription())
         project.setDescription(Settings::instance()->description());
-    else
+    else if (!Settings::instance()->useLastProject()) // if we are using the last project, we hav the last description
     {
         bool descriptionLoaded{false};
 
