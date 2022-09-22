@@ -196,12 +196,12 @@ Project TrayIcons::defaultProject()
                                   projects.end(),
                                   [](const Project &p) { return p.id() == Settings::instance()->projectId(); });
             p == projects.end())
-            project = projects.first();
-        else
         {
             logs::app()->warn("Attempted to use invalid project ID for default project");
-            project = *p;
+            project = projects.first();
         }
+        else
+            project = *p;
     }
     else
     {
