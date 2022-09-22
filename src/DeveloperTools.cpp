@@ -190,6 +190,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
         auto id = new QLineEdit{projects[i].id()};
         id->setReadOnly(true);
         projectTable->setCellWidget(i, 1, id);
+        projectTable->setItem(i, 1, new QTableWidgetItem{projects[i].id()});
         projectTable->setItem(
             i,
             2,
