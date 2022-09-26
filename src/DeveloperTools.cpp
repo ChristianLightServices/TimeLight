@@ -63,8 +63,8 @@ public:
         }
         else if (underMouse())
         {
-            p.fillRect(rect(), QBrush{QColor{"#77444444"}});
-            p.setBrush(QBrush{QColor{"#e7e9e9e9"}});
+            p.fillRect(rect(), QBrush{QColor{0x44, 0x44, 0x44, 0x77}});
+            p.setBrush(QBrush{QColor{0xe9, 0xe9, 0xe9, 0xe7}});
         }
         else
             return;
