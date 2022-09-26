@@ -323,15 +323,6 @@ void TrayIcons::updateRunningEntryTooltip()
     (m_breakIcon ? m_breakIcon : m_trayIcon)->setToolTip(tooltip);
 }
 
-void TrayIcons::getNewProjectId()
-{
-    SettingsDialog d{m_manager,
-                     {{QStringLiteral("Clockify"), QStringLiteral("com.clockify")},
-                      {QStringLiteral("TimeCamp"), QStringLiteral("com.timecamp")}}};
-    d.switchToPage(SettingsDialog::Pages::ProjectPage);
-    d.exec();
-}
-
 void TrayIcons::showAboutDialog()
 {
     // put this into a variable to handle this gonzo string more nicely

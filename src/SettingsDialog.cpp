@@ -32,7 +32,7 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
       m_availableManagers{availableManagers},
       m_tabWidget{new QTabWidget}
 {
-    for (auto &project : m_manager->projects())
+    for (const auto &project : m_manager->projects())
     {
         m_availableProjects.first.push_back(project.id());
         m_availableProjects.second.push_back(project.name());

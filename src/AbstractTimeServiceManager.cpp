@@ -71,7 +71,7 @@ QVector<QPair<QString, QString>> &AbstractTimeServiceManager::users()
 
 QString AbstractTimeServiceManager::projectName(const QString &projectId)
 {
-    for (auto &item : projects())
+    for (const auto &item : projects())
         if (item.id() == projectId)
             return item.name();
 

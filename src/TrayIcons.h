@@ -35,7 +35,6 @@ signals:
 private slots:
     void updateTrayIcons();
     void updateRunningEntryTooltip();
-    void getNewProjectId();
 
     void showAboutDialog();
     void showLicenseDialog(QWidget *parent = nullptr);

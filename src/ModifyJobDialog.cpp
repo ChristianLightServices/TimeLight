@@ -14,7 +14,7 @@ ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager, const Time
     auto layout = new QGridLayout{this};
 
     QComboBox *project{new QComboBox{this}};
-    for (auto &p : m_availableProjects)
+    for (const auto &p : m_availableProjects)
         project->addItem(p.name(), p.id());
     project->setCurrentIndex(
         m_availableProjects.indexOf(entry.project().id().isEmpty() ? m_availableProjects.first() : entry.project()));
