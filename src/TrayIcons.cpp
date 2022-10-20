@@ -16,7 +16,6 @@
 
 #include <SingleApplication>
 
-#include "ClockifyManager.h"
 #include "DeveloperTools.h"
 #include "Logger.h"
 #include "ModifyJobDialog.h"
@@ -24,7 +23,6 @@
 #include "Settings.h"
 #include "SettingsDialog.h"
 #include "SetupFlow.h"
-#include "TimeCampManager.h"
 #include "User.h"
 #include "Utils.h"
 #include "version.h"
@@ -34,7 +32,8 @@ namespace logs = TimeLight::logs;
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
       m_trayIcon{new QSystemTrayIcon},
-      m_teamsClient{new TeamsClient{TimeLight::teamsAppId, 6942, this}}
+      m_teamsClient{new TeamsClient{TimeLight::teamsAppId, 6942, this}},
+      m_recents{new QList<Project>}
 {
     connect(m_teamsClient, &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
         Settings::instance()->setGraphAccessToken(m_teamsClient->accessToken());
@@ -402,7 +401,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(modifyJob, &QAction::triggered, this, [this] {
         if (auto e = m_user.getRunningTimeEntry(); e)
         {
-            auto dialog = new ModifyJobDialog{m_manager, *e};
+            auto dialog = new ModifyJobDialog{m_manager, *e, m_recents};
             dialog->show();
             connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
                 if (result == QDialog::Accepted)
@@ -860,11 +859,10 @@ void TrayIcons::updateQuickStartList()
         });
     };
 
-    QList<Project> recents;
     std::optional<Project> addBreakTime;
     for (auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
     {
-        if (recents.size() >= 10)
+        if (m_recents->size() >= 10)
             break;
         if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
             [[unlikely]]
@@ -878,11 +876,11 @@ void TrayIcons::updateQuickStartList()
             p.setDescription({});
             entry.setProject(p);
         }
-        if (recents.contains(entry.project()))
+        if (m_recents->contains(entry.project()))
             continue;
-        recents.push_back(entry.project());
+        m_recents->push_back(entry.project());
     }
-    for (const auto &project : recents)
+    for (const auto &project : *m_recents)
         addMenuEntry(m_quickStartMenu, project);
     for (const auto &project : m_manager->projects())
         addMenuEntry(m_quickStartAllProjects, project);

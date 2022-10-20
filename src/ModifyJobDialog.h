@@ -13,7 +13,10 @@ class ModifyJobDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ModifyJobDialog(AbstractTimeServiceManager *manager, const TimeEntry &entry, QWidget *parent = nullptr);
+    explicit ModifyJobDialog(AbstractTimeServiceManager *manager,
+                             const TimeEntry &entry,
+                             QSharedPointer<QList<Project>> recents = {},
+                             QWidget *parent = nullptr);
 
     TimeEntry entry() const { return m_entry; }
 

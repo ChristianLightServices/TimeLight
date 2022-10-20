@@ -100,6 +100,8 @@ private:
 
     TimeUpWarning m_timeUpWarning{TimeUpWarning::NotDone};
 
+    QSharedPointer<QList<Project>> m_recents;
+
     friend class SetupFlow;
 };
 

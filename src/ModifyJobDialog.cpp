@@ -5,7 +5,10 @@
 #include <QLabel>
 #include <QLineEdit>
 
-ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager, const TimeEntry &entry, QWidget *parent)
+ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager,
+                                 const TimeEntry &entry,
+                                 QSharedPointer<QList<Project>> recents,
+                                 QWidget *parent)
     : QDialog{parent},
       m_manager{manager},
       m_entry{entry},
@@ -21,7 +24,17 @@ ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager, const Time
     layout->addWidget(new QLabel{tr("Project")}, 0, 0);
     layout->addWidget(project, 0, 1);
 
-    QLineEdit *description{new QLineEdit{m_entry.project().description(), this}};
+    auto description = new QComboBox{this};
+    description->setEditable(true);
+    QStringList descs;
+    if (!m_entry.project().description().isEmpty())
+        descs << m_entry.project().description();
+    if (recents)
+        for (const auto &item : *recents)
+            if (!item.description().isEmpty() && !descs.contains(item.description()))
+                descs << item.description();
+    description->addItems(descs);
+    description->setCurrentText(m_entry.project().description());
     description->setPlaceholderText(tr("Enter a description..."));
 
     layout->addWidget(new QLabel{tr("Description")}, 1, 0);
@@ -37,7 +50,7 @@ ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager, const Time
 
     connect(project, &QComboBox::currentIndexChanged, this, [this](int i) { m_entry.setProject(m_availableProjects[i]); });
     connect(start, &QDateTimeEdit::dateTimeChanged, this, [this](const QDateTime &dt) { m_entry.setStart(dt); });
-    connect(description, &QLineEdit::textChanged, this, [this](const QString &d) {
+    connect(description, &QComboBox::currentTextChanged, this, [this](const QString &d) {
         auto p = m_entry.project();
         p.setDescription(d);
         m_entry.setProject(p);
