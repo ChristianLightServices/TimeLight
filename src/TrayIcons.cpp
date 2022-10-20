@@ -273,6 +273,14 @@ Project TrayIcons::defaultProject()
         }
     }
 
+    // update the recents
+    if (entries.size() >= 25)
+    {
+        m_recents->clear();
+        for (int i = 0; i < 25; ++i)
+            m_recents->append(entries[i].project());
+    }
+
     return project;
 }
 
@@ -860,7 +868,7 @@ void TrayIcons::updateQuickStartList()
     };
 
     std::optional<Project> addBreakTime;
-    for (auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt(), 25))
+    for (auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt()))
     {
         if (m_recents->size() >= 10)
             break;
