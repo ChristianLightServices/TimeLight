@@ -77,14 +77,15 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     timeTable->setHorizontalHeaderLabels(QStringList{} << tr("Start") << tr("End") << tr("Project"));
     timeTable->setEditTriggers(QTableWidget::NoEditTriggers);
     timeTable->verticalHeader()->setVisible(false);
-    timeTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    timeTable->horizontalHeader()->setStretchLastSection(true);
     //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either!
     timeTable->setSelectionMode(QTableWidget::NoSelection);
     layout->addWidget(timeTable);
 
-    layout->addStretch();
     auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, this};
     layout->addWidget(bb, 0, Qt::AlignRight);
 
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
+
+    resize(700, 400);
 }
