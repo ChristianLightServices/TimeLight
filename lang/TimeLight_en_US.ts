@@ -4,37 +4,48 @@
 <context>
     <name>DailyOverviewDialog</name>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="46"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="50"/>
+        <source>Duration</source>
+        <translation>Duration</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="62"/>
         <source>Total time today: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="60"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="104"/>
         <source>Break down time: </source>
         <translation>Break down time: </translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="63"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="107"/>
         <source>Chronologically</source>
         <translation>Chronologically</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="64"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="108"/>
         <source>By project</source>
         <translation>By project</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="114"/>
+        <source>Refresh</source>
+        <translation>Refresh</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
         <source>End</source>
         <translation>End</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="50"/>
         <source>Project</source>
         <translation>Project</translation>
     </message>
@@ -214,7 +225,7 @@
         <translation>Please select a default project in the following dialog.</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="23"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="21"/>
         <source>Running</source>
         <translation>Running</translation>
     </message>

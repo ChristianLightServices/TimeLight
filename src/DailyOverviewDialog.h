@@ -2,6 +2,9 @@
 #define DAILYOVERVIEWDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
+#include <QTableWidget>
+#include <QVBoxLayout>
 
 #include "AbstractTimeServiceManager.h"
 #include "User.h"
@@ -22,6 +25,12 @@ private:
 
     AbstractTimeServiceManager *m_manager;
     User *m_user;
+
+    QLabel *m_totalTime;
+    QTableWidget *m_chronologicalTable;
+    QTableWidget *m_byProjectTable;
+
+    QVBoxLayout *m_layout;
 };
 
 #endif // DAILYOVERVIEWDIALOG_H
