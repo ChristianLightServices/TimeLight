@@ -31,6 +31,7 @@ private:
     QTableWidget *m_byProjectTable;
 
     QVBoxLayout *m_layout;
+    QDate m_day;
 };
 
 #endif // DAILYOVERVIEWDIALOG_H

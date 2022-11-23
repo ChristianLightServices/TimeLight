@@ -1,6 +1,8 @@
 #include "DailyOverviewDialog.h"
 
+#include <QCalendarWidget>
 #include <QComboBox>
+#include <QDateEdit>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -36,7 +38,8 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
       m_user{user},
       m_totalTime{new QLabel},
       m_chronologicalTable{new QTableWidget{0, 3, this}},
-      m_byProjectTable{new QTableWidget{0, 2, this}}
+      m_byProjectTable{new QTableWidget{0, 2, this}},
+      m_day{m_manager->currentDateTime().date()}
 {
     m_layout = new QVBoxLayout{this};
 
@@ -55,7 +58,7 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
 
     auto updateData = [this] {
         auto now = m_manager->currentDateTime();
-        auto todaysTime = m_user->getTimeEntries(std::nullopt, std::nullopt, QDateTime{now.date(), QTime{}}, now);
+        auto todaysTime = m_user->getTimeEntries(std::nullopt, std::nullopt, QDateTime{m_day, QTime{}}, m_day.endOfDay());
         std::reverse(todaysTime.begin(), todaysTime.end());
 
         m_totalTime->setText(
@@ -96,7 +99,17 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     };
     updateData();
 
-    m_layout->addWidget(m_totalTime);
+    auto datePicker = new QDateEdit{this};
+    datePicker->setDate(m_day);
+    datePicker->setMaximumDate(m_manager->currentDateTime().date());
+    datePicker->setCalendarPopup(true);
+
+    auto dayLayout = new QHBoxLayout;
+    dayLayout->addWidget(m_totalTime);
+    dayLayout->addStretch();
+    dayLayout->addWidget(datePicker);
+
+    m_layout->addLayout(dayLayout);
     m_layout->addWidget(m_chronologicalTable);
     m_layout->addWidget(m_byProjectTable);
 
@@ -110,12 +123,6 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     breakdownLayout->addStretch();
     m_layout->addLayout(breakdownLayout);
 
-    auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, this};
-    connect(bb->addButton(tr("Refresh"), QDialogButtonBox::ButtonRole::ActionRole), &QPushButton::clicked, this, updateData);
-    m_layout->addWidget(bb, 0, Qt::AlignRight);
-
-    connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
-
     auto setProperTimeTable = [this, breakdown] {
         if (breakdown->currentData(Qt::UserRole).value<BreakDownOption>() == BreakDownOption::Chronologically)
         {
@@ -128,8 +135,18 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
             m_byProjectTable->setVisible(true);
         }
     };
-    connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
     setProperTimeTable();
+
+    auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, this};
+    connect(bb->addButton(tr("Refresh"), QDialogButtonBox::ButtonRole::ActionRole), &QPushButton::clicked, this, updateData);
+    m_layout->addWidget(bb, 0, Qt::AlignRight);
+
+    connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
+    connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
+    connect(datePicker, &QDateEdit::dateChanged, this, [this, updateData](const QDate &d) {
+        m_day = d;
+        updateData();
+    });
 
     resize(600, 400);
 }
