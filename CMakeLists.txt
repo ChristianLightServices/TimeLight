@@ -137,6 +137,8 @@ set(SRC
 
     src/AbstractTimeServiceManager.cpp
     src/AbstractTimeServiceManager.h
+    src/DailyOverviewDialog.cpp
+    src/DailyOverviewDialog.h
     src/DeveloperTools.cpp
     src/DeveloperTools.h
     src/JsonHelper.h

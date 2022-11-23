@@ -2,6 +2,44 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>DailyOverviewDialog</name>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="46"/>
+        <source>Total time today: </source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="60"/>
+        <source>Break down time: </source>
+        <translation>Break down time: </translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="63"/>
+        <source>Chronologically</source>
+        <translation>Chronologically</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="64"/>
+        <source>By project</source>
+        <translation>By project</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <source>Start</source>
+        <translation>Start</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <source>End</source>
+        <translation>End</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="77"/>
+        <source>Project</source>
+        <translation>Project</translation>
+    </message>
+</context>
+<context>
     <name>DeveloperTools</name>
     <message>
         <location filename="../src/DeveloperTools.cpp" line="118"/>
@@ -56,27 +94,27 @@
         <translation>Projects</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="199"/>
+        <location filename="../src/DeveloperTools.cpp" line="200"/>
         <source>Project name</source>
         <translation>Project name</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="199"/>
+        <location filename="../src/DeveloperTools.cpp" line="200"/>
         <source>Project ID</source>
         <translation>Project ID</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="199"/>
+        <location filename="../src/DeveloperTools.cpp" line="200"/>
         <source>Creation time</source>
         <translation>Creation time</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="211"/>
+        <location filename="../src/DeveloperTools.cpp" line="212"/>
         <source>Disable developer mode</source>
         <translation>Disable developer mode</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="215"/>
+        <location filename="../src/DeveloperTools.cpp" line="216"/>
         <source>Close</source>
         <translation>Close</translation>
     </message>
@@ -108,22 +146,22 @@
 <context>
     <name>ModifyJobDialog</name>
     <message>
-        <location filename="../src/ModifyJobDialog.cpp" line="21"/>
+        <location filename="../src/ModifyJobDialog.cpp" line="24"/>
         <source>Project</source>
         <translation>Project</translation>
     </message>
     <message>
-        <location filename="../src/ModifyJobDialog.cpp" line="25"/>
+        <location filename="../src/ModifyJobDialog.cpp" line="38"/>
         <source>Enter a description...</source>
         <translation>Enter a description...</translation>
     </message>
     <message>
-        <location filename="../src/ModifyJobDialog.cpp" line="27"/>
+        <location filename="../src/ModifyJobDialog.cpp" line="40"/>
         <source>Description</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="../src/ModifyJobDialog.cpp" line="32"/>
+        <location filename="../src/ModifyJobDialog.cpp" line="45"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
@@ -174,6 +212,11 @@
         <location filename="../src/SetupFlow.cpp" line="273"/>
         <source>Please select a default project in the following dialog.</source>
         <translation>Please select a default project in the following dialog.</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="23"/>
+        <source>Running</source>
+        <translation>Running</translation>
     </message>
 </context>
 <context>
@@ -466,27 +509,27 @@
         <translation>Could not load user!</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="785"/>
+        <location filename="../src/TrayIcons.cpp" line="789"/>
         <source>You are on break</source>
         <translation>You are on break</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="463"/>
+        <location filename="../src/TrayIcons.cpp" line="467"/>
         <source>Open the %1 webpage</source>
         <translation>Open the %1 webpage</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="839"/>
+        <location filename="../src/TrayIcons.cpp" line="843"/>
         <source>All projects</source>
         <translation>All projects</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="937"/>
+        <location filename="../src/TrayIcons.cpp" line="940"/>
         <source>Your week is done</source>
         <translation>Your week is done</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/TrayIcons.cpp" line="938"/>
+        <location filename="../src/TrayIcons.cpp" line="941"/>
         <source>You have now worked %n hour(s) this week!</source>
         <translation>
             <numerusform>You have now worked %n hour this week!</numerusform>
@@ -494,17 +537,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="944"/>
+        <location filename="../src/TrayIcons.cpp" line="947"/>
         <source>You&apos;re almost done</source>
         <translation>You&apos;re almost done</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="945"/>
+        <location filename="../src/TrayIcons.cpp" line="948"/>
         <source>You have less than an hour to go to complete your work this week!</source>
         <translation>You have less than an hour to go to complete your work this week!</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="338"/>
+        <location filename="../src/TrayIcons.cpp" line="337"/>
         <source>TimeLight %1 copyright © 2022. Licensed under the MIT license.
 
 Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (light icons, licensed [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)) and [Microsoft](https://github.com/microsoft/fluentui-system-icons) (power icon, licensed [MIT](https://mit-license.org)).</source>
@@ -518,157 +561,162 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
         <translation>The API key seems to be incorrect or invalid.</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="361"/>
+        <location filename="../src/TrayIcons.cpp" line="360"/>
         <source>Show source code</source>
         <translation>Show source code</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="410"/>
+        <location filename="../src/TrayIcons.cpp" line="409"/>
         <source>Modify current job</source>
         <translation>Modify current job</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="427"/>
+        <location filename="../src/TrayIcons.cpp" line="426"/>
         <source>Cancel current job</source>
         <translation>Cancel current job</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="431"/>
+        <location filename="../src/TrayIcons.cpp" line="430"/>
         <source>Cancel job</source>
         <translation>Cancel job</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="431"/>
+        <location filename="../src/TrayIcons.cpp" line="430"/>
         <source>Are you sure you want to cancel the current job?</source>
         <translation>Are you sure you want to cancel the current job?</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="446"/>
+        <location filename="../src/TrayIcons.cpp" line="445"/>
+        <source>Daily time report</source>
+        <translation>Daily time report</translation>
+    </message>
+    <message>
+        <location filename="../src/TrayIcons.cpp" line="450"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="453"/>
+        <location filename="../src/TrayIcons.cpp" line="457"/>
         <source>Developer tools</source>
         <translation>Developer tools</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="478"/>
+        <location filename="../src/TrayIcons.cpp" line="482"/>
         <source>Resume</source>
         <translation>Resume</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="625"/>
+        <location filename="../src/TrayIcons.cpp" line="629"/>
         <source>You were on break for %1</source>
         <translation>You were on break for %1</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="626"/>
+        <location filename="../src/TrayIcons.cpp" line="630"/>
         <source>You worked %2 on %1</source>
         <translation>You worked %2 on %1</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="766"/>
-        <location filename="../src/TrayIcons.cpp" line="778"/>
+        <location filename="../src/TrayIcons.cpp" line="770"/>
+        <location filename="../src/TrayIcons.cpp" line="782"/>
         <source>%1 is running</source>
         <translation>%1 is running</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="770"/>
+        <location filename="../src/TrayIcons.cpp" line="774"/>
         <source>Working on %1</source>
         <translation>Working on %1</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="792"/>
+        <location filename="../src/TrayIcons.cpp" line="796"/>
         <source>%1 is not running</source>
         <translation>%1 is not running</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="797"/>
+        <location filename="../src/TrayIcons.cpp" line="801"/>
         <source>You are not working</source>
         <translation>You are not working</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="804"/>
-        <location filename="../src/TrayIcons.cpp" line="809"/>
+        <location filename="../src/TrayIcons.cpp" line="808"/>
+        <location filename="../src/TrayIcons.cpp" line="813"/>
         <source>You are offline</source>
         <translation>You are offline</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="358"/>
+        <location filename="../src/TrayIcons.cpp" line="357"/>
         <source>Show license</source>
         <translation>Show license</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="370"/>
+        <location filename="../src/TrayIcons.cpp" line="369"/>
         <source>About </source>
         <translation>About </translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="387"/>
+        <location filename="../src/TrayIcons.cpp" line="386"/>
         <source>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/TimeLight/blob/master/LICENSE).</source>
         <translation>Error: could not load the license. Please read the license on [GitHub](https://github.com/ChristianLightServices/TimeLight/blob/master/LICENSE).</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="399"/>
+        <location filename="../src/TrayIcons.cpp" line="398"/>
         <source>MIT license</source>
         <translation>MIT license</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="512"/>
         <location filename="../src/TrayIcons.cpp" line="516"/>
+        <location filename="../src/TrayIcons.cpp" line="520"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="816"/>
-        <location filename="../src/TrayIcons.cpp" line="821"/>
+        <location filename="../src/TrayIcons.cpp" line="820"/>
+        <location filename="../src/TrayIcons.cpp" line="825"/>
         <source>You have been ratelimited</source>
         <translation>You have been ratelimited</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="837"/>
+        <location filename="../src/TrayIcons.cpp" line="841"/>
         <source>Switch to</source>
         <translation>Switch to</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="913"/>
+        <location filename="../src/TrayIcons.cpp" line="916"/>
         <source>Internet connection lost</source>
         <translation>Internet connection lost</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="914"/>
+        <location filename="../src/TrayIcons.cpp" line="917"/>
         <source>The request could not be completed because the internet connection is down.</source>
         <translation>The request could not be completed because the internet connection is down.</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="518"/>
+        <location filename="../src/TrayIcons.cpp" line="522"/>
         <source>Stop</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="357"/>
+        <location filename="../src/TrayIcons.cpp" line="356"/>
         <source>About Qt</source>
         <translation>About Qt</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="466"/>
+        <location filename="../src/TrayIcons.cpp" line="470"/>
         <source>About</source>
         <translation>About</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="467"/>
+        <location filename="../src/TrayIcons.cpp" line="471"/>
         <source>Quit</source>
         <translation>Quit</translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="472"/>
         <location filename="../src/TrayIcons.cpp" line="476"/>
+        <location filename="../src/TrayIcons.cpp" line="480"/>
         <source>Break</source>
         <translation>Break</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/TrayIcons.cpp" line="618"/>
+        <location filename="../src/TrayIcons.cpp" line="622"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n minute</numerusform>
@@ -676,7 +724,7 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/TrayIcons.cpp" line="620"/>
+        <location filename="../src/TrayIcons.cpp" line="624"/>
         <source>%n hour(s) and </source>
         <translation>
             <numerusform>%n hour and </numerusform>
@@ -684,7 +732,7 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/TrayIcons.cpp" line="622"/>
+        <location filename="../src/TrayIcons.cpp" line="626"/>
         <source> and %n second(s)</source>
         <translation>
             <numerusform> and %n second</numerusform>
@@ -692,7 +740,7 @@ Icons from [1RadicalOne](https://commons.wikimedia.org/wiki/User:1RadicalOne) (l
         </translation>
     </message>
     <message>
-        <location filename="../src/TrayIcons.cpp" line="627"/>
+        <location filename="../src/TrayIcons.cpp" line="631"/>
         <source>Job ended</source>
         <translation>Job ended</translation>
     </message>

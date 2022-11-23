@@ -16,6 +16,7 @@
 
 #include <SingleApplication>
 
+#include "DailyOverviewDialog.h"
 #include "DeveloperTools.h"
 #include "Logger.h"
 #include "ModifyJobDialog.h"
@@ -439,6 +440,11 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(this, &TrayIcons::timerStateChanged, this, [this, modifyJob, cancel] {
         modifyJob->setEnabled(m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak);
         cancel->setEnabled(m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak);
+    });
+
+    connect(menu->addAction(tr("Daily time report")), &QAction::triggered, this, [this] {
+        DailyOverviewDialog d{m_manager, &m_user};
+        d.exec();
     });
 
     connect(menu->addAction(tr("Settings")), &QAction::triggered, this, [this] {
