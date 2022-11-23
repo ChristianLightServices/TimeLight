@@ -62,30 +62,64 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     auto breakdown = new QComboBox{this};
     breakdown->addItem(tr("Chronologically"), static_cast<int>(BreakDownOption::Chronologically));
     breakdown->addItem(tr("By project"), static_cast<int>(BreakDownOption::ByProject));
-    breakdown->setEnabled(false);
     breakdownLayout->addWidget(breakdown);
     breakdownLayout->addStretch();
     layout->addLayout(breakdownLayout);
 
-    auto timeTable = new QTableWidget{static_cast<int>(todaysTime.count()), 3, this};
+    auto chronologicalTable = new QTableWidget{static_cast<int>(todaysTime.count()), 3, this};
     for (int i = 0; i < todaysTime.size(); ++i)
     {
-        timeTable->setItem(i, 0, new TimeTableItem{todaysTime[i].start()});
-        timeTable->setItem(i, 1, new TimeTableItem{todaysTime[i].end()});
-        timeTable->setItem(i, 2, new QTableWidgetItem{todaysTime[i].project().name()});
+        chronologicalTable->setItem(i, 0, new TimeTableItem{todaysTime[i].start()});
+        chronologicalTable->setItem(i, 1, new TimeTableItem{todaysTime[i].end()});
+        chronologicalTable->setItem(i, 2, new QTableWidgetItem{todaysTime[i].project().name()});
     }
-    timeTable->setHorizontalHeaderLabels(QStringList{} << tr("Start") << tr("End") << tr("Project"));
-    timeTable->setEditTriggers(QTableWidget::NoEditTriggers);
-    timeTable->verticalHeader()->setVisible(false);
-    timeTable->horizontalHeader()->setStretchLastSection(true);
+    chronologicalTable->setHorizontalHeaderLabels(QStringList{} << tr("Start") << tr("End") << tr("Project"));
+    chronologicalTable->setEditTriggers(QTableWidget::NoEditTriggers);
+    chronologicalTable->verticalHeader()->setVisible(false);
+    chronologicalTable->horizontalHeader()->setStretchLastSection(true);
     //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either!
-    timeTable->setSelectionMode(QTableWidget::NoSelection);
-    layout->addWidget(timeTable);
+    chronologicalTable->setSelectionMode(QTableWidget::NoSelection);
+    layout->addWidget(chronologicalTable);
+
+    QHash<QString, int> msecsByProject;
+    for (int i = 0; i < todaysTime.size(); ++i)
+        msecsByProject[todaysTime[i].project().id()] += todaysTime[i].start().msecsTo(todaysTime[i].end());
+    auto byProjectTable = new QTableWidget{static_cast<int>(msecsByProject.count()), 2, this};
+    int _i = 0;
+    for (const auto &key : msecsByProject.keys())
+    {
+        byProjectTable->setItem(
+            _i, 0, new QTableWidgetItem{QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString("h:mm:ss")});
+        byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->projectName(key)});
+        ++_i;
+    }
+    byProjectTable->setHorizontalHeaderLabels(QStringList{} << tr("Start") << tr("End") << tr("Project"));
+    byProjectTable->setEditTriggers(QTableWidget::NoEditTriggers);
+    byProjectTable->verticalHeader()->setVisible(false);
+    byProjectTable->horizontalHeader()->setStretchLastSection(true);
+    //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either!
+    byProjectTable->setSelectionMode(QTableWidget::NoSelection);
+    layout->addWidget(byProjectTable);
 
     auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, this};
     layout->addWidget(bb, 0, Qt::AlignRight);
 
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
 
-    resize(700, 400);
+    auto setProperTimeTable = [breakdown, chronologicalTable, byProjectTable] {
+        if (breakdown->currentData(Qt::UserRole).value<BreakDownOption>() == BreakDownOption::Chronologically)
+        {
+            chronologicalTable->setVisible(true);
+            byProjectTable->setVisible(false);
+        }
+        else
+        {
+            chronologicalTable->setVisible(false);
+            byProjectTable->setVisible(true);
+        }
+    };
+    connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
+    setProperTimeTable();
+
+    resize(600, 400);
 }
