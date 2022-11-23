@@ -103,6 +103,7 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     datePicker->setDate(m_day);
     datePicker->setMaximumDate(m_manager->currentDateTime().date());
     datePicker->setCalendarPopup(true);
+    datePicker->setDisplayFormat(QStringLiteral("MMMM d, yyyy"));
 
     auto dayLayout = new QHBoxLayout;
     dayLayout->addWidget(m_totalTime);
