@@ -61,8 +61,8 @@ QUrl TimeCampManager::timeEntriesUrl(const QString &userId,
     q.addQueryItem("user_ids", "me");
     auto date = QDate::currentDate();
     // The past 2 months should be sufficient if a date is not set. I do not like TimeCamp's "pagination".
-    q.addQueryItem("from", (start ? start->date() : date.addDays(-1)).toString("yyyy-MM-dd"));
-    q.addQueryItem("to", (end ? end->date() : date).toString("yyyy-MM-dd"));
+    q.addQueryItem("from", (start ? start->date() : date.addDays(-1)).toString(QStringLiteral("yyyy-MM-dd")));
+    q.addQueryItem("to", (end ? end->date() : date).toString(QStringLiteral("yyyy-MM-dd")));
     url.setQuery(q);
     return url;
 }

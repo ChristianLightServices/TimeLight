@@ -72,7 +72,7 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
                                                                                                b.end() :
                                                                                                m_manager->currentDateTime());
                                                                         }))
-                            .toString("h:mm:ss")));
+                            .toString(QStringLiteral("h:mm:ss"))));
 
         m_chronologicalTable->clearContents();
         m_chronologicalTable->setRowCount(static_cast<int>(todaysTime.count()));
@@ -92,7 +92,10 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
         for (const auto &key : msecsByProject.keys())
         {
             m_byProjectTable->setItem(
-                _i, 0, new QTableWidgetItem{QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString("h:mm:ss")});
+                _i,
+                0,
+                new QTableWidgetItem{
+                    QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString(QStringLiteral("h:mm:ss"))});
             m_byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->projectName(key)});
             ++_i;
         }

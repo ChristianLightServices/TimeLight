@@ -159,7 +159,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     userGroupLayout->addWidget(apiKey, 3, 2);
     userGroupLayout->addWidget(
         new QLabel{
-            QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16)).toString("MMMM d, yyyy h:mm:ss A")},
+            QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16)).toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))},
         4,
         2);
 
@@ -174,11 +174,10 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
     workspaceGroupLayout->addWidget(new QLabel{tr("Creation time:")}, 2, 0);
     workspaceGroupLayout->addWidget(new QLabel{workspace.name()}, 0, 1);
     workspaceGroupLayout->addWidget(workspaceId, 1, 1);
-    workspaceGroupLayout->addWidget(
-        new QLabel{
-            QDateTime::fromSecsSinceEpoch(workspace.id().mid(0, 8).toLong(nullptr, 16)).toString("MMMM d, yyyy h:mm:ss A")},
-        2,
-        1);
+    workspaceGroupLayout->addWidget(new QLabel{QDateTime::fromSecsSinceEpoch(workspace.id().mid(0, 8).toLong(nullptr, 16))
+                                                   .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))},
+                                    2,
+                                    1);
 
     auto projectGroup = new QGroupBox{tr("Projects"), this};
     auto projectGroupLayout = new QGridLayout{projectGroup};
@@ -195,7 +194,7 @@ DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *par
             i,
             2,
             new QTableWidgetItem{QDateTime::fromSecsSinceEpoch(projects[i].id().mid(0, 8).toLong(nullptr, 16))
-                                     .toString("MMMM d, yyyy h:mm:ss A")});
+                                     .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))});
     }
     projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Creation time"));
     projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
