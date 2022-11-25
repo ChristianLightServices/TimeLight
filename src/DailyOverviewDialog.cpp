@@ -57,7 +57,6 @@ DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, Us
     m_byProjectTable->setSelectionMode(QTableWidget::NoSelection);
 
     auto updateData = [this] {
-        auto now = m_manager->currentDateTime();
         auto todaysTime = m_user->getTimeEntries(std::nullopt, std::nullopt, QDateTime{m_day, QTime{}}, m_day.endOfDay());
         std::reverse(todaysTime.begin(), todaysTime.end());
 
