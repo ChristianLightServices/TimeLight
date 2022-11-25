@@ -36,10 +36,10 @@ TrayIcons::TrayIcons(QObject *parent)
       m_teamsClient{new TeamsClient{TimeLight::teamsAppId, 6942, this}},
       m_recents{new QList<Project>}
 {
-    connect(m_teamsClient, &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
+    connect(m_teamsClient.data(), &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
         Settings::instance()->setGraphAccessToken(m_teamsClient->accessToken());
     });
-    connect(m_teamsClient, &TeamsClient::refreshTokenChanged, Settings::instance(), [this] {
+    connect(m_teamsClient.data(), &TeamsClient::refreshTokenChanged, Settings::instance(), [this] {
         Settings::instance()->setGraphRefreshToken(m_teamsClient->refreshToken());
     });
     if (Settings::instance()->useTeamsIntegration())
@@ -106,7 +106,7 @@ TrayIcons::TrayIcons(QObject *parent)
         }
     }
 
-    connect(m_manager, &AbstractTimeServiceManager::invalidated, this, [this, fixApiKey] {
+    connect(m_manager.data(), &AbstractTimeServiceManager::invalidated, this, [this, fixApiKey] {
         if (!fixApiKey())
         {
             m_valid = false;
@@ -148,7 +148,7 @@ TrayIcons::TrayIcons(QObject *parent)
         m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
     });
 
-    connect(m_manager, &AbstractTimeServiceManager::ratelimited, this, [this](bool ratelimited) {
+    connect(m_manager.data(), &AbstractTimeServiceManager::ratelimited, this, [this](bool ratelimited) {
         m_ratelimited = ratelimited;
         if (m_ratelimited)
         {
@@ -405,7 +405,7 @@ void TrayIcons::showLicenseDialog(QWidget *parent)
 
 void TrayIcons::addStandardMenuActions(QMenu *menu)
 {
-    menu->addMenu(m_quickStartMenu);
+    menu->addMenu(m_quickStartMenu.data());
     auto modifyJob = menu->addAction(tr("Modify current job"));
     connect(modifyJob, &QAction::triggered, this, [this] {
         if (auto e = m_user.getRunningTimeEntry(); e)
@@ -598,7 +598,7 @@ void TrayIcons::setUpTrayIcon()
     if (m_breakIcon)
         setUpBreakIcon();
 
-    connect(m_manager,
+    connect(m_manager.data(),
             &AbstractTimeServiceManager::internetConnectionChanged,
             this,
             &TrayIcons::updateTrayIcons,
@@ -838,14 +838,14 @@ void TrayIcons::updateQuickStartList()
     m_updatingQuickStartList = true;
 
     if (!m_quickStartMenu)
-        m_quickStartMenu = new QMenu{tr("Switch to")};
+        m_quickStartMenu.reset(new QMenu{tr("Switch to")});
     if (!m_quickStartAllProjects)
-        m_quickStartAllProjects = new QMenu{tr("All projects")};
+        m_quickStartAllProjects.reset(new QMenu{tr("All projects")});
 
     m_quickStartMenu->clear();
     m_quickStartAllProjects->clear();
 
-    auto addMenuEntry = [this](QMenu *menu, const Project &project) {
+    auto addMenuEntry = [this](QSharedPointer<QMenu> menu, const Project &project) {
         auto name{project.name()};
         if (!project.description().isEmpty())
             name.append(" | ").append(project.description());
@@ -906,7 +906,7 @@ void TrayIcons::updateQuickStartList()
     }
 
     m_quickStartMenu->addSeparator();
-    m_quickStartMenu->addMenu(m_quickStartAllProjects);
+    m_quickStartMenu->addMenu(m_quickStartAllProjects.data());
 
     m_updatingQuickStartList = false;
 }

@@ -60,7 +60,7 @@ private:
     template<TimeManager Manager>
     void initializeManager()
     {
-        m_manager = new Manager{Settings::instance()->apiKey().toUtf8()};
+        m_manager.reset(new Manager{Settings::instance()->apiKey().toUtf8()});
         m_manager->setLogger(TimeLight::logs::network());
     }
 
@@ -74,14 +74,14 @@ private:
     void showOfflineNotification();
     void checkForFinishedWeek();
 
-    AbstractTimeServiceManager *m_manager{nullptr};
-    TeamsClient *m_teamsClient;
+    QSharedPointer<AbstractTimeServiceManager> m_manager;
+    QSharedPointer<TeamsClient> m_teamsClient;
 
     QSystemTrayIcon *m_trayIcon{nullptr};
     QSystemTrayIcon *m_breakIcon{nullptr};
 
-    QMenu *m_quickStartMenu{nullptr};
-    QMenu *m_quickStartAllProjects{nullptr};
+    QSharedPointer<QMenu> m_quickStartMenu{nullptr};
+    QSharedPointer<QMenu> m_quickStartAllProjects{nullptr};
     bool m_updatingQuickStartList{false};
 
     QString m_runningEntryTooltipBase;

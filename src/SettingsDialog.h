@@ -11,7 +11,7 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsDialog(AbstractTimeServiceManager *manager,
+    explicit SettingsDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                             const QList<QPair<QString, QString>> &availableManagers,
                             QWidget *parent = nullptr);
 
@@ -26,20 +26,20 @@ public:
     void switchToPage(Pages page);
 
 private:
-    QWidget *createBackendPage();
-    QWidget *createProjectPage();
-    QWidget *createAppPage();
-    QWidget *createTeamsPage();
+    QSharedPointer<QWidget> createBackendPage();
+    QSharedPointer<QWidget> createProjectPage();
+    QSharedPointer<QWidget> createAppPage();
+    QSharedPointer<QWidget> createTeamsPage();
 
-    AbstractTimeServiceManager *m_manager;
+    QSharedPointer<AbstractTimeServiceManager> m_manager;
     // ordered as {name, id}
     QList<QPair<QString, QString>> m_availableManagers;
 
     QTabWidget *m_tabWidget;
-    QWidget *m_backendPage;
-    QWidget *m_projectPage;
-    QWidget *m_appPage;
-    QWidget *m_teamsPage;
+    QSharedPointer<QWidget> m_backendPage;
+    QSharedPointer<QWidget> m_projectPage;
+    QSharedPointer<QWidget> m_appPage;
+    QSharedPointer<QWidget> m_teamsPage;
 
     QPair<QStringList, QStringList> m_availableProjects;
 };

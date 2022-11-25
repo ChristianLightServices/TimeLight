@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QLineEdit>
 
-ModifyJobDialog::ModifyJobDialog(AbstractTimeServiceManager *manager,
+ModifyJobDialog::ModifyJobDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                                  const TimeEntry &entry,
                                  QSharedPointer<QList<Project>> recents,
                                  QWidget *parent)

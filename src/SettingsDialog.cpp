@@ -24,7 +24,7 @@
 
 namespace logs = TimeLight::logs;
 
-SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
+SettingsDialog::SettingsDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                                const QList<QPair<QString, QString>> &availableManagers,
                                QWidget *parent)
     : QDialog{parent},
@@ -45,10 +45,10 @@ SettingsDialog::SettingsDialog(AbstractTimeServiceManager *manager,
     m_projectPage = createProjectPage();
     m_appPage = createAppPage();
     m_teamsPage = createTeamsPage();
-    m_tabWidget->addTab(m_backendPage, tr("Backend settings"));
-    m_tabWidget->addTab(m_projectPage, tr("Default project"));
-    m_tabWidget->addTab(m_appPage, tr("App settings"));
-    m_tabWidget->addTab(m_teamsPage, tr("Microsoft Teams"));
+    m_tabWidget->addTab(m_backendPage.data(), tr("Backend settings"));
+    m_tabWidget->addTab(m_projectPage.data(), tr("Default project"));
+    m_tabWidget->addTab(m_appPage.data(), tr("App settings"));
+    m_tabWidget->addTab(m_teamsPage.data(), tr("Microsoft Teams"));
 
     auto mainWidgetLayout = new QVBoxLayout{this};
     mainWidgetLayout->addWidget(m_tabWidget);
@@ -80,21 +80,21 @@ void SettingsDialog::switchToPage(Pages page)
     switch (page)
     {
     case Pages::BackendPage:
-        m_tabWidget->setCurrentWidget(m_backendPage);
+        m_tabWidget->setCurrentWidget(m_backendPage.data());
         break;
     case Pages::ProjectPage:
-        m_tabWidget->setCurrentWidget(m_projectPage);
+        m_tabWidget->setCurrentWidget(m_projectPage.data());
         break;
     case Pages::AppPage:
-        m_tabWidget->setCurrentWidget(m_appPage);
+        m_tabWidget->setCurrentWidget(m_appPage.data());
         break;
     case Pages::TeamsPage:
-        m_tabWidget->setCurrentWidget(m_teamsPage);
+        m_tabWidget->setCurrentWidget(m_teamsPage.data());
         break;
     }
 }
 
-QWidget *SettingsDialog::createBackendPage()
+QSharedPointer<QWidget> SettingsDialog::createBackendPage()
 {
     auto backendPage{new QWidget};
     auto layout{new QGridLayout{backendPage}};
@@ -187,10 +187,10 @@ QWidget *SettingsDialog::createBackendPage()
         m_manager->setWorkspaceId(workspaces->currentData().toString());
     });
 
-    return backendPage;
+    return QSharedPointer<QWidget>{backendPage};
 }
 
-QWidget *SettingsDialog::createProjectPage()
+QSharedPointer<QWidget> SettingsDialog::createProjectPage()
 {
     auto projectPage{new QWidget};
     auto layout{new QVBoxLayout{projectPage}};
@@ -353,10 +353,10 @@ QWidget *SettingsDialog::createProjectPage()
         Settings::instance()->setDescription(defaultDescriptionEdit->text());
     });
 
-    return projectPage;
+    return QSharedPointer<QWidget>{projectPage};
 }
 
-QWidget *SettingsDialog::createAppPage()
+QSharedPointer<QWidget> SettingsDialog::createAppPage()
 {
     auto appPage{new QWidget};
     auto layout{new QGridLayout{appPage}};
@@ -437,10 +437,10 @@ QWidget *SettingsDialog::createAppPage()
         QDesktopServices::openUrl("file:///" + logs::logFileLocation());
     });
 
-    return appPage;
+    return QSharedPointer<QWidget>{appPage};
 }
 
-QWidget *SettingsDialog::createTeamsPage()
+QSharedPointer<QWidget> SettingsDialog::createTeamsPage()
 {
     auto teamsPage{new QWidget{this}};
     auto layout{new QGridLayout{teamsPage}};
@@ -518,5 +518,5 @@ QWidget *SettingsDialog::createTeamsPage()
         Settings::instance()->setUseTeamsIntegration(true);
     });
 
-    return teamsPage;
+    return QSharedPointer<QWidget>{teamsPage};
 }

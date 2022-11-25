@@ -10,7 +10,7 @@ class DeveloperTools : public QDialog
     Q_OBJECT
 
 public:
-    explicit DeveloperTools(AbstractTimeServiceManager *manager, QWidget *parent = nullptr);
+    explicit DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manager, QWidget *parent = nullptr);
 };
 
 #endif // DEVELOPERTOOLS_H

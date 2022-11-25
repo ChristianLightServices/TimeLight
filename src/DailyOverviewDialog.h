@@ -14,7 +14,7 @@ class DailyOverviewDialog : public QDialog
     Q_OBJECT
 
 public:
-    DailyOverviewDialog(AbstractTimeServiceManager *manager, User *user, QWidget *parent = nullptr);
+    DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager, User *user, QWidget *parent = nullptr);
 
 private:
     enum class BreakDownOption
@@ -23,7 +23,7 @@ private:
         ByProject,
     };
 
-    AbstractTimeServiceManager *m_manager;
+    QSharedPointer<AbstractTimeServiceManager> m_manager;
     User *m_user;
 
     QLabel *m_totalTime;

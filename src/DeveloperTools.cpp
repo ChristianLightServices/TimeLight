@@ -98,7 +98,7 @@ private:
 // to make the moc happy
 #include "DeveloperTools.moc"
 
-DeveloperTools::DeveloperTools(AbstractTimeServiceManager *manager, QWidget *parent)
+DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manager, QWidget *parent)
     : QDialog{parent}
 {
     auto user = manager->getApiKeyOwner();

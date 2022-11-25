@@ -32,7 +32,7 @@ public:
     }
 };
 
-DailyOverviewDialog::DailyOverviewDialog(AbstractTimeServiceManager *manager, User *user, QWidget *parent)
+DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager, User *user, QWidget *parent)
     : QDialog{parent},
       m_manager{manager},
       m_user{user},
