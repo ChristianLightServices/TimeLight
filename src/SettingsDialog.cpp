@@ -472,13 +472,9 @@ QWidget *SettingsDialog::createTeamsPage()
     auto breakLabel = new QLabel{tr("Teams presence while on break"), teamsPage};
     presenceWhenOnBreak->setVisible(Settings::instance()->useSeparateBreakTime());
     breakLabel->setVisible(Settings::instance()->useSeparateBreakTime());
-    connect(Settings::instance(),
-            &Settings::useSeparateBreakTimeChanged,
-            presenceWhenOnBreak,
-            [presenceWhenOnBreak, breakLabel] {
-                presenceWhenOnBreak->setVisible(Settings::instance()->useSeparateBreakTime());
-                breakLabel->setVisible(Settings::instance()->useSeparateBreakTime());
-            });
+
+    auto reauthenticate = new QPushButton{tr("Reauthenticate with Microsoft")};
+    reauthenticate->setEnabled(Settings::instance()->useTeamsIntegration());
 
     layout->addWidget(useTeams, 0, 0, 1, 2);
     layout->addWidget(new QLabel{tr("Teams presence while working"), teamsPage}, 1, 0);
@@ -490,8 +486,18 @@ QWidget *SettingsDialog::createTeamsPage()
 
     TimeLight::addVerticalStretchToQGridLayout(layout);
 
-    connect(useTeams, &QCheckBox::clicked, this, [](bool state) {
+    layout->addWidget(reauthenticate, layout->rowCount(), layout->columnCount(), Qt::AlignRight);
+
+    connect(Settings::instance(),
+            &Settings::useSeparateBreakTimeChanged,
+            presenceWhenOnBreak,
+            [presenceWhenOnBreak, breakLabel] {
+                presenceWhenOnBreak->setVisible(Settings::instance()->useSeparateBreakTime());
+                breakLabel->setVisible(Settings::instance()->useSeparateBreakTime());
+            });
+    connect(useTeams, &QCheckBox::clicked, this, [reauthenticate](bool state) {
         Settings::instance()->setUseTeamsIntegration(state);
+        reauthenticate->setEnabled(state);
         logs::teams()->trace("Teams integration enabled");
     });
     connect(presenceWhenWorking, &QComboBox::currentIndexChanged, this, [presenceWhenWorking] {
@@ -503,6 +509,13 @@ QWidget *SettingsDialog::createTeamsPage()
     connect(presenceWhenNotWorking, &QComboBox::currentIndexChanged, this, [presenceWhenNotWorking] {
         Settings::instance()->setPresenceWhileNotWorking(
             presenceWhenNotWorking->currentData().value<TeamsClient::Presence>());
+    });
+    connect(reauthenticate, &QPushButton::clicked, this, [] {
+        Settings::instance()->setGraphAccessToken({});
+        Settings::instance()->setGraphAccessToken({});
+        // force reauthentication
+        Settings::instance()->setUseTeamsIntegration(false);
+        Settings::instance()->setUseTeamsIntegration(true);
     });
 
     return teamsPage;
