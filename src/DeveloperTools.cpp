@@ -157,11 +157,10 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
     userGroupLayout->addWidget(new QLabel{user.email()}, 1, 2);
     userGroupLayout->addWidget(userId, 2, 2);
     userGroupLayout->addWidget(apiKey, 3, 2);
-    userGroupLayout->addWidget(
-        new QLabel{
-            QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16)).toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))},
-        4,
-        2);
+    userGroupLayout->addWidget(new QLabel{QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16))
+                                              .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))},
+                               4,
+                               2);
 
     auto workspaceGroup = new QGroupBox{tr("Workspace"), this};
     auto workspaceGroupLayout = new QGridLayout{workspaceGroup};
