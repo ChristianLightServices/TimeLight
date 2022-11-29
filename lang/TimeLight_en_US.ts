@@ -4,48 +4,53 @@
 <context>
     <name>DailyOverviewDialog</name>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="50"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="53"/>
         <source>Duration</source>
         <translation>Duration</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="62"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="64"/>
         <source>Total time today: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="104"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="110"/>
+        <source>Today</source>
+        <translation>Today</translation>
+    </message>
+    <message>
+        <location filename="../src/DailyOverviewDialog.cpp" line="132"/>
         <source>Break down time: </source>
         <translation>Break down time: </translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="107"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="135"/>
         <source>Chronologically</source>
         <translation>Chronologically</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="108"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="136"/>
         <source>By project</source>
         <translation>By project</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="114"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="156"/>
         <source>Refresh</source>
         <translation>Refresh</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="46"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="46"/>
         <source>End</source>
         <translation>End</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="43"/>
-        <location filename="../src/DailyOverviewDialog.cpp" line="50"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="46"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="53"/>
         <source>Project</source>
         <translation>Project</translation>
     </message>
@@ -64,7 +69,7 @@
     </message>
     <message>
         <location filename="../src/DeveloperTools.cpp" line="151"/>
-        <location filename="../src/DeveloperTools.cpp" line="172"/>
+        <location filename="../src/DeveloperTools.cpp" line="171"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>
@@ -85,47 +90,47 @@
     </message>
     <message>
         <location filename="../src/DeveloperTools.cpp" line="155"/>
-        <location filename="../src/DeveloperTools.cpp" line="174"/>
+        <location filename="../src/DeveloperTools.cpp" line="173"/>
         <source>Creation time:</source>
         <translation>Creation time:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="166"/>
+        <location filename="../src/DeveloperTools.cpp" line="165"/>
         <source>Workspace</source>
         <translation>Workspace</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="173"/>
+        <location filename="../src/DeveloperTools.cpp" line="172"/>
         <source>Workspace ID:</source>
         <translation>Workspace ID:</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="183"/>
+        <location filename="../src/DeveloperTools.cpp" line="181"/>
         <source>Projects</source>
         <translation>Projects</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="200"/>
+        <location filename="../src/DeveloperTools.cpp" line="198"/>
         <source>Project name</source>
         <translation>Project name</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="200"/>
+        <location filename="../src/DeveloperTools.cpp" line="198"/>
         <source>Project ID</source>
         <translation>Project ID</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="200"/>
+        <location filename="../src/DeveloperTools.cpp" line="198"/>
         <source>Creation time</source>
         <translation>Creation time</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="212"/>
+        <location filename="../src/DeveloperTools.cpp" line="210"/>
         <source>Disable developer mode</source>
         <translation>Disable developer mode</translation>
     </message>
     <message>
-        <location filename="../src/DeveloperTools.cpp" line="216"/>
+        <location filename="../src/DeveloperTools.cpp" line="214"/>
         <source>Close</source>
         <translation>Close</translation>
     </message>
@@ -225,7 +230,7 @@
         <translation>Please select a default project in the following dialog.</translation>
     </message>
     <message>
-        <location filename="../src/DailyOverviewDialog.cpp" line="21"/>
+        <location filename="../src/DailyOverviewDialog.cpp" line="23"/>
         <source>Running</source>
         <translation>Running</translation>
     </message>
@@ -484,12 +489,17 @@
         <translation>Teams presence while on break</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="484"/>
+        <location filename="../src/SettingsDialog.cpp" line="476"/>
+        <source>Reauthenticate with Microsoft</source>
+        <translation>Reauthenticate with Microsoft</translation>
+    </message>
+    <message>
+        <location filename="../src/SettingsDialog.cpp" line="480"/>
         <source>Teams presence while working</source>
         <translation>Teams presence while working</translation>
     </message>
     <message>
-        <location filename="../src/SettingsDialog.cpp" line="486"/>
+        <location filename="../src/SettingsDialog.cpp" line="482"/>
         <source>Teams presence while not working</source>
         <translation>Teams presence while not working</translation>
     </message>
