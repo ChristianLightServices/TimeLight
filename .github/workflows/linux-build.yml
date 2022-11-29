@@ -16,13 +16,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qt-version: ['6.2.*', '6.4.*']
+        qt-version: ['6.2', '6.4']
 
     steps:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: ${{ matrix.qt-version }}
+          version: '${{ matrix.qt-version }}.*'
           cache: true
           modules: 'qtnetworkauth'
 
