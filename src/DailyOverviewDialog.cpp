@@ -107,10 +107,22 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     datePicker->setCalendarPopup(true);
     datePicker->setDisplayFormat(QStringLiteral("MMMM d, yyyy"));
 
+    auto today = new QPushButton{tr("Today"), this};
+
+    QIcon backIcon{":/icons/arrow-left.svg"};
+    QIcon forwardIcon{":/icons/arrow-right.svg"};
+    backIcon.setIsMask(true);
+    forwardIcon.setIsMask(true);
+    auto back = new QPushButton{QIcon::fromTheme("go-previous", backIcon) , {}, this};
+    auto forward = new QPushButton{QIcon::fromTheme("go-next", forwardIcon), {}, this};
+
     auto dayLayout = new QHBoxLayout;
     dayLayout->addWidget(m_totalTime);
     dayLayout->addStretch();
+    dayLayout->addWidget(today);
+    dayLayout->addWidget(back);
     dayLayout->addWidget(datePicker);
+    dayLayout->addWidget(forward);
 
     m_layout->addLayout(dayLayout);
     m_layout->addWidget(m_chronologicalTable);
@@ -149,6 +161,12 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     connect(datePicker, &QDateEdit::dateChanged, this, [this, updateData](const QDate &d) {
         m_day = d;
         updateData();
+    });
+    connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
+    connect(
+        forward, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(1)); });
+    connect(today, &QPushButton::clicked, datePicker, [this, datePicker] {
+        datePicker->setDate(m_manager->currentDateTime().date());
     });
 
     resize(600, 400);

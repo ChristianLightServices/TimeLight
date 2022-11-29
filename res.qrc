@@ -9,5 +9,7 @@
         <file>icons/yellowlight.png</file>
         <file>LICENSE</file>
         <file>icons/download.svg</file>
+        <file>icons/arrow-left.svg</file>
+        <file>icons/arrow-right.svg</file>
     </qresource>
 </RCC>
