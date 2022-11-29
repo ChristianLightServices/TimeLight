@@ -54,7 +54,7 @@ void TimeLight::logs::init(bool debugMode)
     auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         logFileLocation().append("/TimeLight.log").toStdString(), 5 << 20, 5);
     file->set_level(spdlog::level::trace);
-    std::vector<spdlog::sink_ptr> sinks = {console, file};
+    std::vector<spdlog::sink_ptr> sinks{console, file};
 
     _app = std::make_shared<spdlog::logger>("timelight", sinks.begin(), sinks.end());
     _app->set_level(spdlog::level::trace);
