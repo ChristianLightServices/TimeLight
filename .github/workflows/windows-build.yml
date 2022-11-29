@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Qt IFW
         if: ${{ github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v') }}
-        uses: jmarrec/setup-qtifw@v1.0.3
+        uses: jmarrec/setup-qtifw@v1
         with:
           qtifw-version: '4.x'
 
