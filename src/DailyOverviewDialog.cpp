@@ -109,12 +109,12 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
 
     auto today = new QPushButton{tr("Today"), this};
 
-    QIcon backIcon{":/icons/arrow-left.svg"};
-    QIcon forwardIcon{":/icons/arrow-right.svg"};
+    QIcon backIcon{QStringLiteral(":/icons/arrow-left.svg")};
+    QIcon forwardIcon{QStringLiteral(":/icons/arrow-right.svg")};
     backIcon.setIsMask(true);
     forwardIcon.setIsMask(true);
-    auto back = new QPushButton{QIcon::fromTheme("go-previous", backIcon), {}, this};
-    auto forward = new QPushButton{QIcon::fromTheme("go-next", forwardIcon), {}, this};
+    auto back = new QPushButton{QIcon::fromTheme(QStringLiteral("go-previous"), backIcon), {}, this};
+    auto forward = new QPushButton{QIcon::fromTheme(QStringLiteral("go-next"), forwardIcon), {}, this};
     forward->setDisabled(true);
 
     auto dayLayout = new QHBoxLayout;
