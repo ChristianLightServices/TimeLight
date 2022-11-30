@@ -33,25 +33,10 @@ namespace logs = TimeLight::logs;
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
       m_trayIcon{new QSystemTrayIcon},
-      m_teamsClient{new TeamsClient{TimeLight::teamsAppId, 6942, this}},
       m_recents{new QList<Project>}
 {
-    connect(m_teamsClient.data(), &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
-        Settings::instance()->setGraphAccessToken(m_teamsClient->accessToken());
-    });
-    connect(m_teamsClient.data(), &TeamsClient::refreshTokenChanged, Settings::instance(), [this] {
-        Settings::instance()->setGraphRefreshToken(m_teamsClient->refreshToken());
-    });
     if (Settings::instance()->useTeamsIntegration())
-    {
-        m_teamsClient->setAccessToken(Settings::instance()->graphAccessToken());
-        m_teamsClient->setRefreshToken(Settings::instance()->graphRefreshToken());
-        m_teamsClient->authenticate();
-    }
-    connect(Settings::instance(), &Settings::useTeamsIntegrationChanged, this, [this] {
-        if (!m_teamsClient->authenticated())
-            m_teamsClient->authenticate();
-    });
+        setUpTeams();
 
     auto fixApiKey = [&] {
         while (!m_manager->isValid())
@@ -165,6 +150,13 @@ TrayIcons::TrayIcons(QObject *parent)
     });
 
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateTrayIcons, Qt::QueuedConnection);
+
+    connect(Settings::instance(), &Settings::useTeamsIntegrationChanged, this, [this] {
+        if (Settings::instance()->useTeamsIntegration())
+            setUpTeams();
+        else
+            m_teamsClient.clear();
+    });
 }
 
 TrayIcons::~TrayIcons()
@@ -708,6 +700,22 @@ void TrayIcons::setUpBreakIcon()
         updateTrayIcons();
         m_eventLoop.start();
     });
+}
+
+void TrayIcons::setUpTeams()
+{
+    m_teamsClient.reset(new TeamsClient{TimeLight::teamsAppId, 6942, this});
+
+    connect(m_teamsClient.data(), &TeamsClient::accessTokenChanged, Settings::instance(), [this] {
+        Settings::instance()->setGraphAccessToken(m_teamsClient->accessToken());
+    });
+    connect(m_teamsClient.data(), &TeamsClient::refreshTokenChanged, Settings::instance(), [this] {
+        Settings::instance()->setGraphRefreshToken(m_teamsClient->refreshToken());
+    });
+
+    m_teamsClient->setAccessToken(Settings::instance()->graphAccessToken());
+    m_teamsClient->setRefreshToken(Settings::instance()->graphRefreshToken());
+    m_teamsClient->authenticate();
 }
 
 void TrayIcons::setTimerState(TimerState state)

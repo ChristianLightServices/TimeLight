@@ -68,6 +68,7 @@ private:
     QAction *createBreakResumeAction();
     void setUpTrayIcon();
     void setUpBreakIcon();
+    void setUpTeams();
     void setTimerState(TimerState state);
     void updateIconsAndTooltips();
     void updateQuickStartList();
