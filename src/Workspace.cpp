@@ -23,5 +23,5 @@ Workspace &Workspace::operator=(const Workspace &other)
 
 bool Workspace::operator==(const Workspace &other) const
 {
-    return m_id == other.m_id && m_name == other.m_name && m_valid == other.m_valid;
+    return m_id == other.m_id;
 }

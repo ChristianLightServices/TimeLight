@@ -34,5 +34,5 @@ Project &Project::operator=(const Project &other)
 
 bool Project::operator==(const Project &other) const
 {
-    return m_id == other.m_id && m_name == other.m_name && m_description == other.m_description;
+    return m_id == other.m_id;
 }
