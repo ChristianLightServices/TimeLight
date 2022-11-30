@@ -115,6 +115,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     forwardIcon.setIsMask(true);
     auto back = new QPushButton{QIcon::fromTheme("go-previous", backIcon), {}, this};
     auto forward = new QPushButton{QIcon::fromTheme("go-next", forwardIcon), {}, this};
+    forward->setDisabled(true);
 
     auto dayLayout = new QHBoxLayout;
     dayLayout->addWidget(m_totalTime);
@@ -158,8 +159,16 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
 
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
     connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
-    connect(datePicker, &QDateEdit::dateChanged, this, [this, updateData](const QDate &d) {
+    connect(datePicker, &QDateEdit::dateChanged, this, [this, updateData, forward, back, datePicker](const QDate &d) {
         m_day = d;
+        if (m_day == datePicker->maximumDate())
+            forward->setDisabled(true);
+        else
+            forward->setEnabled(true);
+        if (m_day == datePicker->minimumDate())
+            back->setDisabled(true);
+        else
+            back->setEnabled(true);
         updateData();
     });
     connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
