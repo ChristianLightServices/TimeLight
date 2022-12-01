@@ -47,7 +47,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     m_chronologicalTable->setEditTriggers(QTableWidget::NoEditTriggers);
     m_chronologicalTable->verticalHeader()->setVisible(false);
     m_chronologicalTable->horizontalHeader()->setStretchLastSection(true);
-    //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either!
+    //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either! // TODO: if worky, move this
     m_chronologicalTable->setSelectionMode(QTableWidget::NoSelection);
 
     m_byProjectTable->setHorizontalHeaderLabels(QStringList{} << tr("Duration") << tr("Project"));
