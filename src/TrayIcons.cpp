@@ -314,10 +314,10 @@ void TrayIcons::updateTrayIcons()
 void TrayIcons::updateRunningEntryTooltip()
 {
     QString tooltip = m_runningEntryTooltipBase;
-    if (m_currentRunningJob.isValid())
+    if (m_currentRunningJob)
     {
         auto [h, m, s] =
-            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob.start().msecsTo(QDateTime::currentDateTime()));
+            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob->start().msecsTo(QDateTime::currentDateTime()));
         tooltip += QStringLiteral(" (%1:%2:%3)").arg(h).arg(m, 2, 10, QLatin1Char{'0'}).arg(s, 2, 10, QLatin1Char{'0'});
     }
     (m_breakIcon ? m_breakIcon : m_trayIcon)->setToolTip(tooltip);
@@ -417,12 +417,12 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     });
     auto cancel = menu->addAction(tr("Cancel current job"));
     connect(cancel, &QAction::triggered, this, [this] {
-        if (auto e = m_user.getRunningTimeEntry(); e)
+        if (m_currentRunningJob)
         {
             if (QMessageBox::question(nullptr, tr("Cancel job"), tr("Are you sure you want to cancel the current job?")) ==
                 QMessageBox::Yes)
             {
-                m_user.deleteTimeEntry(*e, true);
+                m_user.deleteTimeEntry(*m_currentRunningJob, true);
                 updateTrayIcons();
             }
         }
@@ -555,9 +555,9 @@ void TrayIcons::setUpTrayIcon()
 
         if (reason == QSystemTrayIcon::MiddleClick)
         {
-            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+            if (m_currentRunningJob)
             {
-                if (runningEntry->project().id() == Settings::instance()->breakTimeId())
+                if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
                 {
                     auto time = m_user.stopCurrentTimeEntry();
                     auto project = defaultProject();
@@ -575,7 +575,7 @@ void TrayIcons::setUpTrayIcon()
                 m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
             }
         }
-        else if (m_user.getRunningTimeEntry())
+        else if (m_currentRunningJob)
             m_user.stopCurrentTimeEntry();
         else
         {
@@ -677,9 +677,9 @@ void TrayIcons::setUpBreakIcon()
             return;
         }
 
-        if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+        if (m_currentRunningJob)
         {
-            if (runningEntry->project().id() == Settings::instance()->breakTimeId())
+            if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
             {
                 auto time = m_user.stopCurrentTimeEntry();
                 auto project = defaultProject();
@@ -779,7 +779,7 @@ void TrayIcons::updateIconsAndTooltips()
             m_breakIcon->setIcon(QIcon{":/icons/greenlight.png"});
         }
 
-        m_runningEntryTooltipBase = tr("Working on %1").arg(m_currentRunningJob.project().name());
+        m_runningEntryTooltipBase = tr("Working on %1").arg(m_currentRunningJob->project().name());
         updateRunningEntryTooltip();
         m_updateRunningEntryTooltipTimer.start();
         break;
@@ -867,9 +867,9 @@ void TrayIcons::updateQuickStartList()
             }
 
             QDateTime now{m_manager->currentDateTime()};
-            if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+            if (m_currentRunningJob)
             {
-                if (Settings::instance()->preventSplittingEntries() && runningEntry->project().id() == project.id())
+                if (Settings::instance()->preventSplittingEntries() && m_currentRunningJob->project().id() == project.id())
                 {
                     m_eventLoop.start();
                     return;
