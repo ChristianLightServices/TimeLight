@@ -33,7 +33,7 @@ namespace logs = TimeLight::logs;
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
       m_trayIcon{new QSystemTrayIcon},
-      m_recents{new QList<Project>}
+      m_recentEntries{new QList<TimeEntry>}
 {
     if (Settings::instance()->useTeamsIntegration())
         setUpTeams();
@@ -111,6 +111,9 @@ TrayIcons::TrayIcons(QObject *parent)
     if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         m_breakIcon = new QSystemTrayIcon;
 
+    m_nextPage = m_manager->paginationStartsAt();
+    loadMoreEntries();
+
     setUpTrayIcon();
 
     m_eventLoop.setInterval(Settings::instance()->eventLoopInterval());
@@ -179,7 +182,6 @@ Project TrayIcons::defaultProject()
     Project project;
     int pageNum{m_manager->paginationStartsAt()};
     bool itemsLeftToLoad{true};
-    QVector<TimeEntry> entries;
 
     if (!Settings::instance()->useLastProject())
     {
@@ -203,7 +205,7 @@ Project TrayIcons::defaultProject()
             if (newEntries.empty())
                 itemsLeftToLoad = false;
             else
-                entries.append(newEntries);
+                m_recentEntries->append(newEntries);
 
             for (const auto &entry : newEntries)
             {
@@ -241,7 +243,7 @@ Project TrayIcons::defaultProject()
 
         do
         {
-            for (const auto &entry : entries)
+            for (const auto &entry : *m_recentEntries)
             {
                 if (!Settings::instance()->useSeparateBreakTime() ||
                     entry.project().id() != Settings::instance()->breakTimeId())
@@ -254,9 +256,10 @@ Project TrayIcons::defaultProject()
             if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
                 break;
 
-            entries = m_user.getTimeEntries(++pageNum);
-            if (entries.empty())
+            if (auto entries = m_user.getTimeEntries(++pageNum); entries.empty())
                 itemsLeftToLoad = false;
+            else
+                m_recentEntries->append(entries);
         } while (itemsLeftToLoad && !descriptionLoaded);
 
         if (!descriptionLoaded) [[unlikely]]
@@ -267,12 +270,12 @@ Project TrayIcons::defaultProject()
     }
 
     // update the recents
-    if (entries.size() >= 25)
-    {
-        m_recents->clear();
-        for (int i = 0; i < 25; ++i)
-            m_recents->append(entries[i].project());
-    }
+//    if (entries.size() >= 25)
+//    {
+//        m_recents->clear();
+//        for (int i = 0; i < 25; ++i)
+//            m_recents->append(entries[i]);
+//    }
 
     return project;
 }
@@ -290,6 +293,11 @@ void TrayIcons::updateTrayIcons()
         try
         {
             m_currentRunningJob = *runningEntry;
+            if (m_recentEntries->size() > 0 && *runningEntry != m_recentEntries->first())
+                m_recentEntries->prepend(*runningEntry); // new entry
+            else
+                m_recentEntries->replace(0, *runningEntry); // current entry may have changed
+
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
                 setTimerState(TimerState::OnBreak);
@@ -402,7 +410,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     connect(modifyJob, &QAction::triggered, this, [this] {
         if (auto e = m_user.getRunningTimeEntry(); e)
         {
-            auto dialog = new ModifyJobDialog{m_manager, *e, m_recents};
+            auto dialog = new ModifyJobDialog{m_manager, *e, m_recentEntries};
             dialog->show();
             connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
                 if (result == QDialog::Accepted)
@@ -882,9 +890,10 @@ void TrayIcons::updateQuickStartList()
     };
 
     std::optional<Project> addBreakTime;
-    for (auto &entry : m_user.getTimeEntries(m_manager->paginationStartsAt()))
+    QList<Project> recentProjects;
+    for (auto &entry : *m_recentEntries)
     {
-        if (m_recents->size() >= 10)
+        if (recentProjects.size() >= 10)
             break;
         if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
             [[unlikely]]
@@ -898,12 +907,14 @@ void TrayIcons::updateQuickStartList()
             p.setDescription({});
             entry.setProject(p);
         }
-        if (m_recents->contains(entry.project()))
+        if (std::find_if(recentProjects.begin(), recentProjects.end(), [&entry](const auto &a) {
+                return a == entry.project();
+            }) != recentProjects.end())
             continue;
-        m_recents->push_back(entry.project());
+        recentProjects.push_back(entry.project());
     }
-    for (const auto &project : *m_recents)
-        addMenuEntry(m_quickStartMenu, project);
+    for (const auto &entry : recentProjects)
+        addMenuEntry(m_quickStartMenu, entry);
     for (const auto &project : m_manager->projects())
         addMenuEntry(m_quickStartAllProjects, project);
     // the break time project always comes last
@@ -959,4 +970,24 @@ void TrayIcons::checkForFinishedWeek()
             QTimer::singleShot(msecsThisWeek + 15000, this, &TrayIcons::checkForFinishedWeek);
         }
     }
+}
+
+void TrayIcons::loadMoreEntries()
+{
+    auto newEntries = m_user.getTimeEntries(m_nextPage++);
+    if (m_recentEntries->contains(newEntries.last()))
+    {
+        auto currentPos = m_nextPage;
+        invalidateEntries();
+        while (m_nextPage < currentPos)
+            loadMoreEntries();
+    }
+    else
+        m_recentEntries->append(newEntries);
+}
+
+void TrayIcons::invalidateEntries()
+{
+    m_recentEntries->clear();
+    m_nextPage = m_manager->paginationStartsAt();
 }

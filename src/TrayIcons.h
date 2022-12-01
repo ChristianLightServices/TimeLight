@@ -74,6 +74,8 @@ private:
     void updateQuickStartList();
     void showOfflineNotification();
     void checkForFinishedWeek();
+    void loadMoreEntries();
+    void invalidateEntries();
 
     QSharedPointer<AbstractTimeServiceManager> m_manager;
     QSharedPointer<TeamsClient> m_teamsClient;
@@ -101,7 +103,8 @@ private:
 
     TimeUpWarning m_timeUpWarning{TimeUpWarning::NotDone};
 
-    QSharedPointer<QList<Project>> m_recents;
+    QSharedPointer<QList<TimeEntry>> m_recentEntries;
+    int m_nextPage{};
 
     friend class SetupFlow;
 };

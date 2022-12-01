@@ -43,6 +43,7 @@ public:
     bool isValid() const { return m_isValid; }
 
     TimeEntry &operator=(const TimeEntry &other);
+    bool operator==(const TimeEntry &other) const { return m_id == other.m_id; }
 
     //! Use this to store extra data about the entry (especially info about running time entries).
     json extraData;
