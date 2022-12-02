@@ -11,6 +11,7 @@
 #include "Project.h"
 #include "Settings.h"
 #include "TeamsClient.h"
+#include "TimeEntryStore.h"
 #include "User.h"
 
 class TrayIcons : public QObject
@@ -74,9 +75,6 @@ private:
     void updateQuickStartList();
     void showOfflineNotification();
     void checkForFinishedWeek();
-    void loadMoreEntries();
-    void invalidateEntries();
-
     QSharedPointer<AbstractTimeServiceManager> m_manager;
     QSharedPointer<TeamsClient> m_teamsClient;
 
@@ -90,7 +88,7 @@ private:
     QString m_runningEntryTooltipBase;
     QTimer m_updateRunningEntryTooltipTimer;
 
-    User m_user;
+    QSharedPointer<User> m_user;
     TimerState m_timerState{TimerState::StateUnset};
     std::optional<TimeEntry> m_currentRunningJob;
     TimeEntry m_jobToBeNotified;
@@ -103,8 +101,7 @@ private:
 
     TimeUpWarning m_timeUpWarning{TimeUpWarning::NotDone};
 
-    QSharedPointer<QList<TimeEntry>> m_recentEntries;
-    int m_nextPage{};
+    QSharedPointer<TimeEntryStore> m_timeEntries{};
 
     friend class SetupFlow;
 };

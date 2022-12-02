@@ -159,6 +159,8 @@ set(SRC
     src/TeamsClient.h
     src/TimeEntry.cpp
     src/TimeEntry.h
+    src/TimeEntryStore.cpp
+    src/TimeEntryStore.h
     src/TrayIcons.cpp
     src/TrayIcons.h
     src/User.cpp

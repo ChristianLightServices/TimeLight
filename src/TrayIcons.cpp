@@ -32,8 +32,7 @@ namespace logs = TimeLight::logs;
 
 TrayIcons::TrayIcons(QObject *parent)
     : QObject{parent},
-      m_trayIcon{new QSystemTrayIcon},
-      m_recentEntries{new QList<TimeEntry>}
+      m_trayIcon{new QSystemTrayIcon}
 {
     if (Settings::instance()->useTeamsIntegration())
         setUpTeams();
@@ -100,7 +99,7 @@ TrayIcons::TrayIcons(QObject *parent)
     });
 
     m_user = m_manager->getApiKeyOwner();
-    if (!m_user.isValid()) [[unlikely]]
+    if (!m_user->isValid()) [[unlikely]]
     {
         logs::app()->error("Invalid user!");
         QMessageBox::critical(nullptr, tr("Fatal error"), tr("Could not load user!"));
@@ -108,11 +107,10 @@ TrayIcons::TrayIcons(QObject *parent)
         return;
     }
 
+    m_timeEntries.reset(new TimeEntryStore{m_user, this});
+
     if (Settings::instance()->useSeparateBreakTime() && !Settings::instance()->middleClickForBreak())
         m_breakIcon = new QSystemTrayIcon;
-
-    m_nextPage = m_manager->paginationStartsAt();
-    loadMoreEntries();
 
     setUpTrayIcon();
 
@@ -180,8 +178,6 @@ void TrayIcons::show()
 Project TrayIcons::defaultProject()
 {
     Project project;
-    int pageNum{m_manager->paginationStartsAt()};
-    bool itemsLeftToLoad{true};
 
     if (!Settings::instance()->useLastProject())
     {
@@ -199,31 +195,20 @@ Project TrayIcons::defaultProject()
     }
     else
     {
-        do
+        for (const auto &entry : *m_timeEntries)
         {
-            auto newEntries = m_user.getTimeEntries(pageNum++);
-            if (newEntries.empty())
-                itemsLeftToLoad = false;
-            else
-                m_recentEntries->append(newEntries);
-
-            for (const auto &entry : newEntries)
+            if (entry.project().id().isEmpty()) [[unlikely]]
             {
-                if (entry.project().id().isEmpty()) [[unlikely]]
-                {
-                    logs::network()->error("Getting project id failed");
-                    continue; // no project id to see here, move along
-                }
-                else if (!Settings::instance()->useSeparateBreakTime() ||
-                         entry.project().id() != Settings::instance()->breakTimeId())
-                {
-                    project = entry.project();
-                    break;
-                }
+                logs::network()->error("Getting project id failed");
+                continue; // no project id to see here, move along
             }
-            if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+            else if (!Settings::instance()->useSeparateBreakTime() ||
+                     entry.project().id() != Settings::instance()->breakTimeId())
+            {
+                project = entry.project();
                 break;
-        } while (itemsLeftToLoad && project.id().isEmpty());
+            }
+        }
 
         // when all else fails, use the first extant project
         if (project.id().isEmpty()) [[unlikely]]
@@ -241,26 +226,15 @@ Project TrayIcons::defaultProject()
     {
         bool descriptionLoaded{false};
 
-        do
+        for (const auto &entry : *m_timeEntries)
         {
-            for (const auto &entry : *m_recentEntries)
+            if (!Settings::instance()->useSeparateBreakTime() || entry.project().id() != Settings::instance()->breakTimeId())
             {
-                if (!Settings::instance()->useSeparateBreakTime() ||
-                    entry.project().id() != Settings::instance()->breakTimeId())
-                {
-                    project.setDescription(entry.project().description());
-                    descriptionLoaded = true;
-                    break;
-                }
-            }
-            if (!m_manager->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+                project.setDescription(entry.project().description());
+                descriptionLoaded = true;
                 break;
-
-            if (auto entries = m_user.getTimeEntries(++pageNum); entries.empty())
-                itemsLeftToLoad = false;
-            else
-                m_recentEntries->append(entries);
-        } while (itemsLeftToLoad && !descriptionLoaded);
+            }
+        }
 
         if (!descriptionLoaded) [[unlikely]]
         {
@@ -268,14 +242,6 @@ Project TrayIcons::defaultProject()
             project.setDescription(m_manager->projects().first().description());
         }
     }
-
-    // update the recents
-//    if (entries.size() >= 25)
-//    {
-//        m_recents->clear();
-//        for (int i = 0; i < 25; ++i)
-//            m_recents->append(entries[i]);
-//    }
 
     return project;
 }
@@ -286,17 +252,14 @@ void TrayIcons::updateTrayIcons()
     {
         setTimerState(TimerState::Offline);
         // make requests to see if the internet came back up
-        m_user.getRunningTimeEntry();
+        m_user->getRunningTimeEntry();
     }
-    else if (auto runningEntry = m_user.getRunningTimeEntry(); runningEntry)
+    else if (auto runningEntry = m_user->getRunningTimeEntry(); runningEntry)
     {
         try
         {
             m_currentRunningJob = *runningEntry;
-            if (m_recentEntries->size() > 0 && *runningEntry != m_recentEntries->first())
-                m_recentEntries->prepend(*runningEntry); // new entry
-            else
-                m_recentEntries->replace(0, *runningEntry); // current entry may have changed
+            m_timeEntries->insert(*runningEntry);
 
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
@@ -408,14 +371,14 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     menu->addMenu(m_quickStartMenu.data());
     auto modifyJob = menu->addAction(tr("Modify current job"));
     connect(modifyJob, &QAction::triggered, this, [this] {
-        if (auto e = m_user.getRunningTimeEntry(); e)
+        if (auto e = m_user->getRunningTimeEntry(); e)
         {
-            auto dialog = new ModifyJobDialog{m_manager, *e, m_recentEntries};
+            auto dialog = new ModifyJobDialog{m_manager, *e, m_timeEntries};
             dialog->show();
             connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
                 if (result == QDialog::Accepted)
                 {
-                    m_user.modifyTimeEntry(std::move(dialog->entry()), true);
+                    m_user->modifyTimeEntry(std::move(dialog->entry()), true);
                     updateTrayIcons();
                     updateQuickStartList();
                 }
@@ -430,7 +393,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
             if (QMessageBox::question(nullptr, tr("Cancel job"), tr("Are you sure you want to cancel the current job?")) ==
                 QMessageBox::Yes)
             {
-                m_user.deleteTimeEntry(*m_currentRunningJob, true);
+                m_user->deleteTimeEntry(*m_currentRunningJob, true);
                 updateTrayIcons();
             }
         }
@@ -443,7 +406,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     });
 
     connect(menu->addAction(tr("Daily time report")), &QAction::triggered, this, [this] {
-        DailyOverviewDialog d{m_manager, &m_user};
+        DailyOverviewDialog d{m_manager, m_user};
         d.exec();
     });
 
@@ -490,14 +453,14 @@ QAction *TrayIcons::createBreakResumeAction()
         if (m_timerState == TimerState::NotRunning || m_timerState == TimerState::Running)
         {
             if (m_timerState == TimerState::Running)
-                m_user.stopCurrentTimeEntry();
-            m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
+                m_user->stopCurrentTimeEntry();
+            m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
         }
         else if (m_timerState == TimerState::OnBreak)
         {
-            m_user.stopCurrentTimeEntry();
+            m_user->stopCurrentTimeEntry();
             auto project = defaultProject();
-            m_user.startTimeEntry(project);
+            m_user->startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -530,10 +493,10 @@ void TrayIcons::setUpTrayIcon()
         if (m_timerState == TimerState::NotRunning)
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project);
+            m_user->startTimeEntry(project);
         }
         else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
-            m_user.stopCurrentTimeEntry();
+            m_user->stopCurrentTimeEntry();
 
         updateTrayIcons();
     });
@@ -567,28 +530,28 @@ void TrayIcons::setUpTrayIcon()
             {
                 if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
                 {
-                    auto time = m_user.stopCurrentTimeEntry();
+                    auto time = m_user->stopCurrentTimeEntry();
                     auto project = defaultProject();
-                    m_user.startTimeEntry(project, time);
+                    m_user->startTimeEntry(project, time);
                 }
                 else
                 {
-                    auto time = m_user.stopCurrentTimeEntry();
-                    m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
+                    auto time = m_user->stopCurrentTimeEntry();
+                    m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
                 }
             }
             else
             {
                 auto project = defaultProject();
-                m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
+                m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
             }
         }
         else if (m_currentRunningJob)
-            m_user.stopCurrentTimeEntry();
+            m_user->stopCurrentTimeEntry();
         else
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project);
+            m_user->startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -610,7 +573,7 @@ void TrayIcons::setUpTrayIcon()
 
         // This will either return the job that just ended, plus the job before, or the job that just started and the job
         // that just ended. Either way, we can get enough info to run the notifications.
-        auto jobs = m_user.getTimeEntries(1, 2);
+        auto jobs = m_user->getTimeEntries(1, 2);
         if (jobs.isEmpty())
             return;
         auto job =
@@ -689,20 +652,20 @@ void TrayIcons::setUpBreakIcon()
         {
             if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
             {
-                auto time = m_user.stopCurrentTimeEntry();
+                auto time = m_user->stopCurrentTimeEntry();
                 auto project = defaultProject();
-                m_user.startTimeEntry(project, time);
+                m_user->startTimeEntry(project, time);
             }
             else
             {
-                auto time = m_user.stopCurrentTimeEntry();
-                m_user.startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
+                auto time = m_user->stopCurrentTimeEntry();
+                m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
             }
         }
         else
         {
             auto project = defaultProject();
-            m_user.startTimeEntry(project);
+            m_user->startTimeEntry(project);
         }
 
         updateTrayIcons();
@@ -882,16 +845,16 @@ void TrayIcons::updateQuickStartList()
                     m_eventLoop.start();
                     return;
                 }
-                now = m_user.stopCurrentTimeEntry();
+                now = m_user->stopCurrentTimeEntry();
             }
-            m_user.startTimeEntry(project, now, true);
+            m_user->startTimeEntry(project, now, true);
             m_eventLoop.start();
         });
     };
 
     std::optional<Project> addBreakTime;
     QList<Project> recentProjects;
-    for (auto &entry : *m_recentEntries)
+    for (auto &entry : *m_timeEntries)
     {
         if (recentProjects.size() >= 10)
             break;
@@ -943,10 +906,10 @@ void TrayIcons::checkForFinishedWeek()
     if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done && m_trayIcon->isVisible())
     {
         auto now = QDateTime::currentDateTime();
-        auto entries = m_user.getTimeEntries(std::nullopt,
-                                             std::nullopt,
-                                             now.addDays(-(now.date().dayOfWeek() % 7)),
-                                             now.addDays(6 - (now.date().dayOfWeek() % 7)));
+        auto entries = m_user->getTimeEntries(std::nullopt,
+                                              std::nullopt,
+                                              now.addDays(-(now.date().dayOfWeek() % 7)),
+                                              now.addDays(6 - (now.date().dayOfWeek() % 7)));
         double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [](auto a, auto b) {
             if (b.end().isNull() && b.running().value_or(true))
                 b.setEnd(QDateTime::currentDateTime());
@@ -970,24 +933,4 @@ void TrayIcons::checkForFinishedWeek()
             QTimer::singleShot(msecsThisWeek + 15000, this, &TrayIcons::checkForFinishedWeek);
         }
     }
-}
-
-void TrayIcons::loadMoreEntries()
-{
-    auto newEntries = m_user.getTimeEntries(m_nextPage++);
-    if (m_recentEntries->contains(newEntries.last()))
-    {
-        auto currentPos = m_nextPage;
-        invalidateEntries();
-        while (m_nextPage < currentPos)
-            loadMoreEntries();
-    }
-    else
-        m_recentEntries->append(newEntries);
-}
-
-void TrayIcons::invalidateEntries()
-{
-    m_recentEntries->clear();
-    m_nextPage = m_manager->paginationStartsAt();
 }

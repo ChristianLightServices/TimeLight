@@ -38,7 +38,7 @@ protected:
 
     virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) final;
     virtual TimeEntry jsonToTimeEntry(const json &j) final;
-    virtual User jsonToUser(const json &j) final;
+    virtual QSharedPointer<User> jsonToUser(const json &j) final;
     virtual QPair<QString, QString> jsonToUserData(const json &j) final;
     virtual Workspace jsonToWorkspace(const json &j) final;
     virtual Project jsonToProject(const json &j) final;

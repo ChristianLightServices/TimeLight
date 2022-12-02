@@ -6,7 +6,7 @@
 #include <QDialog>
 
 #include "AbstractTimeServiceManager.h"
-#include "TimeEntry.h"
+#include "TimeEntryStore.h"
 
 class ModifyJobDialog : public QDialog
 {
@@ -15,7 +15,7 @@ class ModifyJobDialog : public QDialog
 public:
     explicit ModifyJobDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                              const TimeEntry &entry,
-                             QSharedPointer<QList<TimeEntry>> recents = {},
+                             QSharedPointer<TimeEntryStore> timeEntries = {},
                              QWidget *parent = nullptr);
 
     TimeEntry entry() const { return m_entry; }

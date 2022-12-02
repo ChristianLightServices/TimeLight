@@ -101,7 +101,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
 
         return TimeEntry{j["entry_id"].get<QString>(),
                          Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
-                         getApiKeyOwner().userId(),
+                         getApiKeyOwner()->userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
                          true,
@@ -140,21 +140,21 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
     }
 }
 
-User TimeCampManager::jsonToUser(const nlohmann::json &j)
+QSharedPointer<User> TimeCampManager::jsonToUser(const nlohmann::json &j)
 {
     try
     {
-        return User{j["user_id"].get<QString>(),
-                    j["display_name"].get<QString>(),
-                    j["root_group_id"].get<QString>(),
-                    {},
-                    j["email"].get<QString>(),
-                    this};
+        return QSharedPointer<User>::create(j["user_id"].get<QString>(),
+                                            j["display_name"].get<QString>(),
+                                            j["root_group_id"].get<QString>(),
+                                            QString{},
+                                            j["email"].get<QString>(),
+                                            sharedFromThis());
     }
     catch (const std::exception &e)
     {
         logger()->error("Error while parsing user: {}", e.what());
-        return {this};
+        return QSharedPointer<User>::create(this);
     }
 }
 

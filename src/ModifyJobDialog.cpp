@@ -7,7 +7,7 @@
 
 ModifyJobDialog::ModifyJobDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                                  const TimeEntry &entry,
-                                 QSharedPointer<QList<TimeEntry>> recents,
+                                 QSharedPointer<TimeEntryStore> timeEntries,
                                  QWidget *parent)
     : QDialog{parent},
       m_manager{manager},
@@ -29,8 +29,8 @@ ModifyJobDialog::ModifyJobDialog(QSharedPointer<AbstractTimeServiceManager> mana
     QStringList descs;
     if (!m_entry.project().description().isEmpty())
         descs << m_entry.project().description();
-    if (recents)
-        for (const auto &item : *recents)
+    if (timeEntries)
+        for (const auto &item : *timeEntries)
         {
             const auto &p = item.project();
             if (!p.description().isEmpty() && !descs.contains(p.description()))

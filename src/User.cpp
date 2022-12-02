@@ -5,8 +5,8 @@ User::User(const QString &userId,
            const QString &workspaceId,
            const QString &avatarUrl,
            const QString &email,
-           AbstractTimeServiceManager *parent)
-    : QObject{parent},
+           QSharedPointer<AbstractTimeServiceManager> parent)
+    : QObject{parent.data()},
       m_userId{userId},
       m_name{name},
       m_workspaceId{workspaceId},

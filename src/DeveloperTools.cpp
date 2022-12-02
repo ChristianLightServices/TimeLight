@@ -121,11 +121,11 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
     auto userGroup = new QGroupBox{tr("User"), this};
     auto userGroupLayout = new QGridLayout{userGroup};
 
-    if (!user.avatarUrl().isEmpty())
+    if (!user->avatarUrl().isEmpty())
     {
-        auto image = new DownloadableImage{user.userId(), userGroup};
+        auto image = new DownloadableImage{user->userId(), userGroup};
         auto m = new QNetworkAccessManager;
-        auto rep = m->get(QNetworkRequest{user.avatarUrl()});
+        auto rep = m->get(QNetworkRequest{user->avatarUrl()});
         connect(rep, &QNetworkReply::finished, image, [m, rep, image, userGroupLayout] {
             QPixmap p;
             p.loadFromData(rep->readAll());
@@ -144,7 +144,7 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
         });
     }
 
-    auto userId = new QLineEdit{user.userId(), userGroup};
+    auto userId = new QLineEdit{user->userId(), userGroup};
     userId->setReadOnly(true);
     auto apiKey = new QLineEdit{manager->apiKey(), userGroup};
     apiKey->setReadOnly(true);
@@ -153,11 +153,11 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
     userGroupLayout->addWidget(new QLabel{tr("User ID:")}, 2, 1);
     userGroupLayout->addWidget(new QLabel{tr("API key:")}, 3, 1);
     userGroupLayout->addWidget(new QLabel{tr("Creation time:")}, 4, 1);
-    userGroupLayout->addWidget(new QLabel{user.name()}, 0, 2);
-    userGroupLayout->addWidget(new QLabel{user.email()}, 1, 2);
+    userGroupLayout->addWidget(new QLabel{user->name()}, 0, 2);
+    userGroupLayout->addWidget(new QLabel{user->email()}, 1, 2);
     userGroupLayout->addWidget(userId, 2, 2);
     userGroupLayout->addWidget(apiKey, 3, 2);
-    userGroupLayout->addWidget(new QLabel{QDateTime::fromSecsSinceEpoch(user.userId().mid(0, 8).toLong(nullptr, 16))
+    userGroupLayout->addWidget(new QLabel{QDateTime::fromSecsSinceEpoch(user->userId().mid(0, 8).toLong(nullptr, 16))
                                               .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))},
                                4,
                                2);

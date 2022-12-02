@@ -221,7 +221,7 @@ void AbstractTimeServiceManager::deleteTimeEntry(const QString &userId, const Ti
                  async);
 }
 
-User AbstractTimeServiceManager::getApiKeyOwner()
+QSharedPointer<User> AbstractTimeServiceManager::getApiKeyOwner()
 {
     json j;
     get(currentUserUrl(), false, [this, &j](QNetworkReply *rep) {
@@ -235,7 +235,7 @@ User AbstractTimeServiceManager::getApiKeyOwner()
         }
     });
 
-    return j.empty() ? User{this} : jsonToUser(j);
+    return j.empty() ? QSharedPointer<User>::create(this) : jsonToUser(j);
 }
 
 Workspace AbstractTimeServiceManager::currentWorkspace()
@@ -293,7 +293,7 @@ void AbstractTimeServiceManager::updateCurrentUser()
             {
                 json j{json::parse(rep->readAll().toStdString())};
                 auto user = jsonToUser(j.is_array() ? j[0] : j);
-                m_isValid = user.isValid();
+                m_isValid = user->isValid();
             }
             catch (const std::exception &e)
             {

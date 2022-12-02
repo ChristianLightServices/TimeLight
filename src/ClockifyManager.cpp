@@ -139,21 +139,21 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
     }
 }
 
-User ClockifyManager::jsonToUser(const nlohmann::json &j)
+QSharedPointer<User> ClockifyManager::jsonToUser(const nlohmann::json &j)
 {
     try
     {
-        return User{j["id"].get<QString>(),
-                    j["name"].get<QString>(),
-                    j["defaultWorkspace"].get<QString>(),
-                    j["profilePicture"].get<QString>(),
-                    j["email"].get<QString>(),
-                    this};
+        return QSharedPointer<User>::create(j["id"].get<QString>(),
+                                            j["name"].get<QString>(),
+                                            j["defaultWorkspace"].get<QString>(),
+                                            j["profilePicture"].get<QString>(),
+                                            j["email"].get<QString>(),
+                                            sharedFromThis());
     }
     catch (const std::exception &e)
     {
         logger()->error("Error while parsing user: {}", e.what());
-        return {this};
+        return QSharedPointer<User>::create(this);
     }
 }
 

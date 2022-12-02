@@ -19,7 +19,7 @@ public:
                   const QString &workspaceId,
                   const QString &avatarUrl,
                   const QString &email,
-                  AbstractTimeServiceManager *parent);
+                  QSharedPointer<AbstractTimeServiceManager> parent);
     User(const User &that);
     User(QObject *parent = nullptr);
 
@@ -35,6 +35,8 @@ public:
                                       std::optional<QDateTime> end = std::nullopt);
 
     User &operator=(const User &other);
+
+    QSharedPointer<AbstractTimeServiceManager> manager() { return m_manager; }
 
     QString userId() const { return m_userId; }
     QString name() const { return m_name; }
@@ -54,7 +56,7 @@ private:
 
     bool m_isValid{true};
 
-    AbstractTimeServiceManager *m_manager{nullptr};
+    QSharedPointer<AbstractTimeServiceManager> m_manager;
 };
 
 #endif // USER_H

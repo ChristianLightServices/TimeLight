@@ -1,6 +1,7 @@
 #ifndef ABSTRACTTIMESERVICEMANAGER_H
 #define ABSTRACTTIMESERVICEMANAGER_H
 
+#include <QEnableSharedFromThis>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -22,7 +23,7 @@ class TimeEntry;
 
 using NetworkReplyCallback = std::function<void(QNetworkReply *)>;
 
-class AbstractTimeServiceManager : public QObject
+class AbstractTimeServiceManager : public QObject, public QEnableSharedFromThis<AbstractTimeServiceManager>
 {
     Q_OBJECT
 
@@ -63,7 +64,7 @@ public:
     void deleteTimeEntry(const QString &userId, const TimeEntry &t, bool async);
 
     bool isConnectedToInternet() const { return m_isConnectedToInternet; }
-    User getApiKeyOwner();
+    QSharedPointer<User> getApiKeyOwner();
     Workspace currentWorkspace();
 
     QString apiKey() const { return m_apiKey; }
@@ -175,7 +176,7 @@ protected:
 
     virtual std::optional<TimeEntry> jsonToRunningTimeEntry(const json &j) = 0;
     virtual TimeEntry jsonToTimeEntry(const json &j) = 0;
-    virtual User jsonToUser(const json &j) = 0;
+    virtual QSharedPointer<User> jsonToUser(const json &j) = 0;
     virtual QPair<QString, QString> jsonToUserData(const json &j) = 0;
     virtual Workspace jsonToWorkspace(const json &j) = 0;
     virtual Project jsonToProject(const json &j) = 0;
