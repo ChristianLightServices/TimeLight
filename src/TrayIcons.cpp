@@ -185,13 +185,13 @@ Project TrayIcons::defaultProject()
         if (auto p = std::find_if(projects.begin(),
                                   projects.end(),
                                   [](const Project &p) { return p.id() == Settings::instance()->projectId(); });
-            p == projects.end())
+            p != projects.end())
+            project = *p;
+        else
         {
             logs::app()->warn("Attempted to use invalid project ID for default project");
             project = projects.first();
         }
-        else
-            project = *p;
     }
     else
     {
