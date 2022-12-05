@@ -23,10 +23,20 @@ public:
     class iterator
     {
     public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = TimeEntry;
+        using difference_type = void;
+        using pointer = TimeEntry *;
+        using reference = TimeEntry &;
+
         iterator &operator++();
         iterator &operator--();
+        iterator &operator+(int i);
+        iterator &operator-(int i);
         bool operator!=(const iterator &other);
+        bool operator==(const iterator &other);
         TimeEntry &operator*() { return m_parent->m_store[m_index]; }
+        TimeEntry *operator->() { return &m_parent->m_store[m_index]; }
 
         bool isAutoloadingEntries() const { return m_autoload; }
         void setAutoloadEntries(bool b) { m_autoload = b; }
@@ -47,10 +57,20 @@ public:
     class const_iterator
     {
     public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = const TimeEntry;
+        using difference_type = void;
+        using pointer = const TimeEntry *;
+        using reference = const TimeEntry &;
+
         const_iterator &operator++();
         const_iterator &operator--();
+        const_iterator &operator+(int i);
+        const_iterator &operator-(int i);
         bool operator!=(const const_iterator &other);
+        bool operator==(const const_iterator &other);
         const TimeEntry &operator*() { return m_parent->m_store[m_index]; }
+        const TimeEntry *operator->() { return &m_parent->m_store[m_index]; }
 
         bool isAutoloadingEntries() const { return m_autoload; }
         void setAutoloadEntries(bool b) { m_autoload = b; }

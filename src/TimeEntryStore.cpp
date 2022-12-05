@@ -48,9 +48,26 @@ TimeEntryStore::iterator &TimeEntryStore::iterator::operator--()
     return *this;
 }
 
+TimeEntryStore::iterator &TimeEntryStore::iterator::operator+(int i)
+{
+    m_index += i;
+    return *this;
+}
+
+TimeEntryStore::iterator &TimeEntryStore::iterator::operator-(int i)
+{
+    m_index -= i;
+    return *this;
+}
+
 bool TimeEntryStore::iterator::operator!=(const iterator &other)
 {
     return m_parent != other.m_parent || m_index != other.m_index;
+}
+
+bool TimeEntryStore::iterator::operator==(const iterator &other)
+{
+    return m_parent == other.m_parent && m_index == other.m_index;
 }
 
 TimeEntryStore::iterator::iterator(qsizetype index, TimeEntryStore *store)
@@ -74,9 +91,26 @@ TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator--()
     return *this;
 }
 
+TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator+(int i)
+{
+    m_index += i;
+    return *this;
+}
+
+TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator-(int i)
+{
+    m_index -= i;
+    return *this;
+}
+
 bool TimeEntryStore::const_iterator::operator!=(const const_iterator &other)
 {
     return m_parent != other.m_parent || m_index != other.m_index;
+}
+
+bool TimeEntryStore::const_iterator::operator==(const const_iterator &other)
+{
+    return m_parent == other.m_parent && m_index == other.m_index;
 }
 
 TimeEntryStore::const_iterator::const_iterator(qsizetype index, TimeEntryStore *store)

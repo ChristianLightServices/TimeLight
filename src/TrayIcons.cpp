@@ -571,14 +571,10 @@ void TrayIcons::setUpTrayIcon()
         if (!Settings::instance()->showDurationNotifications())
             return;
 
-        // This will either return the job that just ended, plus the job before, or the job that just started and the job
-        // that just ended. Either way, we can get enough info to run the notifications.
-        auto jobs = m_user->getTimeEntries(1, 2);
-        if (jobs.isEmpty())
-            return;
-        auto job =
-            std::find_if(jobs.begin(), jobs.end(), [this](const auto &j) { return j.id() == m_jobToBeNotified.id(); });
-        if (job == jobs.end() || job->running().value_or(false))
+        auto job = std::find_if(m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) {
+            return j.id() == m_jobToBeNotified.id();
+        });
+        if (job == m_timeEntries->cend() || job->running().value_or(false))
             return;
 
         QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
@@ -854,7 +850,7 @@ void TrayIcons::updateQuickStartList()
 
     std::optional<Project> addBreakTime;
     QList<Project> recentProjects;
-    for (auto &entry : *m_timeEntries)
+    for (auto &entry : RangeSlice(m_timeEntries->begin(), 25))
     {
         if (recentProjects.size() >= 10)
             break;
