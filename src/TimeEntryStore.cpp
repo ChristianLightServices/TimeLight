@@ -32,20 +32,18 @@ void TimeEntryStore::clearStore()
     m_isAtEnd = false;
 }
 
-bool TimeEntryStore::insert(const TimeEntry &t)
+void TimeEntryStore::insert(const TimeEntry &t)
 {
     QMutexLocker _{&m_mut};
-    if (m_store.contains(t))
-        return false;
-
-    if (auto it = std::find_if(m_store.cbegin(), m_store.cend(), [&t](const auto &x) { return x.start() > t.start(); });
+    if (auto it = std::find_if(m_store.begin(), m_store.end(), [&t](const auto &x) { return t.id() == x.id(); }); it != m_store.end())
+        *it = t;
+    else if (auto it = std::find_if(m_store.cbegin(), m_store.cend(), [&t](const auto &x) { return x.start() > t.start(); });
         it != m_store.cend())
         m_store.insert(it, t);
     else if (t.start() > m_store.first().start())
         m_store.prepend(t);
     else
         m_store.append(t);
-    return true;
 }
 
 TimeEntryStore::iterator &TimeEntryStore::iterator::operator++()

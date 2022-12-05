@@ -19,7 +19,7 @@ public:
 
     const TimeEntry &at(qsizetype i) { return m_store.at(i); }
     qsizetype size() const { return m_store.size(); }
-    bool insert(const TimeEntry &t);
+    void insert(const TimeEntry &t);
 
     class iterator
     {
