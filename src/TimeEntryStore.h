@@ -2,6 +2,7 @@
 #define TIMEENTRYSTORE_H
 
 #include <QObject>
+#include <QMutex>
 
 #include "TimeEntry.h"
 #include "User.h"
@@ -98,6 +99,9 @@ private:
     QList<TimeEntry> m_store;
     int m_nextPage{};
     bool m_isAtEnd{false};
+
+    QTimer m_expiryTimer;
+    QMutex m_mut;
 
     friend class iterator;
 };

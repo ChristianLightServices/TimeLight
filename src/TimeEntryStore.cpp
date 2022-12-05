@@ -1,15 +1,22 @@
 #include "TimeEntryStore.h"
 
+#include <QMutexLocker>
+
 TimeEntryStore::TimeEntryStore(QSharedPointer<User> user, QObject *parent)
     : QObject{parent},
       m_user{user},
       m_nextPage{m_user->manager()->paginationStartsAt()}
 {
     fetchMore();
+
+    connect(&m_expiryTimer, &QTimer::timeout, this, &TimeEntryStore::clearStore);
+    m_expiryTimer.setInterval(3 * 60 * 60 * 1000);
+    m_expiryTimer.start();
 }
 
 void TimeEntryStore::fetchMore()
 {
+    QMutexLocker _{&m_mut};
     auto moreEntries = m_user->getTimeEntries(m_nextPage++);
     if (moreEntries.isEmpty())
         m_isAtEnd = true;
@@ -17,8 +24,16 @@ void TimeEntryStore::fetchMore()
         m_store.append(moreEntries);
 }
 
+void TimeEntryStore::clearStore()
+{
+    QMutexLocker _{&m_mut};
+    m_store.clear();
+    m_isAtEnd = false;
+}
+
 bool TimeEntryStore::insert(const TimeEntry &t)
 {
+    QMutexLocker _{&m_mut};
     if (m_store.contains(t))
         return false;
 
