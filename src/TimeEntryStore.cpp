@@ -28,6 +28,7 @@ void TimeEntryStore::clearStore()
 {
     QMutexLocker _{&m_mut};
     m_store.clear();
+    m_nextPage = m_user->manager()->paginationStartsAt();
     m_isAtEnd = false;
 }
 
