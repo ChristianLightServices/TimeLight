@@ -526,27 +526,21 @@ void TrayIcons::setUpTrayIcon()
 
         if (reason == QSystemTrayIcon::MiddleClick)
         {
-            if (m_currentRunningJob)
+            if (m_timerState == TimerState::Running)
             {
-                if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
-                {
-                    auto time = m_user->stopCurrentTimeEntry();
-                    auto project = defaultProject();
-                    m_user->startTimeEntry(project, time);
-                }
-                else
-                {
-                    auto time = m_user->stopCurrentTimeEntry();
-                    m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
-                }
+                auto time = m_user->stopCurrentTimeEntry();
+                m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
+            }
+            else if (m_timerState == TimerState::OnBreak)
+            {
+                auto time = m_user->stopCurrentTimeEntry();
+                auto project = defaultProject();
+                m_user->startTimeEntry(project, time);
             }
             else
-            {
-                auto project = defaultProject();
                 m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}});
-            }
         }
-        else if (m_currentRunningJob)
+        else if (m_timerState == TimerState::Running || m_timerState == TimerState::OnBreak)
             m_user->stopCurrentTimeEntry();
         else
         {
@@ -644,19 +638,16 @@ void TrayIcons::setUpBreakIcon()
             return;
         }
 
-        if (m_currentRunningJob)
+        if (m_timerState == TimerState::Running)
         {
-            if (m_currentRunningJob->project().id() == Settings::instance()->breakTimeId())
-            {
-                auto time = m_user->stopCurrentTimeEntry();
-                auto project = defaultProject();
-                m_user->startTimeEntry(project, time);
-            }
-            else
-            {
-                auto time = m_user->stopCurrentTimeEntry();
-                m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
-            }
+            auto time = m_user->stopCurrentTimeEntry();
+            m_user->startTimeEntry(Project{Settings::instance()->breakTimeId(), {}}, time);
+        }
+        else if (m_timerState == TimerState::OnBreak)
+        {
+            auto time = m_user->stopCurrentTimeEntry();
+            auto project = defaultProject();
+            m_user->startTimeEntry(project, time);
         }
         else
         {
