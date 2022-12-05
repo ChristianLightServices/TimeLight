@@ -44,6 +44,8 @@ public:
     private:
         iterator(qsizetype index, TimeEntryStore *store);
 
+        void maybeFetchMore();
+
         qsizetype m_index;
         TimeEntryStore *m_parent;
         bool m_autoload{true};
@@ -77,6 +79,8 @@ public:
 
     private:
         const_iterator(qsizetype index, TimeEntryStore *store);
+
+        void maybeFetchMore();
 
         qsizetype m_index;
         TimeEntryStore *m_parent;

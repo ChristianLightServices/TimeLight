@@ -35,10 +35,7 @@ bool TimeEntryStore::insert(const TimeEntry &t)
 TimeEntryStore::iterator &TimeEntryStore::iterator::operator++()
 {
     m_index++;
-
-    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
-        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
-        m_parent->fetchMore();
+    maybeFetchMore();
     return *this;
 }
 
@@ -51,6 +48,7 @@ TimeEntryStore::iterator &TimeEntryStore::iterator::operator--()
 TimeEntryStore::iterator &TimeEntryStore::iterator::operator+(int i)
 {
     m_index += i;
+    maybeFetchMore();
     return *this;
 }
 
@@ -73,15 +71,21 @@ bool TimeEntryStore::iterator::operator==(const iterator &other)
 TimeEntryStore::iterator::iterator(qsizetype index, TimeEntryStore *store)
     : m_index{index},
       m_parent{store}
-{}
+{
+    maybeFetchMore();
+}
+
+void TimeEntryStore::iterator::maybeFetchMore()
+{
+    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
+        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+        m_parent->fetchMore();
+}
 
 TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator++()
 {
     m_index++;
-
-    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
-        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
-        m_parent->fetchMore();
+    maybeFetchMore();
     return *this;
 }
 
@@ -94,6 +98,7 @@ TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator--()
 TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator+(int i)
 {
     m_index += i;
+    maybeFetchMore();
     return *this;
 }
 
@@ -116,4 +121,13 @@ bool TimeEntryStore::const_iterator::operator==(const const_iterator &other)
 TimeEntryStore::const_iterator::const_iterator(qsizetype index, TimeEntryStore *store)
     : m_index{index},
       m_parent{store}
-{}
+{
+    maybeFetchMore();
+}
+
+void TimeEntryStore::const_iterator::maybeFetchMore()
+{
+    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
+        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+        m_parent->fetchMore();
+}
