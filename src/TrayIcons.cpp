@@ -279,7 +279,10 @@ void TrayIcons::updateTrayIcons()
         }
     }
     else
+    {
+        m_currentRunningJob = std::nullopt;
         setTimerState(TimerState::NotRunning);
+    }
 }
 
 void TrayIcons::updateRunningEntryTooltip()
