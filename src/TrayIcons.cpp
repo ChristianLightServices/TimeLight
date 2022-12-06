@@ -44,8 +44,8 @@ TrayIcons::TrayIcons(QObject *parent)
             logs::app()->debug("Fixing API key");
             QMessageBox::warning(nullptr, tr("API key"), tr("The API key seems to be incorrect or invalid."));
             SetupFlow flow{this};
-            flow.resetStage<SetupFlow::Stage::ApiKey>();
-            if (auto r = flow.runStage<SetupFlow::Stage::ApiKey>(); r == SetupFlow::Result::Canceled)
+            flow.resetApiKeyStage();
+            if (auto r = flow.runApiKeyStage(); r == SetupFlow::Result::Canceled)
                 return false;
         }
 

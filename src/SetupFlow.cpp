@@ -27,16 +27,16 @@ SetupFlow::Result SetupFlow::runNextStage()
     {
     case Stage::NotStarted:
         m_stage = Stage::TimeService;
-        return runStage<Stage::TimeService>();
+        return runTimeServiceStage();
     case Stage::TimeService:
         m_stage = Stage::ApiKey;
-        return runStage<Stage::ApiKey>();
+        return runApiKeyStage();
     case Stage::ApiKey:
         m_stage = Stage::Workspace;
-        return runStage<Stage::Workspace>();
+        return runWorkspaceStage();
     case Stage::Workspace:
         m_stage = Stage::Project;
-        return runStage<Stage::Project>();
+        return runProjectStage();
     case Stage::Project:
         m_stage = Stage::Done;
         return SetupFlow::Result::Valid;
@@ -52,16 +52,16 @@ SetupFlow::Result SetupFlow::runPreviousStage()
     {
     case Stage::Done:
         m_stage = Stage::Project;
-        return runStage<Stage::Project>();
+        return runProjectStage();
     case Stage::Project:
         m_stage = Stage::Workspace;
-        return runStage<Stage::Workspace>();
+        return runWorkspaceStage();
     case Stage::Workspace:
         m_stage = Stage::ApiKey;
-        return runStage<Stage::ApiKey>();
+        return runApiKeyStage();
     case Stage::ApiKey:
         m_stage = Stage::TimeService;
-        return runStage<Stage::TimeService>();
+        return runTimeServiceStage();
     default:
         m_stage = Stage::NotStarted;
         return SetupFlow::Result::Valid;
@@ -73,13 +73,13 @@ SetupFlow::Result SetupFlow::rerunCurrentStage()
     switch (m_stage)
     {
     case Stage::TimeService:
-        return runStage<Stage::TimeService>();
+        return runTimeServiceStage();
     case Stage::ApiKey:
-        return runStage<Stage::ApiKey>();
+        return runApiKeyStage();
     case Stage::Workspace:
-        return runStage<Stage::Workspace>();
+        return runWorkspaceStage();
     case Stage::Project:
-        return runStage<Stage::Project>();
+        return runProjectStage();
     default:
         return SetupFlow::Result::Valid;
     }
@@ -90,16 +90,16 @@ void SetupFlow::resetNextStage()
     switch (m_stage)
     {
     case Stage::Done:
-        resetStage<Stage::TimeService>();
+        resetTimeServiceStage();
         break;
     case Stage::TimeService:
-        resetStage<Stage::ApiKey>();
+        resetApiKeyStage();
         break;
     case Stage::ApiKey:
-        resetStage<Stage::Workspace>();
+        resetWorkspaceStage();
         break;
     case Stage::Workspace:
-        resetStage<Stage::Project>();
+        resetProjectStage();
         break;
     default:
         break;
@@ -111,16 +111,16 @@ void SetupFlow::resetPreviousStage()
     switch (m_stage)
     {
     case Stage::ApiKey:
-        resetStage<Stage::TimeService>();
+        resetTimeServiceStage();
         break;
     case Stage::Workspace:
-        resetStage<Stage::ApiKey>();
+        resetApiKeyStage();
         break;
     case Stage::Project:
-        resetStage<Stage::Workspace>();
+        resetWorkspaceStage();
         break;
     case Stage::Done:
-        resetStage<Stage::Project>();
+        resetProjectStage();
         break;
     default:
         break;
@@ -132,24 +132,23 @@ void SetupFlow::resetCurrentStage()
     switch (m_stage)
     {
     case Stage::TimeService:
-        resetStage<Stage::TimeService>();
+        resetTimeServiceStage();
         break;
     case Stage::ApiKey:
-        resetStage<Stage::ApiKey>();
+        resetApiKeyStage();
         break;
     case Stage::Workspace:
-        resetStage<Stage::Workspace>();
+        resetWorkspaceStage();
         break;
     case Stage::Project:
-        resetStage<Stage::Project>();
+        resetProjectStage();
         break;
     default:
         break;
     }
 }
 
-template<>
-SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
+SetupFlow::Result SetupFlow::runTimeServiceStage() const
 {
     if (Settings::instance()->timeService().isEmpty())
     {
@@ -177,8 +176,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::TimeService>() const
     return SetupFlow::Result::Valid;
 }
 
-template<>
-SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::ApiKey>() const
+SetupFlow::Result SetupFlow::runApiKeyStage() const
 {
     Result r = SetupFlow::Result::Valid;
 
@@ -215,8 +213,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::ApiKey>() const
     return r;
 }
 
-template<>
-SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
+SetupFlow::Result SetupFlow::runWorkspaceStage() const
 {
     Result r = SetupFlow::Result::Valid;
 
@@ -253,8 +250,7 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Workspace>() const
     return r;
 }
 
-template<>
-SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Project>() const
+SetupFlow::Result SetupFlow::runProjectStage() const
 {
     auto validProjectSet = [] {
         return (Settings::instance()->useLastProject() || !Settings::instance()->projectId().isEmpty()) &&
@@ -277,26 +273,22 @@ SetupFlow::Result SetupFlow::runStage<SetupFlow::Stage::Project>() const
     return validProjectSet() ? SetupFlow::Result::Valid : SetupFlow::Result::Invalid;
 }
 
-template<>
-void SetupFlow::resetStage<SetupFlow::Stage::TimeService>() const
+void SetupFlow::resetTimeServiceStage() const
 {
     Settings::instance()->setTimeService({});
 }
 
-template<>
-void SetupFlow::resetStage<SetupFlow::Stage::ApiKey>() const
+void SetupFlow::resetApiKeyStage() const
 {
     Settings::instance()->setApiKey({});
 }
 
-template<>
-void SetupFlow::resetStage<SetupFlow::Stage::Workspace>() const
+void SetupFlow::resetWorkspaceStage() const
 {
     Settings::instance()->setWorkspaceId({});
 }
 
-template<>
-void SetupFlow::resetStage<SetupFlow::Stage::Project>() const
+void SetupFlow::resetProjectStage() const
 {
     Settings::instance()->setProjectId({});
     Settings::instance()->setBreakTimeId({});

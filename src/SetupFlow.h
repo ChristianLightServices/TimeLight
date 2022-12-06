@@ -34,31 +34,15 @@ public:
     bool done() const { return m_stage == Stage::Done; }
     Stage stage() const { return m_stage; }
 
-    template<Stage stage>
-    Result runStage() const
-    {
-        return Result::Valid;
-    }
-    template<>
-    Result runStage<Stage::TimeService>() const;
-    template<>
-    Result runStage<Stage::ApiKey>() const;
-    template<>
-    Result runStage<Stage::Workspace>() const;
-    template<>
-    Result runStage<Stage::Project>() const;
+    Result runTimeServiceStage() const;
+    Result runApiKeyStage() const;
+    Result runWorkspaceStage() const;
+    Result runProjectStage() const;
 
-    template<Stage stage>
-    void resetStage() const
-    {}
-    template<>
-    void resetStage<Stage::TimeService>() const;
-    template<>
-    void resetStage<Stage::ApiKey>() const;
-    template<>
-    void resetStage<Stage::Workspace>() const;
-    template<>
-    void resetStage<Stage::Project>() const;
+    void resetTimeServiceStage() const;
+    void resetApiKeyStage() const;
+    void resetWorkspaceStage() const;
+    void resetProjectStage() const;
 
 public slots:
     void cancelFlow();
