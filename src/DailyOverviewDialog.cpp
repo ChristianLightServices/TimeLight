@@ -63,7 +63,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
         std::reverse(todaysTime.begin(), todaysTime.end());
 
         m_totalTime->setText(
-            tr("Total time today: ")
+            tr("Total time: ")
                 .append(QTime::fromMSecsSinceStartOfDay(std::accumulate(todaysTime.begin(),
                                                                         todaysTime.end(),
                                                                         0,
