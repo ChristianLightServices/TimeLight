@@ -217,10 +217,13 @@ SetupFlow::Result SetupFlow::runWorkspaceStage() const
 {
     Result r = SetupFlow::Result::Valid;
 
-    if (Settings::instance()->workspaceId().isEmpty())
+    auto workspaces = m_parent->m_manager->workspaces();
+    if (Settings::instance()->workspaceId().isEmpty() ||
+        std::find_if(workspaces.begin(), workspaces.end(), [](const auto &w) {
+            return w.id() == Settings::instance()->workspaceId();
+        }) == workspaces.end())
     {
         logs::app()->trace("Initializing workspace");
-        auto workspaces = m_parent->m_manager->workspaces();
         QStringList names;
         for (const auto &w : workspaces)
             names << w.name();
