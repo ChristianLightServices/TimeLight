@@ -259,7 +259,8 @@ void TrayIcons::updateTrayIcons()
     {
         try
         {
-            m_currentRunningJob = *runningEntry;
+            bool different = m_currentRunningJob != runningEntry;
+            m_currentRunningJob = runningEntry;
 
             // This request is performed in another thread to minimize chances of lock races
             QThread::create([this, runningEntry] { m_timeEntries->insert(*runningEntry); })->start();
@@ -269,6 +270,8 @@ void TrayIcons::updateTrayIcons()
                 setTimerState(TimerState::OnBreak);
             else
                 setTimerState(TimerState::Running);
+            if (different)
+                updateIconsAndTooltips();
             // At this point, the previous job will have been notified for, so it's safe to overwrite it
             m_jobToBeNotified = runningEntry;
         }
