@@ -753,29 +753,37 @@ void AbstractTimeServiceManager::httpRequest(const HttpVerb verb,
     req.setRawHeader(authHeaderName(), apiKeyForRequests());
 
     QNetworkReply *rep = nullptr;
+    std::string verbName;
     switch (verb)
     {
     case HttpVerb::Get:
         rep = m_manager.get(req);
+        verbName = "GET";
         break;
     case HttpVerb::Post:
         rep = m_manager.post(req, body);
+        verbName = "POST";
         break;
     case HttpVerb::Patch:
         rep = m_manager.sendCustomRequest(req, QByteArrayLiteral("PATCH"), body);
+        verbName = "PATCH";
         break;
     case HttpVerb::Put:
         rep = m_manager.put(req, body);
+        verbName = "PUT";
         break;
     case HttpVerb::Head:
         rep = m_manager.head(req);
+        verbName = "HEAD";
         break;
     case HttpVerb::Delete:
         rep = m_manager.deleteResource(req);
+        verbName = "DELETE";
         break;
     default:
         break;
     }
+    logger()->trace("Network request: {} {}", verbName, url.toString().toStdString());
 
     using namespace std::placeholders;
     m_pendingReplies.insert(rep,
