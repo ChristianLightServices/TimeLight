@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 
 #include "AbstractTimeServiceManager.h"
+#include "TimeEntryStore.h"
 #include "User.h"
 
 class DailyOverviewDialog : public QDialog
@@ -16,6 +17,7 @@ class DailyOverviewDialog : public QDialog
 public:
     DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                         QSharedPointer<User> user,
+                        QSharedPointer<TimeEntryStore> entryStore,
                         QWidget *parent = nullptr);
 
 private:
@@ -26,7 +28,7 @@ private:
     };
 
     QSharedPointer<AbstractTimeServiceManager> m_manager;
-    QSharedPointer<User> m_user;
+    QSharedPointer<TimeEntryStore> m_entries;
 
     QLabel *m_totalTime;
     QTableWidget *m_chronologicalTable;

@@ -34,10 +34,11 @@ public:
 
 DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                                          QSharedPointer<User> user,
+                                         QSharedPointer<TimeEntryStore> entryStore,
                                          QWidget *parent)
     : QDialog{parent},
       m_manager{manager},
-      m_user{user},
+      m_entries{entryStore},
       m_totalTime{new QLabel},
       m_chronologicalTable{new QTableWidget{0, 3, this}},
       m_byProjectTable{new QTableWidget{0, 2, this}},
@@ -59,8 +60,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     m_byProjectTable->setSelectionMode(QTableWidget::NoSelection);
 
     auto updateData = [this] {
-        auto todaysTime = m_user->getTimeEntries(std::nullopt, std::nullopt, QDateTime{m_day, QTime{}}, m_day.endOfDay());
-        std::reverse(todaysTime.begin(), todaysTime.end());
+        auto todaysTime = m_entries->constSliceByDate(QDateTime{m_day, QTime{}}, m_day.endOfDay());
 
         m_totalTime->setText(
             tr("Total time: ")
@@ -76,17 +76,18 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
                             .toString(QStringLiteral("h:mm:ss"))));
 
         m_chronologicalTable->clearContents();
-        m_chronologicalTable->setRowCount(static_cast<int>(todaysTime.count()));
-        for (int i = 0; i < todaysTime.size(); ++i)
+        m_chronologicalTable->setRowCount(TimeLight::rangeSize(todaysTime));
+        for (auto [i, it] = std::tuple(m_chronologicalTable->rowCount() - 1, todaysTime.begin()); it != todaysTime.end();
+             --i, ++it)
         {
-            m_chronologicalTable->setItem(i, 0, new TimeTableItem{todaysTime[i].start()});
-            m_chronologicalTable->setItem(i, 1, new TimeTableItem{todaysTime[i].end()});
-            m_chronologicalTable->setItem(i, 2, new QTableWidgetItem{todaysTime[i].project().name()});
+            m_chronologicalTable->setItem(i, 0, new TimeTableItem{it->start()});
+            m_chronologicalTable->setItem(i, 1, new TimeTableItem{it->end()});
+            m_chronologicalTable->setItem(i, 2, new QTableWidgetItem{it->project().name()});
         }
 
         QHash<QString, int> msecsByProject;
-        for (int i = 0; i < todaysTime.size(); ++i)
-            msecsByProject[todaysTime[i].project().id()] += todaysTime[i].start().msecsTo(todaysTime[i].end());
+        for (const auto &t : todaysTime)
+            msecsByProject[t.project().id()] += t.start().msecsTo(t.end());
         m_byProjectTable->clearContents();
         m_byProjectTable->setRowCount(static_cast<int>(msecsByProject.count()));
         int _i = 0;

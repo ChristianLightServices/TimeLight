@@ -74,6 +74,7 @@ private:
     void updateIconsAndTooltips();
     void updateQuickStartList();
     void showOfflineNotification();
+    void checkForJobNotification();
     void checkForFinishedWeek();
     QSharedPointer<AbstractTimeServiceManager> m_manager;
     QSharedPointer<TeamsClient> m_teamsClient;
@@ -91,7 +92,7 @@ private:
     QSharedPointer<User> m_user;
     TimerState m_timerState{TimerState::StateUnset};
     std::optional<TimeEntry> m_currentRunningJob;
-    TimeEntry m_jobToBeNotified;
+    std::optional<TimeEntry> m_jobToBeNotified;
 
     QTimer m_eventLoop;
     QTimer m_alertOnTimeUpTimer;

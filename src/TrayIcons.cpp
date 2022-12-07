@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QTextBrowser>
+#include <QThread>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -259,7 +260,9 @@ void TrayIcons::updateTrayIcons()
         try
         {
             m_currentRunningJob = *runningEntry;
-            m_timeEntries->insert(*runningEntry);
+
+            // This request is performed in another thread to minimize chances of lock races
+            QThread::create([this, runningEntry] { m_timeEntries->insert(*runningEntry); })->start();
 
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
@@ -267,7 +270,7 @@ void TrayIcons::updateTrayIcons()
             else
                 setTimerState(TimerState::Running);
             // At this point, the previous job will have been notified for, so it's safe to overwrite it
-            m_jobToBeNotified = *runningEntry;
+            m_jobToBeNotified = runningEntry;
         }
         catch (const std::exception &ex)
         {
@@ -374,9 +377,9 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     menu->addMenu(m_quickStartMenu.data());
     auto modifyJob = menu->addAction(tr("Modify current job"));
     connect(modifyJob, &QAction::triggered, this, [this] {
-        if (auto e = m_user->getRunningTimeEntry(); e)
+        if (m_currentRunningJob)
         {
-            auto dialog = new ModifyJobDialog{m_manager, *e, m_timeEntries};
+            auto dialog = new ModifyJobDialog{m_manager, *m_currentRunningJob, m_timeEntries};
             dialog->show();
             connect(dialog, &QDialog::finished, this, [this, dialog](int result) {
                 if (result == QDialog::Accepted)
@@ -409,7 +412,7 @@ void TrayIcons::addStandardMenuActions(QMenu *menu)
     });
 
     connect(menu->addAction(tr("Daily time report")), &QAction::triggered, this, [this] {
-        DailyOverviewDialog d{m_manager, m_user};
+        DailyOverviewDialog d{m_manager, m_user, m_timeEntries};
         d.exec();
     });
 
@@ -564,30 +567,8 @@ void TrayIcons::setUpTrayIcon()
             &TrayIcons::updateTrayIcons,
             Qt::QueuedConnection);
 
-    connect(this, &TrayIcons::jobEnded, this, [this] {
-        if (!Settings::instance()->showDurationNotifications())
-            return;
-
-        auto job = std::find_if(m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) {
-            return j.id() == m_jobToBeNotified.id();
-        });
-        if (job == m_timeEntries->cend() || job->running().value_or(false))
-            return;
-
-        QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
-        QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
-        if (duration.hour() > 0)
-            timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
-        else
-            timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
-        auto message =
-            (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
-                tr("You were on break for %1") :
-                tr("You worked %2 on %1").arg(job->project().name());
-        m_trayIcon->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
-
-        updateQuickStartList();
-    });
+    connect(this, &TrayIcons::jobEnded, this, &TrayIcons::checkForJobNotification);
+    connect(this, &TrayIcons::jobStarted, this, &TrayIcons::checkForJobNotification);
     connect(this, &TrayIcons::jobStarted, this, &TrayIcons::updateQuickStartList, Qt::QueuedConnection);
 
     auto showOrHideBreakButton = [this, breakResumeAction] {
@@ -890,16 +871,41 @@ void TrayIcons::showOfflineNotification()
                                "down."));
 }
 
+void TrayIcons::checkForJobNotification()
+{
+    if (!m_jobToBeNotified || !Settings::instance()->showDurationNotifications())
+        return;
+
+    auto job = std::find_if(m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) {
+        return j.id() == m_jobToBeNotified->id();
+    });
+    if (job == m_timeEntries->cend() || job->running().value_or(false))
+        return;
+
+    QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
+    QString timeString{tr("%n minute(s)", nullptr, duration.minute())};
+    if (duration.hour() > 0)
+        timeString.prepend(tr("%n hour(s) and ", nullptr, duration.hour()));
+    else
+        timeString.append(tr(" and %n second(s)", nullptr, duration.second()));
+    auto message =
+        (Settings::instance()->useSeparateBreakTime() && job->project().id() == Settings::instance()->breakTimeId()) ?
+            tr("You were on break for %1") :
+            tr("You worked %2 on %1").arg(job->project().name());
+    m_trayIcon->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
+    m_jobToBeNotified = std::nullopt;
+
+    updateQuickStartList();
+}
+
 void TrayIcons::checkForFinishedWeek()
 {
     // we can't show a bubble if the icon isn't visible
     if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done && m_trayIcon->isVisible())
     {
         auto now = QDateTime::currentDateTime();
-        auto entries = m_user->getTimeEntries(std::nullopt,
-                                              std::nullopt,
-                                              now.addDays(-(now.date().dayOfWeek() % 7)),
-                                              now.addDays(6 - (now.date().dayOfWeek() % 7)));
+        auto entries = m_timeEntries->constSliceByDate(now.addDays(-(now.date().dayOfWeek() % 7)),
+                                                       now.addDays(6 - (now.date().dayOfWeek() % 7)));
         double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [](auto a, auto b) {
             if (b.end().isNull() && b.running().value_or(true))
                 b.setEnd(QDateTime::currentDateTime());

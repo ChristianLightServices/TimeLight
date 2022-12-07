@@ -1,147 +1,134 @@
 #include "TimeEntryStore.h"
 
 #include <QMutexLocker>
+#include <QThread>
+#include <QTableView>
+
+#include "Logger.h"
 
 TimeEntryStore::TimeEntryStore(QSharedPointer<User> user, QObject *parent)
-    : QObject{parent},
+    : QAbstractListModel{parent},
       m_user{user},
       m_nextPage{m_user->manager()->paginationStartsAt()}
 {
     fetchMore();
 
     connect(&m_expiryTimer, &QTimer::timeout, this, &TimeEntryStore::clearStore);
-    m_expiryTimer.setInterval(3 * 60 * 60 * 1000);
+    m_expiryTimer.setInterval(2 * 60 * 60 * 1000);
     m_expiryTimer.start();
+}
+
+QVariant TimeEntryStore::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_store.size())
+        return {};
+
+    switch (role)
+    {
+    case Roles::Id:
+        return m_store[index.row()].id();
+    case Roles::UserId:
+        return m_store[index.row()].userId();
+    case Roles::Start:
+        return m_store[index.row()].start();
+    case Roles::End:
+        return m_store[index.row()].end();
+    case Roles::Project:
+//        return m_store[index.row()].project();
+        return m_store[index.row()].project().name();
+    case Roles::IsRunning:
+        return m_store[index.row()].running().value_or(false);
+    default:
+        return {};
+    }
+}
+
+QHash<int, QByteArray> TimeEntryStore::roleNames() const
+{
+    return {
+        {Roles::Id, QByteArrayLiteral("id")},
+        {Roles::UserId, QByteArrayLiteral("userId")},
+        {Roles::Start, QByteArrayLiteral("start")},
+        {Roles::End, QByteArrayLiteral("end")},
+        {Roles::Project, QByteArrayLiteral("project")},
+        {Roles::IsRunning, QByteArrayLiteral("isRunning")},
+    };
 }
 
 void TimeEntryStore::fetchMore()
 {
-    QMutexLocker _{&m_mut};
+    if (m_isAtEnd)
+        return;
+
+    TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: lock mutex", QThread::currentThreadId());
+    QMutexLocker _{&m_mutex};
     auto moreEntries = m_user->getTimeEntries(m_nextPage++);
     if (moreEntries.isEmpty())
         m_isAtEnd = true;
     else
+    {
+        beginInsertRows({}, m_store.size(), m_store.size() + moreEntries.size() - 1);
         m_store.append(moreEntries);
+        endInsertRows();
+    }
+    TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: unlock mutex", QThread::currentThreadId());
 }
 
 void TimeEntryStore::clearStore()
 {
-    QMutexLocker _{&m_mut};
+    TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: lock mutex", QThread::currentThreadId());
+    QMutexLocker _{&m_mutex};
+    beginResetModel();
     m_store.clear();
+    endResetModel();
     m_nextPage = m_user->manager()->paginationStartsAt();
     m_isAtEnd = false;
+    TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: unlock mutex", QThread::currentThreadId());
 }
 
 void TimeEntryStore::insert(const TimeEntry &t)
 {
-    QMutexLocker _{&m_mut};
-    if (auto it = std::find_if(m_store.begin(), m_store.end(), [&t](const auto &x) { return t.id() == x.id(); }); it != m_store.end())
+    TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: lock mutex", QThread::currentThreadId());
+    QMutexLocker _{&m_mutex};
+    if (auto it = std::find_if(static_begin(), static_end(), [&t](const auto &x) { return t.id() == x.id(); });
+        it != static_end())
         *it = t;
-    else if (auto it = std::find_if(m_store.cbegin(), m_store.cend(), [&t](const auto &x) { return x.start() > t.start(); });
-        it != m_store.cend())
-        m_store.insert(it, t);
+    else if (auto it = std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
+             it != static_cend())
+    {
+        beginInsertRows({}, it.index(), it.index());
+        m_store.insert(it.index(), t);
+        endInsertRows();
+    }
     else if (t.start() > m_store.first().start())
+    {
+        beginInsertRows({}, 0, 0);
         m_store.prepend(t);
+        endInsertRows();
+    }
     else
+    {
+        beginInsertRows({}, m_store.size(), m_store.size());
         m_store.append(t);
+        endInsertRows();
+    }
+    TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: unlock mutex", QThread::currentThreadId());
 }
 
-TimeEntryStore::iterator &TimeEntryStore::iterator::operator++()
+RangeSlice<TimeEntryStore::iterator> TimeEntryStore::sliceByDate(const QDateTime &oldest, const QDateTime &newest)
 {
-    m_index++;
-    maybeFetchMore();
-    return *this;
+    auto start = std::find_if(
+        begin(), end(), [&newest, &oldest](const TimeEntry &t) { return t.start() <= std::max(newest, oldest); });
+    auto finish = std::find_if(
+        start, end(), [&newest, &oldest](const TimeEntry &t) { return t.start() < std::min(newest, oldest); });
+    return {start, finish};
 }
 
-TimeEntryStore::iterator &TimeEntryStore::iterator::operator--()
+RangeSlice<TimeEntryStore::const_iterator> TimeEntryStore::constSliceByDate(const QDateTime &oldest, const QDateTime &newest)
 {
-    m_index--;
-    return *this;
-}
-
-TimeEntryStore::iterator &TimeEntryStore::iterator::operator+(int i)
-{
-    m_index += i;
-    maybeFetchMore();
-    return *this;
-}
-
-TimeEntryStore::iterator &TimeEntryStore::iterator::operator-(int i)
-{
-    m_index -= i;
-    return *this;
-}
-
-bool TimeEntryStore::iterator::operator!=(const iterator &other)
-{
-    return m_parent != other.m_parent || m_index != other.m_index;
-}
-
-bool TimeEntryStore::iterator::operator==(const iterator &other)
-{
-    return m_parent == other.m_parent && m_index == other.m_index;
-}
-
-TimeEntryStore::iterator::iterator(qsizetype index, TimeEntryStore *store)
-    : m_index{index},
-      m_parent{store}
-{
-    maybeFetchMore();
-}
-
-void TimeEntryStore::iterator::maybeFetchMore()
-{
-    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
-        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
-        m_parent->fetchMore();
-}
-
-TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator++()
-{
-    m_index++;
-    maybeFetchMore();
-    return *this;
-}
-
-TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator--()
-{
-    m_index--;
-    return *this;
-}
-
-TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator+(int i)
-{
-    m_index += i;
-    maybeFetchMore();
-    return *this;
-}
-
-TimeEntryStore::const_iterator &TimeEntryStore::const_iterator::operator-(int i)
-{
-    m_index -= i;
-    return *this;
-}
-
-bool TimeEntryStore::const_iterator::operator!=(const const_iterator &other)
-{
-    return m_parent != other.m_parent || m_index != other.m_index;
-}
-
-bool TimeEntryStore::const_iterator::operator==(const const_iterator &other)
-{
-    return m_parent == other.m_parent && m_index == other.m_index;
-}
-
-TimeEntryStore::const_iterator::const_iterator(qsizetype index, TimeEntryStore *store)
-    : m_index{index},
-      m_parent{store}
-{
-    maybeFetchMore();
-}
-
-void TimeEntryStore::const_iterator::maybeFetchMore()
-{
-    if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
-        m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
-        m_parent->fetchMore();
+    auto start = std::find_if(
+        cbegin(), cend(), [&newest, &oldest](const TimeEntry &t) { return t.start() <= std::max(newest, oldest); });
+    auto finish = std::find_if(
+        start, cend(), [&newest, &oldest](const TimeEntry &t) { return t.start() < std::min(newest, oldest); });
+    return {start, finish};
 }
