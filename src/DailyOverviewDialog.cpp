@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QPushButton>
+#include <QThread>
 
 #include "TimeEntry.h"
 
@@ -59,56 +60,16 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     m_byProjectTable->horizontalHeader()->setStretchLastSection(true);
     m_byProjectTable->setSelectionMode(QTableWidget::NoSelection);
 
-    auto updateData = [this] {
-        auto todaysTime = m_entries->constSliceByDate(QDateTime{m_day, QTime{}}, m_day.endOfDay());
-
-        m_totalTime->setText(
-            tr("Total time: ")
-                .append(QTime::fromMSecsSinceStartOfDay(std::accumulate(todaysTime.begin(),
-                                                                        todaysTime.end(),
-                                                                        0,
-                                                                        [this](int a, const TimeEntry &b) -> int {
-                                                                            return a + b.start().msecsTo(
-                                                                                           b.end().isValid() ?
-                                                                                               b.end() :
-                                                                                               m_manager->currentDateTime());
-                                                                        }))
-                            .toString(QStringLiteral("h:mm:ss"))));
-
-        m_chronologicalTable->clearContents();
-        m_chronologicalTable->setRowCount(TimeLight::rangeSize(todaysTime));
-        for (auto [i, it] = std::tuple(m_chronologicalTable->rowCount() - 1, todaysTime.begin()); it != todaysTime.end();
-             --i, ++it)
-        {
-            m_chronologicalTable->setItem(i, 0, new TimeTableItem{it->start()});
-            m_chronologicalTable->setItem(i, 1, new TimeTableItem{it->end()});
-            m_chronologicalTable->setItem(i, 2, new QTableWidgetItem{it->project().name()});
-        }
-
-        QHash<QString, int> msecsByProject;
-        for (const auto &t : todaysTime)
-            msecsByProject[t.project().id()] += t.start().msecsTo(t.end());
-        m_byProjectTable->clearContents();
-        m_byProjectTable->setRowCount(static_cast<int>(msecsByProject.count()));
-        int _i = 0;
-        for (const auto &key : msecsByProject.keys())
-        {
-            m_byProjectTable->setItem(
-                _i,
-                0,
-                new QTableWidgetItem{
-                    QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString(QStringLiteral("h:mm:ss"))});
-            m_byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->projectName(key)});
-            ++_i;
-        }
-    };
-    updateData();
-
     auto datePicker = new QDateEdit{this};
     datePicker->setDate(m_day);
     datePicker->setMaximumDate(m_manager->currentDateTime().date());
     datePicker->setCalendarPopup(true);
     datePicker->setDisplayFormat(QStringLiteral("MMMM d, yyyy"));
+
+    m_loadingEntries = new QProgressBar{this};
+    m_loadingEntries->setMinimum(0);
+    m_loadingEntries->setMaximum(0);
+    m_loadingEntries->setVisible(false);
 
     auto today = new QPushButton{tr("Today"), this};
 
@@ -123,6 +84,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     auto dayLayout = new QHBoxLayout;
     dayLayout->addWidget(m_totalTime);
     dayLayout->addStretch();
+    dayLayout->addWidget(m_loadingEntries, 1);
     dayLayout->addWidget(today);
     dayLayout->addWidget(back);
     dayLayout->addWidget(datePicker);
@@ -157,13 +119,57 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     setProperTimeTable();
 
     auto bb = new QDialogButtonBox{QDialogButtonBox::Ok, this};
-    connect(bb->addButton(tr("Refresh"), QDialogButtonBox::ButtonRole::ActionRole), &QPushButton::clicked, this, updateData);
+    auto reset = bb->addButton(tr("Refresh"), QDialogButtonBox::ButtonRole::ActionRole);
     m_layout->addWidget(bb, 0, Qt::AlignRight);
 
-    connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
-    connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
-    connect(datePicker, &QDateEdit::dateChanged, this, [this, updateData, forward, back, datePicker](const QDate &d) {
-        m_day = d;
+    auto updateTotalTime = [this] {
+        auto todaysTime = m_entries->constSliceByDate(QDateTime{m_day, QTime{}}, m_day.endOfDay());
+
+        m_totalTime->setText(
+            tr("Total time: ")
+                .append(QTime::fromMSecsSinceStartOfDay(std::accumulate(todaysTime.begin(),
+                                                                        todaysTime.end(),
+                                                                        0,
+                                                                        [this](int a, const TimeEntry &b) -> int {
+                                                                            return a + b.start().msecsTo(
+                                                                                           b.end().isValid() ?
+                                                                                               b.end() :
+                                                                                               m_manager->currentDateTime());
+                                                                        }))
+                            .toString(QStringLiteral("h:mm:ss"))));
+    };
+    auto updateData = [this, datePicker, forward, back, today, reset, updateTotalTime] {
+        auto todaysTime = m_entries->constSliceByDate(QDateTime{m_day, QTime{}}, m_day.endOfDay());
+
+        updateTotalTime();
+
+        m_chronologicalTable->clearContents();
+        m_chronologicalTable->setRowCount(TimeLight::rangeSize(todaysTime));
+        for (auto [i, it] = std::tuple(m_chronologicalTable->rowCount() - 1, todaysTime.begin()); it != todaysTime.end();
+             --i, ++it)
+        {
+            m_chronologicalTable->setItem(i, 0, new TimeTableItem{it->start()});
+            m_chronologicalTable->setItem(i, 1, new TimeTableItem{it->end()});
+            m_chronologicalTable->setItem(i, 2, new QTableWidgetItem{it->project().name()});
+        }
+
+        QHash<QString, int> msecsByProject;
+        for (const auto &t : todaysTime)
+            msecsByProject[t.project().id()] += t.start().msecsTo(t.end());
+        m_byProjectTable->clearContents();
+        m_byProjectTable->setRowCount(static_cast<int>(msecsByProject.count()));
+        int _i = 0;
+        for (const auto &key : msecsByProject.keys())
+        {
+            m_byProjectTable->setItem(
+                _i,
+                0,
+                new QTableWidgetItem{
+                    QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString(QStringLiteral("h:mm:ss"))});
+            m_byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->projectName(key)});
+            ++_i;
+        }
+
         if (m_day == datePicker->maximumDate())
             forward->setDisabled(true);
         else
@@ -172,14 +178,42 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
             back->setDisabled(true);
         else
             back->setEnabled(true);
-        updateData();
-    });
+        datePicker->setEnabled(true);
+        today->setEnabled(true);
+        reset->setEnabled(true);
+        m_loadingEntries->setVisible(false);
+    };
+    updateData();
+
+    auto totalTimeUpdater = new QTimer{this};
+    totalTimeUpdater->setInterval(1000);
+    totalTimeUpdater->callOnTimeout(updateTotalTime);
+    totalTimeUpdater->start();
+
+    connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
+    connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
+    connect(datePicker,
+            &QDateEdit::dateChanged,
+            this,
+            [this, updateData, forward, back, datePicker, today, reset](const QDate &d) {
+                m_day = d;
+
+                forward->setDisabled(true);
+                back->setDisabled(true);
+                datePicker->setDisabled(true);
+                today->setDisabled(true);
+                reset->setDisabled(true);
+                m_loadingEntries->setVisible(true);
+
+                QThread::create([updateData] { updateData(); })->start();
+            });
     connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
     connect(
         forward, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(1)); });
     connect(today, &QPushButton::clicked, datePicker, [this, datePicker] {
         datePicker->setDate(m_manager->currentDateTime().date());
     });
+    connect(reset, &QPushButton::clicked, this, updateData);
 
     resize(600, 400);
 }

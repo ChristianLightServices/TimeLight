@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QProgressBar>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
@@ -33,6 +34,7 @@ private:
     QLabel *m_totalTime;
     QTableWidget *m_chronologicalTable;
     QTableWidget *m_byProjectTable;
+    QProgressBar *m_loadingEntries;
 
     QVBoxLayout *m_layout;
     QDate m_day;
