@@ -46,6 +46,12 @@ jobs:
           plugins: qt appimage
           dir: ${{ github.workspace }}
 
+      - name: Install FUSE
+        if: ${{ github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          sudo apt-add-repository universe
+          sudo apt install libfuse2 -y
+
       - name: Build release package
         if: ${{ github.event.inputs.packageRelease || startsWith(github.ref, 'refs/tags/v') }}
         run: |
