@@ -131,20 +131,17 @@ void TimeEntryStore::insert(const TimeEntry &t)
         QTimer::singleShot(10, std::bind(&TimeEntryStore::insert, this, std::move(t)));
 }
 
-RangeSlice<TimeEntryStore::iterator> TimeEntryStore::sliceByDate(const QDateTime &oldest, const QDateTime &newest)
+RangeSlice<TimeEntryStore::iterator> TimeEntryStore::sliceByDate(const QDateTime &from, const QDateTime &to)
 {
-    auto start = std::find_if(
-        begin(), end(), [&newest, &oldest](const TimeEntry &t) { return t.start() <= std::max(newest, oldest); });
-    auto finish = std::find_if(
-        start, end(), [&newest, &oldest](const TimeEntry &t) { return t.start() < std::min(newest, oldest); });
+    auto start = std::find_if(begin(), end(), [&to, &from](const TimeEntry &t) { return t.start() <= std::max(to, from); });
+    auto finish = std::find_if(start, end(), [&to, &from](const TimeEntry &t) { return t.start() < std::min(to, from); });
     return {start, finish};
 }
 
-RangeSlice<TimeEntryStore::const_iterator> TimeEntryStore::constSliceByDate(const QDateTime &oldest, const QDateTime &newest)
+RangeSlice<TimeEntryStore::const_iterator> TimeEntryStore::constSliceByDate(const QDateTime &from, const QDateTime &to)
 {
-    auto start = std::find_if(
-        cbegin(), cend(), [&newest, &oldest](const TimeEntry &t) { return t.start() <= std::max(newest, oldest); });
-    auto finish = std::find_if(
-        start, cend(), [&newest, &oldest](const TimeEntry &t) { return t.start() < std::min(newest, oldest); });
+    auto start =
+        std::find_if(cbegin(), cend(), [&to, &from](const TimeEntry &t) { return t.start() <= std::max(to, from); });
+    auto finish = std::find_if(start, cend(), [&to, &from](const TimeEntry &t) { return t.start() < std::min(to, from); });
     return {start, finish};
 }
