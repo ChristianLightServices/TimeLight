@@ -80,7 +80,7 @@ void TimeEntryStore::fetchMore()
         TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: unlock mutex", QThread::currentThreadId());
     }
     else
-        QTimer::singleShot(10, this, &TimeEntryStore::fetchMore);
+        QTimer::singleShot(0, this, &TimeEntryStore::fetchMore);
 }
 
 void TimeEntryStore::clearStore()
@@ -117,7 +117,7 @@ void TimeEntryStore::clearStore(const_iterator deleteAt)
         TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: unlock mutex", QThread::currentThreadId());
     }
     else
-        QTimer::singleShot(10, this, [this, deleteAt] { clearStore(deleteAt); });
+        QTimer::singleShot(0, this, [this, deleteAt] { clearStore(deleteAt); });
 }
 
 void TimeEntryStore::insert(const TimeEntry &t)
@@ -152,7 +152,7 @@ void TimeEntryStore::insert(const TimeEntry &t)
         TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: unlock mutex", QThread::currentThreadId());
     }
     else
-        QTimer::singleShot(10, std::bind(&TimeEntryStore::insert, this, std::move(t)));
+        QTimer::singleShot(0, std::bind(&TimeEntryStore::insert, this, std::move(t)));
 }
 
 RangeSlice<TimeEntryStore::iterator> TimeEntryStore::sliceByDate(const QDateTime &from, const QDateTime &to)
