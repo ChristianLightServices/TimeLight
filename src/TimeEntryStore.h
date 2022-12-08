@@ -23,25 +23,18 @@ public:
         IsRunning,
     };
 
-    explicit TimeEntryStore(QSharedPointer<User> user, QObject *parent = nullptr);
-
-    int rowCount(const QModelIndex & = {}) const { return m_store.size(); }
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    QHash<int, QByteArray> roleNames() const;
-
-    void fetchMore();
-    void clearStore();
-
-    const TimeEntry &at(qsizetype i) { return m_store.at(i); }
-    qsizetype size() const { return m_store.size(); }
-    void insert(const TimeEntry &t);
-
     template<class Type>
     class iterator_base
     {
     public:
         iterator_base() {}
-        iterator_base(const iterator_base &other) = default;
+
+        template<class Other>
+        iterator_base(const iterator_base<Other> &other)
+            : m_index{other.m_index},
+              m_parent{other.m_parent},
+              m_autoload{other.m_autoload}
+        {}
 
         using iterator_category = std::bidirectional_iterator_tag;
         using value_type = Type;
@@ -133,7 +126,7 @@ public:
                 m_parent->fetchMore();
         }
 
-        qsizetype m_index{0};
+        qsizetype m_index{-1};
         QSharedPointer<TimeEntryStore> m_parent;
         bool m_autoload{true};
 
@@ -142,6 +135,20 @@ public:
 
     using iterator = iterator_base<TimeEntry>;
     using const_iterator = iterator_base<const TimeEntry>;
+
+    explicit TimeEntryStore(QSharedPointer<User> user, QObject *parent = nullptr);
+
+    int rowCount(const QModelIndex & = {}) const { return m_store.size(); }
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    QHash<int, QByteArray> roleNames() const;
+
+    void fetchMore();
+    void clearStore();
+    void clearStore(const_iterator deleteAt);
+
+    const TimeEntry &at(qsizetype i) { return m_store.at(i); }
+    qsizetype size() const { return m_store.size(); }
+    void insert(const TimeEntry &t);
 
     iterator begin() noexcept { return iterator{0, sharedFromThis()}; }
     iterator end() noexcept { return iterator{-1, sharedFromThis()}; }
@@ -164,6 +171,7 @@ private:
     QSharedPointer<User> m_user;
 
     QList<TimeEntry> m_store;
+    QList<QPair<int, int>> m_pagesOccuredAtIndex;
     int m_nextPage{};
     bool m_isAtEnd{false};
 

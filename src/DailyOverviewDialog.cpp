@@ -193,23 +193,27 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
         totalTimeUpdater->start();
     };
     updateData();
+
+    auto lockUIAndUpdate = [this, totalTimeUpdater, forward, back, datePicker, today, reset, updateData] {
+        totalTimeUpdater->stop();
+        forward->setDisabled(true);
+        back->setDisabled(true);
+        datePicker->setDisabled(true);
+        today->setDisabled(true);
+        reset->setDisabled(true);
+        m_loadingEntries->setVisible(true);
+
+        QTimer::singleShot(0, [updateData] { updateData(); });
+    };
+
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
     connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
     connect(datePicker,
             &QDateEdit::dateChanged,
             this,
-            [this, updateData, forward, back, datePicker, today, reset, totalTimeUpdater](const QDate &d) {
+            [this, lockUIAndUpdate](const QDate &d) {
                 m_day = d;
-
-                totalTimeUpdater->stop();
-                forward->setDisabled(true);
-                back->setDisabled(true);
-                datePicker->setDisabled(true);
-                today->setDisabled(true);
-                reset->setDisabled(true);
-                m_loadingEntries->setVisible(true);
-
-                QTimer::singleShot(0, [updateData] { updateData(); });
+                lockUIAndUpdate();
             });
     connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
     connect(
@@ -217,7 +221,12 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     connect(today, &QPushButton::clicked, datePicker, [this, datePicker] {
         datePicker->setDate(m_manager->currentDateTime().date());
     });
-    connect(reset, &QPushButton::clicked, this, updateData);
+    connect(reset, &QPushButton::clicked, this, [this, lockUIAndUpdate] {
+        m_entries->clearStore(std::find_if(m_entries->static_cbegin(), m_entries->static_cend(), [this](const TimeEntry &t) {
+            return t.start() <= m_day.endOfDay();
+        }));
+        lockUIAndUpdate();
+    });
 
     resize(600, 400);
 }

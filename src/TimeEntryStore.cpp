@@ -13,7 +13,7 @@ TimeEntryStore::TimeEntryStore(QSharedPointer<User> user, QObject *parent)
 {
     fetchMore();
 
-    connect(&m_expiryTimer, &QTimer::timeout, this, &TimeEntryStore::clearStore);
+    connect(&m_expiryTimer, &QTimer::timeout, this, [this] { clearStore(); });
     m_expiryTimer.setInterval(2 * 60 * 60 * 1000);
     m_expiryTimer.start();
 }
@@ -63,9 +63,13 @@ void TimeEntryStore::fetchMore()
     if (m_mutex.tryLock())
     {
         TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: lock mutex", QThread::currentThreadId());
+        m_pagesOccuredAtIndex.push_back({m_nextPage, m_store.size()});
         auto moreEntries = m_user->getTimeEntries(m_nextPage++);
         if (moreEntries.isEmpty())
+        {
             m_isAtEnd = true;
+            m_pagesOccuredAtIndex.pop_back();
+        }
         else
         {
             beginInsertRows({}, m_store.size(), m_store.size() + moreEntries.size() - 1);
@@ -81,19 +85,39 @@ void TimeEntryStore::fetchMore()
 
 void TimeEntryStore::clearStore()
 {
+    clearStore({});
+}
+
+void TimeEntryStore::clearStore(const_iterator deleteAt)
+{
     if (m_mutex.tryLock())
     {
         TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: lock mutex", QThread::currentThreadId());
         beginResetModel();
-        m_store.clear();
-        endResetModel();
         m_nextPage = m_user->manager()->paginationStartsAt();
+        if (deleteAt.index() >= 0 && deleteAt.index() < m_store.size())
+        {
+            m_pagesOccuredAtIndex.push_back({m_nextPage, m_store.size()});
+            for (int i = 0; i < m_pagesOccuredAtIndex.size() - 1; ++i)
+                if (m_pagesOccuredAtIndex[i + 1].second > deleteAt.index())
+                {
+                    m_nextPage = m_pagesOccuredAtIndex[i].first;
+                    m_store.resize(m_pagesOccuredAtIndex[i].second);
+                    break;
+                }
+        }
+        else
+        {
+            m_store.clear();
+            m_pagesOccuredAtIndex.clear();
+        }
+        endResetModel();
         m_isAtEnd = false;
         m_mutex.unlock();
         TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: unlock mutex", QThread::currentThreadId());
     }
     else
-        QTimer::singleShot(10, this, &TimeEntryStore::clearStore);
+        QTimer::singleShot(10, this, [this, deleteAt] { clearStore(deleteAt); });
 }
 
 void TimeEntryStore::insert(const TimeEntry &t)
@@ -105,7 +129,7 @@ void TimeEntryStore::insert(const TimeEntry &t)
             it != static_end())
             *it = t;
         else if (auto it =
-                     std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
+                 std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
                  it != static_cend())
         {
             beginInsertRows({}, it.index(), it.index());
