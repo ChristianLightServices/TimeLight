@@ -30,7 +30,7 @@ ModifyJobDialog::ModifyJobDialog(QSharedPointer<AbstractTimeServiceManager> mana
     if (!m_entry.project().description().isEmpty())
         descs << m_entry.project().description();
     if (timeEntries)
-        for (const auto &item : *timeEntries)
+        for (const auto &item : RangeSlice(timeEntries->begin(), 50))
         {
             const auto &p = item.project();
             if (!p.description().isEmpty() && !descs.contains(p.description()))
