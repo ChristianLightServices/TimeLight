@@ -263,7 +263,7 @@ void TrayIcons::updateTrayIcons()
             m_currentRunningJob = runningEntry;
 
             // This request is performed in another thread to minimize chances of lock races
-            QThread::create([this, runningEntry] { m_timeEntries->insert(*runningEntry); })->start();
+            m_timeEntries->insert(*runningEntry);
 
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())

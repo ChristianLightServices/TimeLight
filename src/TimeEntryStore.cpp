@@ -60,59 +60,75 @@ void TimeEntryStore::fetchMore()
     if (m_isAtEnd)
         return;
 
-    TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: lock mutex", QThread::currentThreadId());
-    QMutexLocker _{&m_mutex};
-    auto moreEntries = m_user->getTimeEntries(m_nextPage++);
-    if (moreEntries.isEmpty())
-        m_isAtEnd = true;
-    else
+    if (m_mutex.tryLock())
     {
-        beginInsertRows({}, m_store.size(), m_store.size() + moreEntries.size() - 1);
-        m_store.append(moreEntries);
-        endInsertRows();
+        TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: lock mutex", QThread::currentThreadId());
+        auto moreEntries = m_user->getTimeEntries(m_nextPage++);
+        if (moreEntries.isEmpty())
+            m_isAtEnd = true;
+        else
+        {
+            beginInsertRows({}, m_store.size(), m_store.size() + moreEntries.size() - 1);
+            m_store.append(moreEntries);
+            endInsertRows();
+        }
+        m_mutex.unlock();
+        TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: unlock mutex", QThread::currentThreadId());
     }
-    TimeLight::logs::app()->trace("TimeEntryStore::fetchMore() on thread {}: unlock mutex", QThread::currentThreadId());
+    else
+        QTimer::singleShot(10, this, &TimeEntryStore::fetchMore);
 }
 
 void TimeEntryStore::clearStore()
 {
-    TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: lock mutex", QThread::currentThreadId());
-    QMutexLocker _{&m_mutex};
-    beginResetModel();
-    m_store.clear();
-    endResetModel();
-    m_nextPage = m_user->manager()->paginationStartsAt();
-    m_isAtEnd = false;
-    TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: unlock mutex", QThread::currentThreadId());
+    if (m_mutex.tryLock())
+    {
+        TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: lock mutex", QThread::currentThreadId());
+        beginResetModel();
+        m_store.clear();
+        endResetModel();
+        m_nextPage = m_user->manager()->paginationStartsAt();
+        m_isAtEnd = false;
+        m_mutex.unlock();
+        TimeLight::logs::app()->trace("TimeEntryStore::clearStore() on thread {}: unlock mutex", QThread::currentThreadId());
+    }
+    else
+        QTimer::singleShot(10, this, &TimeEntryStore::clearStore);
 }
 
 void TimeEntryStore::insert(const TimeEntry &t)
 {
-    TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: lock mutex", QThread::currentThreadId());
-    QMutexLocker _{&m_mutex};
-    if (auto it = std::find_if(static_begin(), static_end(), [&t](const auto &x) { return t.id() == x.id(); });
-        it != static_end())
-        *it = t;
-    else if (auto it = std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
-             it != static_cend())
+    if (m_mutex.tryLock())
     {
-        beginInsertRows({}, it.index(), it.index());
-        m_store.insert(it.index(), t);
-        endInsertRows();
-    }
-    else if (t.start() > m_store.first().start())
-    {
-        beginInsertRows({}, 0, 0);
-        m_store.prepend(t);
-        endInsertRows();
+        TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: lock mutex", QThread::currentThreadId());
+        if (auto it = std::find_if(static_begin(), static_end(), [&t](const auto &x) { return t.id() == x.id(); });
+            it != static_end())
+            *it = t;
+        else if (auto it =
+                     std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
+                 it != static_cend())
+        {
+            beginInsertRows({}, it.index(), it.index());
+            m_store.insert(it.index(), t);
+            endInsertRows();
+        }
+        else if (m_store.size() > 0 && t.start() > m_store.first().start())
+        {
+            beginInsertRows({}, 0, 0);
+            m_store.prepend(t);
+            endInsertRows();
+        }
+        else
+        {
+            beginInsertRows({}, m_store.size(), m_store.size());
+            m_store.append(t);
+            endInsertRows();
+        }
+        m_mutex.unlock();
+        TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: unlock mutex", QThread::currentThreadId());
     }
     else
-    {
-        beginInsertRows({}, m_store.size(), m_store.size());
-        m_store.append(t);
-        endInsertRows();
-    }
-    TimeLight::logs::app()->trace("TimeEntryStore::insert() on thread {}: unlock mutex", QThread::currentThreadId());
+        QTimer::singleShot(10, std::bind(&TimeEntryStore::insert, this, std::move(t)));
 }
 
 RangeSlice<TimeEntryStore::iterator> TimeEntryStore::sliceByDate(const QDateTime &oldest, const QDateTime &newest)
