@@ -101,7 +101,12 @@ public:
                 return false;
 
             if (other.m_index < 0 || other.m_index >= m_parent->size())
-                return m_parent->m_isAtEnd;
+            {
+                if (m_index >= 0 && m_index < m_parent->size())
+                    return false;
+                else
+                    return true;
+            }
             else
                 return m_index == other.m_index;
         }
