@@ -146,6 +146,7 @@ public:
     void clearStore();
     void clearStore(const_iterator deleteAt);
 
+    TimeEntry &operator[](qsizetype i) { return m_store[i]; }
     const TimeEntry &at(qsizetype i) { return m_store.at(i); }
     qsizetype size() const { return m_store.size(); }
     void insert(const TimeEntry &t);

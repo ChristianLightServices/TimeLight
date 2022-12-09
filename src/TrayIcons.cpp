@@ -271,7 +271,15 @@ void TrayIcons::updateTrayIcons()
             else
                 setTimerState(TimerState::Running);
             if (different)
+            {
+                if (m_timeEntries->size() > 1)
+                {
+                    auto &previous = (*m_timeEntries)[1];
+                    if (previous.running())
+                        previous.setEnd(m_manager->currentDateTime());
+                }
                 updateIconsAndTooltips();
+            }
             // At this point, the previous job will have been notified for, so it's safe to overwrite it
             m_jobToBeNotified = runningEntry;
         }
