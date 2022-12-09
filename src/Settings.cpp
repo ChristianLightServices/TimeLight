@@ -366,6 +366,37 @@ void Settings::setPresenceWhileNotWorking(const TeamsClient::Presence &presence)
     m_settingsDirty = true;
 }
 
+void Settings::reset()
+{
+    setApiKey({});
+    setBreakTimeId({});
+    setDescription({});
+    setProjectId({});
+    setWorkspaceId({});
+    setUseSeparateBreakTime(false);
+    setMiddleClickForBreak(false);
+    setDisableDescription(false);
+    setUseLastDescription(true);
+    setUseLastProject(true);
+    setSplitByDescription(true);
+    setPreventSplittingEntries(true);
+    setShowDurationNotifications(true);
+    setEventLoopInterval(5000);
+    setAlertOnTimeUp(true);
+    setWeekHours(40);
+    setDeveloperMode(false);
+    setUseTeamsIntegration(false);
+    setGraphAccessToken({});
+    setGraphRefreshToken({});
+    setPresenceWhileWorking(TeamsClient::Presence::Available);
+    setPresenceWhileNotWorking(TeamsClient::Presence::Away);
+    setPresenceWhileOnBreak(TeamsClient::Presence::Away);
+    setTimeService({});
+
+    save(false);
+
+}
+
 void Settings::save(bool async)
 {
     auto apiKeyJob = new QKeychain::WritePasswordJob{QCoreApplication::applicationName(), this};
@@ -391,17 +422,19 @@ void Settings::save(bool async)
 
     settings.setValue(QStringLiteral("timeService"), m_timeService);
 
-    settings.beginGroup(m_timeService);
-
-    settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
-    settings.setValue(QStringLiteral("description"), m_description);
-    settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);
-    settings.setValue(QStringLiteral("projectId"), m_projectId);
-    settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
-    settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
-    settings.setValue(QStringLiteral("useSeparateBreakTime"), m_useSeparateBreakTime);
-    settings.setValue(QStringLiteral("workspaceId"), m_workspaceId);
-    settings.endGroup();
+    if (!m_timeService.isEmpty())
+    {
+        settings.beginGroup(m_timeService);
+        settings.setValue(QStringLiteral("breakTimeId"), m_breakTimeId);
+        settings.setValue(QStringLiteral("description"), m_description);
+        settings.setValue(QStringLiteral("disableDescription"), m_disableDescription);
+        settings.setValue(QStringLiteral("projectId"), m_projectId);
+        settings.setValue(QStringLiteral("useLastDescription"), m_useLastDescription);
+        settings.setValue(QStringLiteral("useLastProject"), m_useLastProject);
+        settings.setValue(QStringLiteral("useSeparateBreakTime"), m_useSeparateBreakTime);
+        settings.setValue(QStringLiteral("workspaceId"), m_workspaceId);
+        settings.endGroup();
+    }
 
     settings.beginGroup(QStringLiteral("app"));
     settings.setValue(QStringLiteral("middleClickForBreak"), m_middleClickForBreak);

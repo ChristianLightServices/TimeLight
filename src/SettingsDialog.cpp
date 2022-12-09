@@ -45,10 +45,12 @@ SettingsDialog::SettingsDialog(QSharedPointer<AbstractTimeServiceManager> manage
     m_projectPage = createProjectPage();
     m_appPage = createAppPage();
     m_teamsPage = createTeamsPage();
+    m_resetPage = createResetPage();
     m_tabWidget->addTab(m_backendPage.data(), tr("Backend settings"));
     m_tabWidget->addTab(m_projectPage.data(), tr("Default project"));
     m_tabWidget->addTab(m_appPage.data(), tr("App settings"));
     m_tabWidget->addTab(m_teamsPage.data(), tr("Microsoft Teams"));
+    m_tabWidget->addTab(m_resetPage.data(), tr("Reset"));
 
     auto mainWidgetLayout = new QVBoxLayout{this};
     mainWidgetLayout->addWidget(m_tabWidget);
@@ -519,4 +521,29 @@ QSharedPointer<QWidget> SettingsDialog::createTeamsPage()
     });
 
     return QSharedPointer<QWidget>{teamsPage};
+}
+
+QSharedPointer<QWidget> SettingsDialog::createResetPage()
+{
+    auto resetPage = new QWidget{this};
+    auto layout = new QGridLayout{resetPage};
+
+    auto reset = new QPushButton{tr("Reset all settings"), resetPage};
+
+    layout->addWidget(reset, 0, 0);
+    TimeLight::addVerticalStretchToQGridLayout(layout);
+    TimeLight::addHorizontalStretchToQGridLayout(layout);
+
+    connect(reset, &QPushButton::clicked, this, [this] {
+        if (QMessageBox::question(this,
+                                  tr("Reset all settings?"),
+                                  tr("Are you sure you want to reset all settings to their default values? You will be "
+                                     "disconnected from all connected services.")) == QMessageBox::Yes)
+        {
+            Settings::instance()->reset();
+            TimeLight::restartApp();
+        }
+    });
+
+    return QSharedPointer<QWidget>{resetPage};
 }

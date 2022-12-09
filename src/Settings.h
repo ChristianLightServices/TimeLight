@@ -65,6 +65,8 @@ public slots:
     void setPresenceWhileOnBreak(const TeamsClient::Presence &presence);
     void setPresenceWhileNotWorking(const TeamsClient::Presence &presence);
 
+    void reset();
+
 signals:
     void timeServiceChanged();
     void apiKeyChanged();

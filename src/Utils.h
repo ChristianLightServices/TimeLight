@@ -34,6 +34,7 @@ namespace TimeLight
     void restartApp();
 
     void addVerticalStretchToQGridLayout(QGridLayout *layout);
+    void addHorizontalStretchToQGridLayout(QGridLayout *layout);
 
     std::tuple<int, int, int> msecsToHoursMinutesSeconds(int msecs);
 

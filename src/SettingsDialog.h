@@ -30,6 +30,7 @@ private:
     QSharedPointer<QWidget> createProjectPage();
     QSharedPointer<QWidget> createAppPage();
     QSharedPointer<QWidget> createTeamsPage();
+    QSharedPointer<QWidget> createResetPage();
 
     QSharedPointer<AbstractTimeServiceManager> m_manager;
     // ordered as {name, id}
@@ -40,6 +41,7 @@ private:
     QSharedPointer<QWidget> m_projectPage;
     QSharedPointer<QWidget> m_appPage;
     QSharedPointer<QWidget> m_teamsPage;
+    QSharedPointer<QWidget> m_resetPage;
 
     QPair<QStringList, QStringList> m_availableProjects;
 };

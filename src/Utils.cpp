@@ -14,6 +14,12 @@ void TimeLight::addVerticalStretchToQGridLayout(QGridLayout *layout)
     layout->setRowStretch(layout->rowCount() - 1, 1);
 }
 
+void TimeLight::addHorizontalStretchToQGridLayout(QGridLayout *layout)
+{
+    layout->addWidget(new QWidget{layout->parentWidget()}, layout->columnCount(), 0, 1, layout->rowCount());
+    layout->setColumnStretch(layout->columnCount() - 1, 1);
+}
+
 std::tuple<int, int, int> TimeLight::msecsToHoursMinutesSeconds(int msecs)
 {
     int h = msecs / 1000 / 60 / 60;
