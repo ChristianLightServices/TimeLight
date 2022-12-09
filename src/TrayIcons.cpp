@@ -262,8 +262,16 @@ void TrayIcons::updateTrayIcons()
             bool different = m_currentRunningJob != runningEntry;
             m_currentRunningJob = runningEntry;
 
-            // This request is performed in another thread to minimize chances of lock races
             m_timeEntries->insert(*runningEntry);
+
+            if (different && m_timeEntries->size() > 1)
+            {
+                if (auto &previous = (*m_timeEntries)[1]; previous.running())
+                {
+                    previous.setEnd(m_manager->currentDateTime());
+                    previous.setRunning(false);
+                }
+            }
 
             if (Settings::instance()->useSeparateBreakTime() &&
                 runningEntry->project().id() == Settings::instance()->breakTimeId())
@@ -271,17 +279,10 @@ void TrayIcons::updateTrayIcons()
             else
                 setTimerState(TimerState::Running);
             if (different)
-            {
-                if (m_timeEntries->size() > 1)
-                {
-                    auto &previous = (*m_timeEntries)[1];
-                    if (previous.running())
-                        previous.setEnd(m_manager->currentDateTime());
-                }
                 updateIconsAndTooltips();
-            }
-            // At this point, the previous job will have been notified for, so it's safe to overwrite it
-            m_jobToBeNotified = runningEntry;
+
+            if (!m_jobIdToBeNotified)
+                m_jobIdToBeNotified = runningEntry->id();
         }
         catch (const std::exception &ex)
         {
@@ -884,13 +885,16 @@ void TrayIcons::showOfflineNotification()
 
 void TrayIcons::checkForJobNotification()
 {
-    if (!m_jobToBeNotified || !Settings::instance()->showDurationNotifications())
+    if (!m_jobIdToBeNotified || !Settings::instance()->showDurationNotifications())
         return;
 
     auto job = std::find_if(m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) {
-        return j.id() == m_jobToBeNotified->id();
+        return j.id() == m_jobIdToBeNotified;
     });
-    if (job == m_timeEntries->cend() || job->running().value_or(false))
+    if (job == m_timeEntries->cend())
+        return;
+    auto &j = *job;
+    if (job->running().value_or(false))
         return;
 
     QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
@@ -904,7 +908,7 @@ void TrayIcons::checkForJobNotification()
             tr("You were on break for %1") :
             tr("You worked %2 on %1").arg(job->project().name());
     m_trayIcon->showMessage(tr("Job ended"), message.arg(timeString), QSystemTrayIcon::Information, 5000);
-    m_jobToBeNotified = std::nullopt;
+    m_jobIdToBeNotified = std::nullopt;
 
     updateQuickStartList();
 }

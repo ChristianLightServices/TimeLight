@@ -92,7 +92,7 @@ private:
     QSharedPointer<User> m_user;
     TimerState m_timerState{TimerState::StateUnset};
     std::optional<TimeEntry> m_currentRunningJob;
-    std::optional<TimeEntry> m_jobToBeNotified;
+    std::optional<QString> m_jobIdToBeNotified;
 
     QTimer m_eventLoop;
     QTimer m_alertOnTimeUpTimer;

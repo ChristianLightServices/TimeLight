@@ -39,6 +39,7 @@ public:
     void setProject(const Project &project) { m_project = project; }
     void setStart(const QDateTime &start) { m_start = start; }
     void setEnd(const QDateTime &end) { m_end = end; }
+    void setRunning(std::optional<bool> state) { m_running = state; }
 
     bool isValid() const { return m_isValid; }
 
