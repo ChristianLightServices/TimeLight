@@ -12,28 +12,6 @@
 #include "Logger.h"
 #include "TimeEntry.h"
 
-class TimeTableItem : public QTableWidgetItem
-{
-public:
-    enum class ItemType
-    {
-        Time,
-        Project,
-    };
-
-    TimeTableItem(const QDateTime &time)
-        : QTableWidgetItem{time.isValid() ? time.toString(QStringLiteral("h:mm:ss A")) : QObject::tr("Running")}
-    {
-        setData(Qt::UserRole, time);
-    }
-
-    // TODO: This no worky!
-    bool operator<(const QTableWidgetItem &other)
-    {
-        return this->data(Qt::UserRole).toDateTime() < other.data(Qt::UserRole).toDateTime();
-    }
-};
-
 DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager,
                                          QSharedPointer<User> user,
                                          QSharedPointer<TimeEntryStore> entryStore,
@@ -52,7 +30,6 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     m_chronologicalTable->setEditTriggers(QTableWidget::NoEditTriggers);
     m_chronologicalTable->verticalHeader()->setVisible(false);
     m_chronologicalTable->horizontalHeader()->setStretchLastSection(true);
-    //    timeTable->sortItems(0, Qt::AscendingOrder); // TODO: This no worky either! // TODO: if worky, move this
     m_chronologicalTable->setSelectionMode(QTableWidget::NoSelection);
 
     m_byProjectTable->setHorizontalHeaderLabels(QStringList{} << tr("Duration") << tr("Project"));
@@ -155,8 +132,16 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
         for (auto [i, it] = std::tuple(m_chronologicalTable->rowCount() - 1, todaysTime.begin()); it != todaysTime.end();
              --i, ++it)
         {
-            m_chronologicalTable->setItem(i, 0, new TimeTableItem{it->start()});
-            m_chronologicalTable->setItem(i, 1, new TimeTableItem{it->end()});
+            m_chronologicalTable->setItem(i,
+                                          0,
+                                          new QTableWidgetItem{it->start().isValid() ?
+                                                                   it->start().toString(QStringLiteral("h:mm:ss A")) :
+                                                                   QObject::tr("Running")});
+            m_chronologicalTable->setItem(i,
+                                          1,
+                                          new QTableWidgetItem{it->end().isValid() ?
+                                                                   it->end().toString(QStringLiteral("h:mm:ss A")) :
+                                                                   QObject::tr("Running")});
             m_chronologicalTable->setItem(i, 2, new QTableWidgetItem{it->project().name()});
         }
 
