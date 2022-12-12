@@ -514,7 +514,7 @@ QSharedPointer<QWidget> SettingsDialog::createTeamsPage()
     });
     connect(reauthenticate, &QPushButton::clicked, this, [] {
         Settings::instance()->setGraphAccessToken({});
-        Settings::instance()->setGraphAccessToken({});
+        Settings::instance()->setGraphRefreshToken({});
         // force reauthentication
         Settings::instance()->setUseTeamsIntegration(false);
         Settings::instance()->setUseTeamsIntegration(true);
