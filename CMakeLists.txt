@@ -49,12 +49,7 @@ if (NOT Qt6Keychain_FOUND)
         GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain
         GIT_TAG v0.13.2
     )
-
-    FetchContent_GetProperties(qt6keychain)
-    if(NOT qt6keychain_POPULATED)
-        FetchContent_Populate(qt6keychain)
-        add_subdirectory(${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    FetchContent_MakeAvailable(qt6keychain)
 endif()
 
 find_package(spdlog 1.10.0)
@@ -65,16 +60,9 @@ if(NOT spdlog_FOUND)
     include(FetchContent)
     FetchContent_Declare(spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog
-        GIT_TAG v1.10.0
+        GIT_TAG v1.11.0
     )
-
-    FetchContent_GetProperties(spdlog)
-    if(NOT spdlog_POPULATED)
-        FetchContent_Populate(spdlog)
-        add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
-
-#    FetchContent_MakeAvailable(spdlog)
+    FetchContent_MakeAvailable(spdlog)
 endif()
 
 find_package(Backward)
