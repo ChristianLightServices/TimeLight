@@ -28,17 +28,8 @@ if(NOT nlohmann_json_FOUND)
     message("Fetching nlohmann/json from GitHub...")
 
     include(FetchContent)
-
-    FetchContent_Declare(json
-        GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-        GIT_TAG v3.10.5
-    )
-
-    FetchContent_GetProperties(json)
-    if(NOT json_POPULATED)
-        FetchContent_Populate(json)
-        add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+    FetchContent_MakeAvailable(json)
 endif()
 
 find_package(Qt6Keychain 0.13.2)
