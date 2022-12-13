@@ -1,8 +1,8 @@
 #include "TimeEntryStore.h"
 
 #include <QMutexLocker>
-#include <QThread>
 #include <QTableView>
+#include <QThread>
 
 #include "Logger.h"
 
@@ -34,7 +34,7 @@ QVariant TimeEntryStore::data(const QModelIndex &index, int role) const
     case Roles::End:
         return m_store[index.row()].end();
     case Roles::Project:
-//        return m_store[index.row()].project();
+        // return m_store[index.row()].project();
         return m_store[index.row()].project().name();
     case Roles::IsRunning:
         return m_store[index.row()].running();
@@ -129,7 +129,7 @@ void TimeEntryStore::insert(const TimeEntry &t)
             it != static_end())
             *it = t;
         else if (auto it =
-                 std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
+                     std::find_if(static_cbegin(), static_cend(), [&t](const auto &x) { return x.start() > t.start(); });
                  it != static_cend())
         {
             beginInsertRows({}, it.index(), it.index());

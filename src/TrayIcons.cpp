@@ -886,9 +886,8 @@ void TrayIcons::checkForJobNotification()
     if (!m_jobIdToBeNotified || !Settings::instance()->showDurationNotifications())
         return;
 
-    auto job = std::find_if(m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) {
-        return j.id() == m_jobIdToBeNotified;
-    });
+    auto job = std::find_if(
+        m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) { return j.id() == m_jobIdToBeNotified; });
     if (job == m_timeEntries->cend())
         return;
     auto &j = *job;

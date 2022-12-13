@@ -122,7 +122,8 @@ public:
         void maybeFetchMore()
         {
             if (m_index == m_parent->m_store.size() && m_autoload && !m_parent->m_isAtEnd &&
-                m_parent->m_user->manager()->supportedPagination().testFlag(AbstractTimeServiceManager::Pagination::TimeEntries))
+                m_parent->m_user->manager()->supportedPagination().testFlag(
+                    AbstractTimeServiceManager::Pagination::TimeEntries))
                 m_parent->fetchMore();
         }
 

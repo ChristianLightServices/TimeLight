@@ -394,7 +394,6 @@ void Settings::reset()
     setTimeService({});
 
     save(false);
-
 }
 
 void Settings::save(bool async)

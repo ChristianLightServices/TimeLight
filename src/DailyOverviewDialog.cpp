@@ -193,13 +193,10 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
 
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
     connect(breakdown, &QComboBox::currentIndexChanged, this, setProperTimeTable);
-    connect(datePicker,
-            &QDateEdit::dateChanged,
-            this,
-            [this, lockUIAndUpdate](const QDate &d) {
-                m_day = d;
-                lockUIAndUpdate();
-            });
+    connect(datePicker, &QDateEdit::dateChanged, this, [this, lockUIAndUpdate](const QDate &d) {
+        m_day = d;
+        lockUIAndUpdate();
+    });
     connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
     connect(
         forward, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(1)); });
