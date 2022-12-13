@@ -1,8 +1,5 @@
 #include "TimeEntry.h"
 
-#include "ClockifyManager.h"
-#include "JsonHelper.h"
-
 TimeEntry::TimeEntry(const QString &id,
                      const Project &project,
                      const QString &userId,
