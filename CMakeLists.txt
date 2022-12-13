@@ -20,10 +20,7 @@ endif()
 
 find_package(Qt6 6.2 COMPONENTS Core Network NetworkAuth Widgets LinguistTools Svg REQUIRED)
 
-# some of the following several lines of CMake shamelessly stolen from https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-# (since I'm using the repo, I don't feel too bad about using their example CMake stuff)
 find_package(nlohmann_json 3.10.5)
-
 if(NOT nlohmann_json_FOUND)
     message("Fetching nlohmann/json from GitHub...")
 
@@ -33,8 +30,6 @@ if(NOT nlohmann_json_FOUND)
 endif()
 
 find_package(Qt6Keychain 0.13.2)
-
-# sorta stolen from https://nheko.im/nheko-reborn/nheko/-/blob/master/CMakeLists.txt
 if (NOT Qt6Keychain_FOUND)
     message("Fetching qtkeychain from GitHub...")
 
@@ -53,7 +48,6 @@ if (NOT Qt6Keychain_FOUND)
 endif()
 
 find_package(spdlog 1.10.0)
-
 if(NOT spdlog_FOUND)
     message("Fetching spdlog from GitHub...")
 
@@ -66,7 +60,6 @@ if(NOT spdlog_FOUND)
 endif()
 
 find_package(Backward)
-
 if (NOT Backward_FOUND)
     message("Fetching backward-cpp from GitHub...")
 
