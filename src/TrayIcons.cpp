@@ -278,8 +278,6 @@ void TrayIcons::updateTrayIcons()
                 setTimerState(TimerState::OnBreak);
             else
                 setTimerState(TimerState::Running);
-            if (different)
-                updateIconsAndTooltips();
 
             if (!m_jobIdToBeNotified)
                 m_jobIdToBeNotified = runningEntry->id();
