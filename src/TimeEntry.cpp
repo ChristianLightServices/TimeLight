@@ -5,7 +5,7 @@ TimeEntry::TimeEntry(const QString &id,
                      const QString &userId,
                      const QDateTime &start,
                      const QDateTime &end,
-                     std::optional<bool> running,
+                     bool running,
                      json extra,
                      QObject *parent)
     : QObject{parent},

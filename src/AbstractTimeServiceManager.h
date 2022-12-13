@@ -186,7 +186,8 @@ protected:
     //! Return a string representing the time format used by your time service. See
     //! https://doc.qt.io/qt-5/qtime.html#toString and https://doc.qt.io/qt-5/qdate.html#toString-1 for examples of how to
     //! build format strings.
-    virtual const QString jsonTimeFormatString() const = 0;
+    virtual const QDateTime stringToDateTime(const QString &string) const = 0;
+    virtual const QString dateTimeToString(const QDateTime &date) const = 0;
 
     virtual HttpVerb httpVerbForAction(const TimeEntryAction action) const = 0;
     virtual int httpReturnCodeForVerb(const HttpVerb verb) const = 0;

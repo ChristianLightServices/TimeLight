@@ -524,7 +524,7 @@ QDateTime AbstractTimeServiceManager::jsonToDateTime(const nlohmann::json &j) co
 {
     try
     {
-        return QDateTime::fromString(j.get<QString>(), jsonTimeFormatString());
+        return stringToDateTime(j.get<QString>());
     }
     catch (const std::exception &e)
     {
@@ -535,7 +535,7 @@ QDateTime AbstractTimeServiceManager::jsonToDateTime(const nlohmann::json &j) co
 
 json AbstractTimeServiceManager::dateTimeToJson(const QDateTime &dt) const
 {
-    return dt.toString(jsonTimeFormatString());
+    return dateTimeToString(dt);
 }
 
 void AbstractTimeServiceManager::defaultSuccessCb(QNetworkReply *rep) {}

@@ -50,7 +50,11 @@ protected:
     virtual Workspace jsonToWorkspace(const json &j) final;
     virtual Project jsonToProject(const json &j) final;
 
-    virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-ddTHH:mm:ssZ"); }
+    virtual const QDateTime stringToDateTime(const QString &string) const final
+    {
+        return QDateTime::fromString(string, Qt::ISODate);
+    }
+    virtual const QString dateTimeToString(const QDateTime &date) const final { return date.toString(Qt::ISODate); }
 
     virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 

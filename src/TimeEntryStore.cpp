@@ -37,7 +37,7 @@ QVariant TimeEntryStore::data(const QModelIndex &index, int role) const
 //        return m_store[index.row()].project();
         return m_store[index.row()].project().name();
     case Roles::IsRunning:
-        return m_store[index.row()].running().value_or(false);
+        return m_store[index.row()].running();
     default:
         return {};
     }

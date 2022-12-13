@@ -306,7 +306,7 @@ void TrayIcons::updateRunningEntryTooltip()
     if (m_currentRunningJob)
     {
         auto [h, m, s] =
-            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob->start().msecsTo(QDateTime::currentDateTime()));
+            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob->start().msecsTo(m_manager->currentDateTime()));
         tooltip += QStringLiteral(" (%1:%2:%3)").arg(h).arg(m, 2, 10, QLatin1Char{'0'}).arg(s, 2, 10, QLatin1Char{'0'});
     }
     (m_breakIcon ? m_breakIcon : m_trayIcon)->setToolTip(tooltip);
@@ -894,7 +894,7 @@ void TrayIcons::checkForJobNotification()
     if (job == m_timeEntries->cend())
         return;
     auto &j = *job;
-    if (job->running().value_or(false))
+    if (job->running())
         return;
 
     QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
@@ -918,13 +918,11 @@ void TrayIcons::checkForFinishedWeek()
     // we can't show a bubble if the icon isn't visible
     if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done && m_trayIcon->isVisible())
     {
-        auto now = QDateTime::currentDateTime();
+        auto now = m_manager->currentDateTime();
         auto entries = m_timeEntries->constSliceByDate(now.addDays(-(now.date().dayOfWeek() % 7)),
                                                        now.addDays(6 - (now.date().dayOfWeek() % 7)));
-        double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [](auto a, auto b) {
-            if (b.end().isNull() && b.running().value_or(true))
-                b.setEnd(QDateTime::currentDateTime());
-            return a + b.start().msecsTo(b.end());
+        double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [this](auto a, auto b) {
+            return a + b.start().msecsTo((b.end().isNull() || b.running()) ? m_manager->currentDateTime() : b.end());
         });
         double hoursThisWeek = std::get<0>(TimeLight::msecsToHoursMinutesSeconds(msecsThisWeek));
         if (hoursThisWeek >= Settings::instance()->weekHours())

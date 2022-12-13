@@ -23,7 +23,7 @@ public:
               const QString &userId,
               const QDateTime &start,
               const QDateTime &end,
-              std::optional<bool> running,
+              bool running,
               json extra = {},
               QObject *parent = nullptr);
     TimeEntry(const TimeEntry &that);
@@ -34,12 +34,12 @@ public:
     QString userId() const { return m_userId; }
     QDateTime start() const { return m_start; }
     QDateTime end() const { return m_end; }
-    std::optional<bool> running() const { return m_running; }
+    bool running() const { return m_running; }
 
     void setProject(const Project &project) { m_project = project; }
     void setStart(const QDateTime &start) { m_start = start; }
     void setEnd(const QDateTime &end) { m_end = end; }
-    void setRunning(std::optional<bool> state) { m_running = state; }
+    void setRunning(bool state) { m_running = state; }
 
     bool isValid() const { return m_isValid; }
 
@@ -55,7 +55,7 @@ private:
     QString m_userId;
     QDateTime m_start;
     QDateTime m_end;
-    std::optional<bool> m_running;
+    bool m_running;
 
     bool m_isValid{false};
 };

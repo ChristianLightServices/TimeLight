@@ -43,7 +43,14 @@ protected:
     virtual Workspace jsonToWorkspace(const json &j) final;
     virtual Project jsonToProject(const json &j) final;
 
-    virtual const QString jsonTimeFormatString() const final { return QStringLiteral("yyyy-MM-dd HH:mm:ss"); }
+    virtual const QDateTime stringToDateTime(const QString &string) const final
+    {
+        return QDateTime::fromString(string, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    }
+    virtual const QString dateTimeToString(const QDateTime &date) const final
+    {
+        return date.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    }
 
     virtual json timeEntryToJson(const TimeEntry &t, TimeEntryAction action) final;
 
