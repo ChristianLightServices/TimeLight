@@ -106,7 +106,7 @@ void TimeLight::logs::crashHandler(int signal)
     p.print(st);
 
     auto filename{logFileLocation().toStdString() + "/backtrace-" +
-                  std::to_string(QDateTime::currentDateTime().toMSecsSinceEpoch()) + ".txt"};
+                  std::to_string(QDateTime::currentDateTime().toSecsSinceEpoch()) + ".txt"};
     std::ofstream dump{filename};
     if (dump)
     {
