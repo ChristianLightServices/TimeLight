@@ -888,10 +888,7 @@ void TrayIcons::checkForJobNotification()
 
     auto job = std::find_if(
         m_timeEntries->cbegin(), m_timeEntries->cend(), [this](const auto &j) { return j.id() == m_jobIdToBeNotified; });
-    if (job == m_timeEntries->cend())
-        return;
-    auto &j = *job;
-    if (job->running())
+    if (job == m_timeEntries->cend() || job->running())
         return;
 
     QTime duration{QTime::fromMSecsSinceStartOfDay(static_cast<int>(job->start().msecsTo(job->end())))};
