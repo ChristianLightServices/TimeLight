@@ -3,8 +3,3 @@ rebuild_master:
     - rebuild_package:
         project: home:LorenDB
         package: TimeLight
-  filters:
-    event: push
-    branches:
-      only:
-        - master
