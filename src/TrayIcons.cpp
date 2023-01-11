@@ -294,6 +294,11 @@ void TrayIcons::updateTrayIcons()
     else
     {
         m_currentRunningJob = std::nullopt;
+        if (m_timeEntries->size() > 1 && m_timeEntries->begin()->running())
+        {
+            m_timeEntries->begin()->setEnd(m_manager->currentDateTime());
+            m_timeEntries->begin()->setRunning(false);
+        }
         setTimerState(TimerState::NotRunning);
     }
 }
