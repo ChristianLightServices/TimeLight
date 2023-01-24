@@ -865,7 +865,8 @@ void TrayIcons::updateQuickStartList()
     for (const auto &entry : recentProjects)
         addMenuEntry(m_quickStartMenu, entry);
     for (const auto &project : m_manager->projects())
-        addMenuEntry(m_quickStartAllProjects, project);
+        if (!project.archived())
+            addMenuEntry(m_quickStartAllProjects, project);
     // the break time project always comes last
     if (addBreakTime.has_value())
     {

@@ -189,7 +189,7 @@ Project ClockifyManager::jsonToProject(const nlohmann::json &j)
     try
     {
         auto val = (j.is_array() ? j[0] : j);
-        return Project{val["id"].get<QString>(), val["name"].get<QString>(), this};
+        return Project{val["id"].get<QString>(), val["name"].get<QString>(), val["archived"].get<bool>(), this};
     }
     catch (const std::exception &e)
     {

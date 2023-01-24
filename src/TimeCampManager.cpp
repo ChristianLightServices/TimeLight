@@ -100,7 +100,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
             return std::nullopt;
 
         return TimeEntry{j["entry_id"].get<QString>(),
-                         Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, this},
+                         Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, false, this},
                          getApiKeyOwner()->userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
@@ -125,6 +125,7 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
             Project{j["task_id"].get<QString>(),
                     j["name"].get<QString>(),
                     j.contains("description") ? j["description"].get<QString>() : QString{},
+                    false,
                     this},
             j["user_id"].get<QString>(),
             QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss")), Qt::LocalTime},
@@ -190,7 +191,10 @@ Project TimeCampManager::jsonToProject(const nlohmann::json &j)
     try
     {
         auto val = (j.is_array() ? j[0] : j);
-        return Project{QString::number(val["task_id"].get<int>()), val["name"].get<QString>(), this};
+        return Project{QString::number(val["task_id"].get<int>()),
+                       val["name"].get<QString>(),
+                       static_cast<bool>(val["archived"].get<int>()),
+                       this};
     }
     catch (const std::exception &e)
     {
