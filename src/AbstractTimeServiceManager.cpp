@@ -69,13 +69,13 @@ QVector<QPair<QString, QString>> &AbstractTimeServiceManager::users()
     return m_users;
 }
 
-QString AbstractTimeServiceManager::projectName(const QString &projectId)
+Project AbstractTimeServiceManager::getProjectById(const QString &projectId)
 {
     for (const auto &item : projects())
         if (item.id() == projectId)
-            return item.name();
+            return item;
 
-    return "";
+    return {};
 }
 
 QString AbstractTimeServiceManager::userName(const QString &userId)

@@ -844,6 +844,8 @@ void TrayIcons::updateQuickStartList()
     {
         if (recentProjects.size() >= 10)
             break;
+        if (entry.project().archived())
+            continue;
         if (Settings::instance()->useSeparateBreakTime() && entry.project().id() == Settings::instance()->breakTimeId())
             [[unlikely]]
         {

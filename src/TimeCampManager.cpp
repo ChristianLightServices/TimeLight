@@ -100,7 +100,7 @@ std::optional<TimeEntry> TimeCampManager::jsonToRunningTimeEntry(const nlohmann:
             return std::nullopt;
 
         return TimeEntry{j["entry_id"].get<QString>(),
-                         Project{{j["task_id"].get<QString>()}, {j["name"].get<QString>()}, false, this},
+                         getProjectById(j["task_id"].get<QString>()),
                          getApiKeyOwner()->userId(),
                          jsonToDateTime(j["start_time"]),
                          {},
@@ -120,13 +120,13 @@ TimeEntry TimeCampManager::jsonToTimeEntry(const nlohmann::json &j)
     try
     {
         auto day = QDate::fromString(j["date"].get<QString>(), QStringLiteral("yyyy-MM-dd"));
+        auto project = getProjectById(j["task_id"].get<QString>());
+        if (j.contains("description"))
+            project.setDescription(j["description"].get<QString>());
+
         return TimeEntry{
             QString::number(j["id"].get<int>()),
-            Project{j["task_id"].get<QString>(),
-                    j["name"].get<QString>(),
-                    j.contains("description") ? j["description"].get<QString>() : QString{},
-                    false,
-                    this},
+            project,
             j["user_id"].get<QString>(),
             QDateTime{day, QTime::fromString(j["start_time"].get<QString>(), QStringLiteral("HH:mm:ss")), Qt::LocalTime},
             QDateTime{day, QTime::fromString(j["end_time"].get<QString>(), QStringLiteral("HH:mm:ss")), Qt::LocalTime},

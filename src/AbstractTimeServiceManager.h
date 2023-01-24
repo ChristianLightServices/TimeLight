@@ -46,7 +46,7 @@ public:
     QVector<Workspace> &workspaces();
     QVector<QPair<QString, QString>> &users();
 
-    QString projectName(const QString &projectId);
+    Project getProjectById(const QString &projectId);
     QString userName(const QString &userId);
 
     void startTimeEntry(const QString &userId, const Project &project, bool async);

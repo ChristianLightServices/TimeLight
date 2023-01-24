@@ -159,7 +159,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
                 0,
                 new QTableWidgetItem{
                     QTime::fromMSecsSinceStartOfDay(msecsByProject[key]).toString(QStringLiteral("h:mm:ss"))});
-            m_byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->projectName(key)});
+            m_byProjectTable->setItem(_i, 1, new QTableWidgetItem{m_manager->getProjectById(key).name()});
             ++_i;
         }
 

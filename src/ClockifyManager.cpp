@@ -110,11 +110,9 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
         Project project;
         if (entry.contains("projectId") && !entry["projectId"].is_null())
         {
-            QString projectId;
-            projectId = entry["projectId"].get<QString>();
-            project = {projectId,
-                       projectName(projectId),
-                       entry.contains("description") ? entry["description"].get<QString>() : QString{}};
+            project = getProjectById(entry["projectId"].get<QString>());
+            if (entry.contains("description"))
+                project.setDescription(entry["description"].get<QString>());
         }
         auto userId = entry["userId"].get<QString>();
         auto start = jsonToDateTime(entry["timeInterval"]["start"]);
