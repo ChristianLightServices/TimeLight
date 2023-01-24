@@ -1,2 +1,2 @@
 #!/bin/bash
-lupdate6 -no-obsolete src/ -ts lang/*.ts
+lupdate -no-obsolete src/ -ts lang/*.ts
