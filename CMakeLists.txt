@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 option(GENERATE_INSTALLER "Generate an installer." OFF)
 
-project(TimeLight VERSION 2.4.0 LANGUAGES CXX)
+project(TimeLight VERSION 2.4.1 LANGUAGES CXX)
 
 set(TimeLight_VERSION_STR "${TimeLight_VERSION_MAJOR}.${TimeLight_VERSION_MINOR}.${TimeLight_VERSION_PATCH}")
 
