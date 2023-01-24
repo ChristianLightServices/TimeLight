@@ -196,7 +196,8 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
             new QTableWidgetItem{QDateTime::fromSecsSinceEpoch(projects[i].id().mid(0, 8).toLong(nullptr, 16))
                                      .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))});
     }
-    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Archived") << tr("Creation time"));
+    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Archived")
+                                                          << tr("Creation time"));
     projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
     projectTable->verticalHeader()->setVisible(false);
     projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
