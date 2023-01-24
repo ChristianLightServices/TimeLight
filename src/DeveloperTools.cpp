@@ -181,7 +181,7 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
     auto projectGroup = new QGroupBox{tr("Projects"), this};
     auto projectGroupLayout = new QGridLayout{projectGroup};
 
-    auto projectTable = new QTableWidget{static_cast<int>(projects.count()), 3, workspaceGroup};
+    auto projectTable = new QTableWidget{static_cast<int>(projects.count()), 4, workspaceGroup};
     for (int i = 0; i < projects.size(); ++i)
     {
         projectTable->setItem(i, 0, new QTableWidgetItem{projects[i].name()});
@@ -189,13 +189,14 @@ DeveloperTools::DeveloperTools(QSharedPointer<AbstractTimeServiceManager> manage
         id->setReadOnly(true);
         projectTable->setCellWidget(i, 1, id);
         projectTable->setItem(i, 1, new QTableWidgetItem{projects[i].id()});
+        projectTable->setItem(i, 2, new QTableWidgetItem{projects[i].archived() ? tr("Yes") : tr("No")});
         projectTable->setItem(
             i,
-            2,
+            3,
             new QTableWidgetItem{QDateTime::fromSecsSinceEpoch(projects[i].id().mid(0, 8).toLong(nullptr, 16))
                                      .toString(QStringLiteral("MMMM d, yyyy h:mm:ss A"))});
     }
-    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Creation time"));
+    projectTable->setHorizontalHeaderLabels(QStringList{} << tr("Project name") << tr("Project ID") << tr("Archived") << tr("Creation time"));
     projectTable->setEditTriggers(QTableWidget::NoEditTriggers);
     projectTable->verticalHeader()->setVisible(false);
     projectTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
