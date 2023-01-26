@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             a.setApplicationVersion(QStringLiteral(VERSION_STR));
 
+            delete[] newArgv;
+
             QCommandLineParser parser;
             QCommandLineOption debug{"debug", QObject::tr("Print debug information to the command line.")};
             parser.addOption(debug);
