@@ -36,19 +36,19 @@ int main(int argc, char *argv[])
     int retCode{0};
     do
     {
+        // Make sure argc and argv survive restarts. This has to be outside the try so the pointer can be freed in the catch
+        // block if necessary.
+        int newArgc = argc;
+        auto newArgv = new char *[argc];
+        for (int i = 0; i < argc; ++i)
+            newArgv[i] = qstrdup(argv[i]);
+
         try
         {
-            // make sure argc and argv survive restarts
-            int newArgc = argc;
-            auto newArgv = new char *[argc];
-            for (int i = 0; i < argc; ++i)
-                newArgv[i] = qstrdup(argv[i]);
 
             SingleApplication a{newArgc, newArgv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             a.setApplicationVersion(QStringLiteral(VERSION_STR));
-
-            delete[] newArgv;
 
             QCommandLineParser parser;
             QCommandLineOption debug{"debug", QObject::tr("Print debug information to the command line.")};
@@ -74,6 +74,9 @@ int main(int argc, char *argv[])
 
             if (retCode == TimeLight::appRestartCode)
                 TimeLight::logs::app()->debug("App restart requested");
+
+            delete[] newArgv;
+            newArgv = nullptr;
         }
         catch (const nlohmann::json::exception &e)
         {
@@ -81,6 +84,9 @@ int main(int argc, char *argv[])
             TimeLight::logs::app()->critical("Unhandled exception: {}", e.what());
             TimeLight::logs::app()->critical("Restarting the app...");
             retCode = TimeLight::appRestartCode;
+
+            if (newArgv)
+                delete[] newArgv;
         }
     } while (retCode == TimeLight::appRestartCode);
 
