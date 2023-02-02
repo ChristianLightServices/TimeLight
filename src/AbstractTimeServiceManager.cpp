@@ -89,7 +89,7 @@ QString AbstractTimeServiceManager::userName(const QString &userId)
 
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId, const Project &project, bool async)
 {
-    startTimeEntry(userId, project, currentDateTime(), async);
+    startTimeEntry(userId, project, QDateTime::currentDateTime(), async);
 }
 
 void AbstractTimeServiceManager::startTimeEntry(const QString &userId,
@@ -130,7 +130,7 @@ std::optional<TimeEntry> AbstractTimeServiceManager::getRunningTimeEntry(const Q
 
 QDateTime AbstractTimeServiceManager::stopRunningTimeEntry(const QString &userId, bool async)
 {
-    auto now = currentDateTime();
+    auto now = QDateTime::currentDateTime();
     auto t = getRunningTimeEntry(userId);
     if (t)
     {

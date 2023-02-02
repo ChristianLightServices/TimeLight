@@ -15,7 +15,6 @@ public:
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://clockify.me/tracker")}; }
     virtual const QString apiBaseUrl() const final { return QStringLiteral("https://api.clockify.me/api/v1"); }
     virtual const QFlags<Pagination> supportedPagination() const final;
-    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTimeUtc(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("X-Api-Key"); }

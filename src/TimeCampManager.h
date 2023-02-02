@@ -16,7 +16,6 @@ public:
     virtual QUrl timeTrackerWebpageUrl() const final { return QUrl{QStringLiteral("https://app.timecamp.com/dashboard")}; }
     virtual const QString apiBaseUrl() const final { return QStringLiteral("https://app.timecamp.com/third_party/api"); }
     virtual const QFlags<Pagination> supportedPagination() const final;
-    virtual const QDateTime currentDateTime() const final { return QDateTime::currentDateTime(); }
 
 protected:
     virtual const QByteArray authHeaderName() const final { return QByteArrayLiteral("Authorization"); }

@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
 
         try
         {
-
             SingleApplication a{newArgc, newArgv};
             a.setWindowIcon(QIcon{QStringLiteral(":/icons/greenlight.png")});
             a.setApplicationVersion(QStringLiteral(VERSION_STR));

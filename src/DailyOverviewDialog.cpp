@@ -9,7 +9,6 @@
 #include <QPushButton>
 #include <QThread>
 
-#include "Logger.h"
 #include "TimeEntry.h"
 
 DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManager> manager,
@@ -22,7 +21,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
       m_totalTime{new QLabel},
       m_chronologicalTable{new QTableWidget{0, 3, this}},
       m_byProjectTable{new QTableWidget{0, 2, this}},
-      m_day{m_manager->currentDateTime().date()}
+      m_day{QDate::currentDate()}
 {
     m_layout = new QVBoxLayout{this};
 
@@ -40,7 +39,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
 
     auto datePicker = new QDateEdit{this};
     datePicker->setDate(m_day);
-    datePicker->setMaximumDate(m_manager->currentDateTime().date());
+    datePicker->setMaximumDate(QDate::currentDate());
     datePicker->setCalendarPopup(true);
     datePicker->setDisplayFormat(QStringLiteral("MMMM d, yyyy"));
 
@@ -112,7 +111,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
                                                                             return a + b.start().msecsTo(
                                                                                            b.end().isValid() ?
                                                                                                b.end() :
-                                                                                               m_manager->currentDateTime());
+                                                                                               QDateTime::currentDateTime());
                                                                         }))
                             .toString(QStringLiteral("h:mm:ss"))));
     };
@@ -188,7 +187,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
         reset->setDisabled(true);
         m_loadingEntries->setVisible(true);
 
-        QTimer::singleShot(0, [updateData] { updateData(); });
+        QTimer::singleShot(0, this, [updateData] { updateData(); });
     };
 
     connect(bb, &QDialogButtonBox::accepted, this, &QDialog::close);
@@ -200,9 +199,7 @@ DailyOverviewDialog::DailyOverviewDialog(QSharedPointer<AbstractTimeServiceManag
     connect(back, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(-1)); });
     connect(
         forward, &QPushButton::clicked, datePicker, [datePicker] { datePicker->setDate(datePicker->date().addDays(1)); });
-    connect(today, &QPushButton::clicked, datePicker, [this, datePicker] {
-        datePicker->setDate(m_manager->currentDateTime().date());
-    });
+    connect(today, &QPushButton::clicked, datePicker, [this, datePicker] { datePicker->setDate(QDate::currentDate()); });
     connect(reset, &QPushButton::clicked, this, [this, lockUIAndUpdate] {
         m_entries->clearStore(std::find_if(m_entries->static_cbegin(), m_entries->static_cend(), [this](const TimeEntry &t) {
             return t.start() <= m_day.endOfDay();

@@ -268,7 +268,7 @@ void TrayIcons::updateTrayIcons()
             {
                 if (auto &previous = (*m_timeEntries)[1]; previous.running())
                 {
-                    previous.setEnd(m_manager->currentDateTime());
+                    previous.setEnd(QDateTime::currentDateTime());
                     previous.setRunning(false);
                 }
             }
@@ -296,7 +296,7 @@ void TrayIcons::updateTrayIcons()
         m_currentRunningJob = std::nullopt;
         if (m_timeEntries->size() > 1 && m_timeEntries->begin()->running())
         {
-            m_timeEntries->begin()->setEnd(m_manager->currentDateTime());
+            m_timeEntries->begin()->setEnd(QDateTime::currentDateTime());
             m_timeEntries->begin()->setRunning(false);
         }
         setTimerState(TimerState::NotRunning);
@@ -309,7 +309,7 @@ void TrayIcons::updateRunningEntryTooltip()
     if (m_currentRunningJob)
     {
         auto [h, m, s] =
-            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob->start().msecsTo(m_manager->currentDateTime()));
+            TimeLight::msecsToHoursMinutesSeconds(m_currentRunningJob->start().msecsTo(QDateTime::currentDateTime()));
         tooltip += QStringLiteral(" (%1:%2:%3)").arg(h).arg(m, 2, 10, QLatin1Char{'0'}).arg(s, 2, 10, QLatin1Char{'0'});
     }
     (m_breakIcon ? m_breakIcon : m_trayIcon)->setToolTip(tooltip);
@@ -823,7 +823,7 @@ void TrayIcons::updateQuickStartList()
                 return;
             }
 
-            QDateTime now{m_manager->currentDateTime()};
+            QDateTime now{QDateTime::currentDateTime()};
             if (m_currentRunningJob)
             {
                 if (Settings::instance()->preventSplittingEntries() && m_currentRunningJob->project().id() == project.id())
@@ -920,11 +920,11 @@ void TrayIcons::checkForFinishedWeek()
     // we can't show a bubble if the icon isn't visible
     if (Settings::instance()->alertOnTimeUp() && m_timeUpWarning != TimeUpWarning::Done && m_trayIcon->isVisible())
     {
-        auto now = m_manager->currentDateTime();
+        auto now = QDateTime::currentDateTime();
         auto entries = m_timeEntries->constSliceByDate(now.addDays(-(now.date().dayOfWeek() % 7)),
                                                        now.addDays(6 - (now.date().dayOfWeek() % 7)));
         double msecsThisWeek = std::accumulate(entries.begin(), entries.end(), 0, [this](auto a, auto b) {
-            return a + b.start().msecsTo((b.end().isNull() || b.running()) ? m_manager->currentDateTime() : b.end());
+            return a + b.start().msecsTo((b.end().isNull() || b.running()) ? QDateTime::currentDateTime() : b.end());
         });
         double hoursThisWeek = std::get<0>(TimeLight::msecsToHoursMinutesSeconds(msecsThisWeek));
         if (hoursThisWeek >= Settings::instance()->weekHours())

@@ -102,11 +102,6 @@ public:
     //! This function should be overridden if your service starts pagination at a value other than 1.
     virtual int paginationStartsAt() const { return 1; }
 
-    //! Return a function that will return the current date and time as defined by your time service. Generally, you will
-    //! need to choose either UTC or the local time. For these, QDateTime::currentDateTime() and
-    //! QDateTime::currentDateTimeUtc() should suffice.
-    virtual const QDateTime currentDateTime() const = 0;
-
     // ***** END FUNCTIONS THAT SHOULD BE OVERRIDDEN *****
 
 signals:

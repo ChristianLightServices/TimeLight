@@ -55,9 +55,9 @@ QUrl ClockifyManager::timeEntriesUrl(const QString &userId,
     QUrl url{apiBaseUrl() + "/workspaces/" + workspaceId + "/user/" + userId + "/time-entries"};
     QUrlQuery q;
     if (start)
-        q.addQueryItem(QStringLiteral("start"), dateTimeToString(*start));
+        q.addQueryItem(QStringLiteral("start"), dateTimeToString(start->toUTC()));
     if (end)
-        q.addQueryItem(QStringLiteral("end"), dateTimeToString(*end));
+        q.addQueryItem(QStringLiteral("end"), dateTimeToString(end->toUTC()));
     url.setQuery(q);
     return url;
 }
@@ -128,7 +128,7 @@ TimeEntry ClockifyManager::jsonToTimeEntry(const nlohmann::json &j)
 
         start.setTimeSpec(Qt::UTC);
         end.setTimeSpec(Qt::UTC);
-        return TimeEntry{id, project, userId, start, end, running, {}, this};
+        return TimeEntry{id, project, userId, start.toLocalTime(), end.toLocalTime(), running, {}, this};
     }
     catch (const std::exception &e)
     {
